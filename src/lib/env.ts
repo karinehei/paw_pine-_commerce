@@ -1,29 +1,17 @@
 import "server-only";
 
 import type { CommerceMode } from "@/lib/commerce/types";
-import { isShopifyApiVersion, normaliseShopifyDomain } from "@/lib/security";
+import { resolveShopifyConfig, type ShopifyConfig } from "@/lib/commerce/shopify/config";
 
 export { getGtmId, getSiteUrl } from "@/lib/env-public";
 
-export function getShopifyConfig(): {
-  domain: string;
-  token: string;
-  version: string;
-} | null {
-  const domain = process.env.SHOPIFY_STORE_DOMAIN?.trim();
-  const token = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
-  const version = process.env.SHOPIFY_STOREFRONT_API_VERSION?.trim() || "2025-04";
-
-  if (!domain || !token) {
-    return null;
-  }
-
-  const normalised = normaliseShopifyDomain(domain);
-  if (!normalised || !isShopifyApiVersion(version)) {
-    return null;
-  }
-
-  return { domain: normalised, token, version };
+export function getShopifyConfig(): ShopifyConfig | null {
+  return resolveShopifyConfig({
+    SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
+    SHOPIFY_STOREFRONT_PRIVATE_TOKEN: process.env.SHOPIFY_STOREFRONT_PRIVATE_TOKEN,
+    SHOPIFY_STOREFRONT_ACCESS_TOKEN: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+    SHOPIFY_STOREFRONT_API_VERSION: process.env.SHOPIFY_STOREFRONT_API_VERSION,
+  });
 }
 
 export function getCommerceMode(): CommerceMode {
@@ -33,4 +21,3 @@ export function getCommerceMode(): CommerceMode {
 export function isShopifyMode(): boolean {
   return getCommerceMode() === "shopify";
 }
-

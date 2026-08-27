@@ -21,9 +21,13 @@ UI components import `Product`, `Cart`, and server actions. They do not import `
 The switch is environment, not a runtime feature flag in the client:
 
 ```
-SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_ACCESS_TOKEN  → Shopify
-otherwise                                               → demo
+SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_PRIVATE_TOKEN  → Shopify (2026-07)
+otherwise                                                 → demo
 ```
+
+The private token is sent as `Shopify-Storefront-Private-Token` from the server only, with `Shopify-Storefront-Buyer-IP` when a buyer IP is available. It is never prefixed `NEXT_PUBLIC_`.
+
+If Shopify is configured and the Storefront API fails, the request errors. The demo catalogue is not used as a silent fallback.
 
 ## Data flow
 
@@ -41,7 +45,7 @@ The same cookie stores only `{ mode: "shopify", id }`. Line items are fetched fr
 
 ## Shopify taxonomy fallback
 
-If a collection handle such as `dogs` does not exist in the connected shop, the provider loads products and applies the same tag/species filters as demo mode. That lets a store go live before every collection is merchandised, as long as products are tagged.
+If a collection handle such as `dogs` does not exist in the connected shop, the provider loads **live Storefront products** and applies tag/species filters. Overlay titles are generated from the handle. This is not the demo catalogue. Network, auth, and GraphQL failures still surface as shop errors.
 
 ## Caching
 

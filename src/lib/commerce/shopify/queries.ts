@@ -147,7 +147,7 @@ export const CART_CREATE_MUTATION = `
   mutation CartCreate($lines: [CartLineInput!]) {
     cartCreate(input: { lines: $lines }) {
       cart { ${CART_FRAGMENT} }
-      userErrors { message }
+      userErrors { code message }
     }
   }
 `;
@@ -156,7 +156,7 @@ export const CART_LINES_ADD_MUTATION = `
   mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
     cartLinesAdd(cartId: $cartId, lines: $lines) {
       cart { ${CART_FRAGMENT} }
-      userErrors { message }
+      userErrors { code message }
     }
   }
 `;
@@ -165,7 +165,7 @@ export const CART_LINES_UPDATE_MUTATION = `
   mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
     cartLinesUpdate(cartId: $cartId, lines: $lines) {
       cart { ${CART_FRAGMENT} }
-      userErrors { message }
+      userErrors { code message }
     }
   }
 `;
@@ -174,7 +174,7 @@ export const CART_LINES_REMOVE_MUTATION = `
   mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
     cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
       cart { ${CART_FRAGMENT} }
-      userErrors { message }
+      userErrors { code message }
     }
   }
 `;

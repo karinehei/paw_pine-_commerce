@@ -1,7 +1,7 @@
 import { CommerceError } from "@/lib/commerce/errors";
 import { applyProductQuery, buildFacets, filterByCollection } from "@/lib/commerce/filters";
 import { shopifyFetch } from "@/lib/commerce/shopify/client";
-import { demoCollections } from "@/lib/commerce/demo/catalog";
+import { collectionOverlayFromHandle } from "@/lib/commerce/shopify/collection-overlay";
 import {
   buildShopifySearchQuery,
   mapCart,
@@ -39,12 +39,24 @@ import type {
 
 function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
   if (payload?.userErrors?.length) {
-    const message = payload.userErrors[0]?.message ?? "";
+    const first = payload.userErrors[0];
+    const message = first?.message ?? "";
+    const code = first?.code?.toLowerCase() ?? "";
     const lower = message.toLowerCase();
-    if (lower.includes("stock")) {
+    if (
+      code.includes("stock") ||
+      code.includes("inventory") ||
+      lower.includes("stock") ||
+      lower.includes("inventory")
+    ) {
       throw new CommerceError("out_of_stock");
     }
-    if (lower.includes("not found") || lower.includes("does not exist") || lower.includes("expired")) {
+    if (
+      code.includes("not_found") ||
+      lower.includes("not found") ||
+      lower.includes("does not exist") ||
+      lower.includes("expired")
+    ) {
       throw new CommerceError("invalid_cart");
     }
     throw new CommerceError("invalid_cart");
@@ -70,6 +82,7 @@ export const shopifyProvider: CommerceProvider = {
     const { sortKey, reverse } = toShopifyProductSort(query.sort);
     const data = await shopifyFetch<{ products: { nodes: ShopifyProductNode[] } }>({
       query: PRODUCTS_QUERY,
+      operation: "products",
       variables: {
         query: buildShopifySearchQuery(query),
         sortKey,
@@ -83,6 +96,7 @@ export const shopifyProvider: CommerceProvider = {
   async getProduct(handle: string) {
     const data = await shopifyFetch<{ product: ShopifyProductNode | null }>({
       query: PRODUCT_BY_HANDLE_QUERY,
+      operation: "productByHandle",
       variables: { handle },
     });
     return data.product ? mapProduct(data.product) : null;
@@ -91,7 +105,7 @@ export const shopifyProvider: CommerceProvider = {
   async getCollections() {
     const data = await shopifyFetch<{
       collections: { nodes: ShopifyCollectionNode[] };
-    }>({ query: COLLECTIONS_QUERY });
+    }>({ query: COLLECTIONS_QUERY, operation: "collections" });
     return data.collections.nodes.map(mapCollection);
   },
 
@@ -100,33 +114,29 @@ export const shopifyProvider: CommerceProvider = {
     query: ProductQuery = {},
   ): Promise<CollectionResult | null> {
     const { sortKey, reverse } = toShopifyCollectionSort(query.sort);
-    try {
-      const data = await shopifyFetch<{ collection: ShopifyCollectionNode | null }>({
-        query: COLLECTION_BY_HANDLE_QUERY,
-        variables: { handle, sortKey, reverse },
-      });
+    const data = await shopifyFetch<{ collection: ShopifyCollectionNode | null }>({
+      query: COLLECTION_BY_HANDLE_QUERY,
+      operation: "collectionByHandle",
+      variables: { handle, sortKey, reverse },
+    });
 
-      if (data.collection) {
-        const mapped = (data.collection.products?.nodes ?? []).map(mapProduct);
-        return {
-          collection: mapCollection(data.collection),
-          products: applyProductQuery(mapped, query),
-          facets: buildFacets(mapped),
-        };
-      }
-    } catch {
-      // Unknown handles and empty shops fall through to tag-based collections.
+    if (data.collection) {
+      const mapped = (data.collection.products?.nodes ?? []).map(mapProduct);
+      return {
+        collection: mapCollection(data.collection),
+        products: applyProductQuery(mapped, query),
+        facets: buildFacets(mapped),
+      };
     }
 
     const { products } = await this.getProducts();
     const scoped = filterByCollection(products, handle);
-    const meta = demoCollections.find((item) => item.handle === handle);
-    if (!scoped || !meta) {
+    if (!scoped) {
       return null;
     }
 
     return {
-      collection: meta,
+      collection: collectionOverlayFromHandle(handle),
       products: applyProductQuery(scoped, query),
       facets: buildFacets(scoped),
     };
@@ -137,6 +147,7 @@ export const shopifyProvider: CommerceProvider = {
       search: { nodes: Array<ShopifyProductNode | Record<string, never>> };
     }>({
       query: SEARCH_QUERY,
+      operation: "searchProducts",
       variables: { query },
       revalidate: 30,
     });
@@ -149,6 +160,7 @@ export const shopifyProvider: CommerceProvider = {
   async getCart(cartId: string) {
     const data = await shopifyFetch<{ cart: ShopifyCartNode | null }>({
       query: CART_QUERY,
+      operation: "cart",
       variables: { id: cartId },
       cache: "no-store",
     });
@@ -158,6 +170,7 @@ export const shopifyProvider: CommerceProvider = {
   async createCart(lines: CartLineInput[] = []) {
     const data = await shopifyFetch<{ cartCreate: ShopifyUserErrorPayload }>({
       query: CART_CREATE_MUTATION,
+      operation: "cartCreate",
       variables: {
         lines: lines.map((line) => ({
           merchandiseId: line.variantId,
@@ -172,6 +185,7 @@ export const shopifyProvider: CommerceProvider = {
   async addToCart(cartId: string, variantId: string, quantity: number) {
     const data = await shopifyFetch<{ cartLinesAdd: ShopifyUserErrorPayload }>({
       query: CART_LINES_ADD_MUTATION,
+      operation: "cartLinesAdd",
       variables: {
         cartId,
         lines: [{ merchandiseId: variantId, quantity }],
@@ -184,6 +198,7 @@ export const shopifyProvider: CommerceProvider = {
   async updateCart(cartId: string, lineId: string, quantity: number) {
     const data = await shopifyFetch<{ cartLinesUpdate: ShopifyUserErrorPayload }>({
       query: CART_LINES_UPDATE_MUTATION,
+      operation: "cartLinesUpdate",
       variables: {
         cartId,
         lines: [{ id: lineId, quantity }],
@@ -196,6 +211,7 @@ export const shopifyProvider: CommerceProvider = {
   async removeFromCart(cartId: string, lineId: string) {
     const data = await shopifyFetch<{ cartLinesRemove: ShopifyUserErrorPayload }>({
       query: CART_LINES_REMOVE_MUTATION,
+      operation: "cartLinesRemove",
       variables: { cartId, lineIds: [lineId] },
       cache: "no-store",
     });

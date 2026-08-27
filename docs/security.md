@@ -4,7 +4,8 @@ This storefront is a portfolio prototype. It is not a claim that the application
 
 ## Secrets and environment
 
-- `SHOPIFY_STOREFRONT_ACCESS_TOKEN` is server-only (`src/lib/env.ts` imports `server-only`).
+- `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` is server-only (`src/lib/env.ts` imports `server-only`). It is sent as `Shopify-Storefront-Private-Token`, never as a `NEXT_PUBLIC_*` variable.
+- A legacy `SHOPIFY_STOREFRONT_ACCESS_TOKEN` is still accepted for public Storefront tokens (`X-Shopify-Storefront-Access-Token`) if the private token is unset. Do not put either on the client.
 - Store domain is accepted only if it matches `*.myshopify.com`. A poisoned env value cannot send the token to an arbitrary host.
 - API version must match `YYYY-MM`.
 - `.env*` is gitignored; `.env.example` has empty token fields.
@@ -47,8 +48,10 @@ This storefront is a portfolio prototype. It is not a claim that the application
 
 ## Logging
 
+- Storefront failures log `[storefront] operation code http_status` only. Tokens, headers, query documents, and GraphQL bodies are never logged.
 - GraphQL error bodies and tokens are not returned to the client.
-- The only console sink is the optional analytics debug adapter, which logs event names and typed payloads — not secrets.
+- Shopper-facing copy is mapped from `CommerceError.code` in `toUserErrorMessage`.
+- The analytics debug adapter logs event names and typed payloads — not secrets.
 
 ## Headers
 

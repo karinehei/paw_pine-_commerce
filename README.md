@@ -77,7 +77,7 @@ npm run test:e2e
 npm run build
 ```
 
-Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on the server. Never commit `.env.local`.
+Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on the server. Never commit `.env.local`. Never use `NEXT_PUBLIC_` for Shopify secrets.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -85,8 +85,12 @@ Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on t
 | `NEXT_PUBLIC_GTM_ID` | No | Optional `GTM-…` container |
 | `NEXT_PUBLIC_ANALYTICS_DEBUG` | No | Console-log analytics events |
 | `SHOPIFY_STORE_DOMAIN` | Live catalogue | `your-store.myshopify.com` |
-| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Live catalogue | Storefront API token |
-| `SHOPIFY_STOREFRONT_API_VERSION` | No | Defaults to `2025-04` |
+| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Live catalogue | Headless **private** Storefront token (server only) |
+| `SHOPIFY_STOREFRONT_API_VERSION` | No | Defaults to `2026-07` |
+
+Shopify mode uses the Storefront GraphQL API at `/api/2026-07/graphql.json` for products, collections, search, and cart mutations. If those credentials are missing, the local demo catalogue is used. If they are present and Shopify fails, the shop shows an error — it does not swap in mock products.
+
+On Vercel, set `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` on the server Environment Variables (Production). Leave them empty for a demo-only deploy.
 
 Expected Shopify tags when connecting a live shop: `species:dog|cat`, `category:toys|harnesses|beds|feeding|scratching`, `material:…`, optional `sku:`, `dimensions:`, `care:`, `feature:`.
 

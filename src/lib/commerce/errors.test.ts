@@ -12,5 +12,8 @@ describe("commerce errors", () => {
     expect(toUserErrorMessage(new Error("X-Shopify-Storefront-Access-Token invalid"))).toBe(
       "Something went wrong. Please try again.",
     );
+    expect(toUserErrorMessage(new Error("Shopify-Storefront-Private-Token shfpt_secret"))).toBe(
+      "Something went wrong. Please try again.",
+    );
   });
 });

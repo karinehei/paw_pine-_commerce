@@ -24,7 +24,7 @@ A short httpOnly cookie stores either a Shopify cart GID or a demo cart id plus 
 
 ## 6. How does Shopify checkout work?
 
-`cart.checkoutUrl` from the Storefront API. The storefront validates that the URL is HTTPS and on a Shopify host, then the shopper leaves for Shopify-hosted checkout. Demo mode stops at `/cart?checkout=demo` and does not collect payment.
+`cart.checkoutUrl` from the Storefront API. The storefront validates that the URL is HTTPS and on a Shopify host, then the shopper leaves for Shopify-hosted checkout. Demo mode stops at `/cart?checkout=demo` and does not collect payment. Live mode uses server-only `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` (never `NEXT_PUBLIC_*`).
 
 ## 7. How would you integrate Posti or Matkahuolto?
 

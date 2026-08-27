@@ -16,8 +16,8 @@ Design and implement a modern headless commerce prototype that demonstrates both
 Customer
   → Next.js storefront (App Router, React Server Components)
     → Commerce service layer (shared types, provider switch)
-      → Shopify Storefront GraphQL API   (when credentials exist)
-      → Demo catalogue + cookie cart     (when they do not)
+      → Shopify Storefront GraphQL API   (private token, server only)
+      → Demo catalogue + cookie cart     (when credentials are absent)
         → Products / collections / cart
           → Shopify-hosted checkout
 ```

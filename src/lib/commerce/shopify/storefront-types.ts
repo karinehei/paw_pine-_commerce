@@ -75,6 +75,6 @@ export interface ShopifyCartNode {
 }
 
 export interface ShopifyUserErrorPayload {
-  userErrors?: Array<{ message: string }>;
+  userErrors?: Array<{ message: string; code?: string }>;
   cart?: ShopifyCartNode | null;
 }
