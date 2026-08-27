@@ -1,0 +1,312 @@
+import type {
+  Cart,
+  Collection,
+  Money,
+  Product,
+  ProductCategory,
+  ProductImage,
+  ProductShape,
+  ProductVariant,
+  ProductVisual,
+  Species,
+} from "@/lib/commerce/types";
+import type {
+  ShopifyCartNode,
+  ShopifyCollectionNode,
+  ShopifyImage,
+  ShopifyMoney,
+  ShopifyProductNode,
+  ShopifyVariantNode,
+} from "@/lib/commerce/shopify/storefront-types";
+
+const CATEGORIES: ProductCategory[] = [
+  "toys",
+  "harnesses",
+  "beds",
+  "feeding",
+  "scratching",
+];
+const SHAPES: ProductShape[] = [
+  "ring",
+  "rope",
+  "harness",
+  "bed",
+  "raised-bed",
+  "bowl",
+  "slow-bowl",
+  "mice",
+  "wand",
+  "column",
+  "panel",
+  "perch",
+  "cave",
+  "dish",
+  "puzzle",
+];
+const PALETTES: Array<{ background: string; accent: string }> = [
+  { background: "#E4D3B8", accent: "#8B5E34" },
+  { background: "#C9D1C4", accent: "#2C4538" },
+  { background: "#E7D9C6", accent: "#A58B6A" },
+  { background: "#D8DCD4", accent: "#6A7568" },
+  { background: "#E6DED2", accent: "#8A7B6A" },
+  { background: "#E8E2D6", accent: "#4C6A7A" },
+];
+
+function mapMoney(money: ShopifyMoney | null | undefined): Money | null {
+  if (!money?.amount) {
+    return null;
+  }
+  return { amount: money.amount, currencyCode: money.currencyCode || "EUR" };
+}
+
+function mapImage(image: ShopifyImage | null | undefined, fallbackAlt: string): ProductImage | null {
+  if (!image?.url) {
+    return null;
+  }
+
+  return {
+    url: image.url,
+    altText: image.altText?.trim() || fallbackAlt,
+    width: image.width ?? 1200,
+    height: image.height ?? 1500,
+  };
+}
+
+function tagValue(tags: string[], prefix: string): string | undefined {
+  const match = tags.find((tag) => tag.toLowerCase().startsWith(`${prefix}:`));
+  return match?.slice(prefix.length + 1).trim();
+}
+
+function mapSpecies(product: ShopifyProductNode): Species {
+  const tagged = tagValue(product.tags, "species")?.toLowerCase();
+  if (tagged === "cat" || tagged === "dog") {
+    return tagged;
+  }
+  const lowered = product.tags.map((tag) => tag.toLowerCase());
+  if (lowered.includes("cat") || product.productType.toLowerCase().includes("cat")) {
+    return "cat";
+  }
+  return "dog";
+}
+
+function mapCategory(product: ShopifyProductNode): ProductCategory {
+  const tagged = tagValue(product.tags, "category")?.toLowerCase();
+  if (tagged && CATEGORIES.includes(tagged as ProductCategory)) {
+    return tagged as ProductCategory;
+  }
+  const type = product.productType.toLowerCase();
+  const fromType = CATEGORIES.find((category) => type.includes(category));
+  return fromType ?? "toys";
+}
+
+function hashString(value: string): number {
+  return [...value].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+function mapVisual(handle: string): ProductVisual {
+  const palette =
+    PALETTES[hashString(handle) % PALETTES.length] ?? {
+      background: "#E4D3B8",
+      accent: "#8B5E34",
+    };
+  const shape = SHAPES[hashString(handle) % SHAPES.length] ?? "bowl";
+  return {
+    background: palette.background,
+    accent: palette.accent,
+    shape,
+  };
+}
+
+function mapVariant(node: ShopifyVariantNode, productTitle: string): ProductVariant {
+  return {
+    id: node.id,
+    title: node.title,
+    availableForSale: node.availableForSale,
+    quantityAvailable: node.quantityAvailable,
+    selectedOptions: node.selectedOptions,
+    price: mapMoney(node.price) ?? { amount: "0.00", currencyCode: "EUR" },
+    compareAtPrice: mapMoney(node.compareAtPrice),
+    image: mapImage(node.image, productTitle),
+  };
+}
+
+function extractFeatures(description: string, tags: string[]): string[] {
+  const fromTags = tags
+    .filter((tag) => tag.toLowerCase().startsWith("feature:"))
+    .map((tag) => tag.slice("feature:".length).trim())
+    .filter(Boolean);
+
+  if (fromTags.length > 0) {
+    return fromTags;
+  }
+
+  return description
+    .split("\n")
+    .map((line) => line.replace(/^[-•]\s*/, "").trim())
+    .filter((line) => line.length > 12 && line.length < 80)
+    .slice(0, 3);
+}
+
+export function mapProduct(node: ShopifyProductNode): Product {
+  const images = node.images.nodes
+    .map((image) => mapImage(image, node.title))
+    .filter((image): image is ProductImage => Boolean(image));
+  const featured = mapImage(node.featuredImage, node.title) ?? images[0] ?? null;
+  const features = extractFeatures(node.description, node.tags);
+
+  return {
+    id: node.id,
+    handle: node.handle,
+    title: node.title,
+    description: node.description,
+    descriptionHtml: node.descriptionHtml,
+    availableForSale: node.availableForSale,
+    featuredImage: featured,
+    images: images.length > 0 ? images : featured ? [featured] : [],
+    priceRange: {
+      minVariantPrice:
+        mapMoney(node.priceRange.minVariantPrice) ?? {
+          amount: "0.00",
+          currencyCode: "EUR",
+        },
+      maxVariantPrice:
+        mapMoney(node.priceRange.maxVariantPrice) ?? {
+          amount: "0.00",
+          currencyCode: "EUR",
+        },
+    },
+    compareAtPriceRange: {
+      minVariantPrice: mapMoney(node.compareAtPriceRange.minVariantPrice),
+      maxVariantPrice: mapMoney(node.compareAtPriceRange.maxVariantPrice),
+    },
+    variants: node.variants.nodes.map((variant) => mapVariant(variant, node.title)),
+    options: node.options.filter((option) => option.name.toLowerCase() !== "title"),
+    tags: node.tags,
+    vendor: node.vendor,
+    productType: node.productType,
+    species: mapSpecies(node),
+    category: mapCategory(node),
+    material: tagValue(node.tags, "material") || node.vendor,
+    features,
+    createdAt: node.createdAt,
+    visual: mapVisual(node.handle),
+  };
+}
+
+export function mapCollection(node: ShopifyCollectionNode): Collection {
+  return {
+    id: node.id,
+    handle: node.handle,
+    title: node.title,
+    description: node.description,
+    image: mapImage(node.image, node.title),
+  };
+}
+
+export function mapCart(node: ShopifyCartNode): Cart {
+  return {
+    id: node.id,
+    checkoutUrl: node.checkoutUrl,
+    totalQuantity: node.totalQuantity,
+    lines: node.lines.nodes.map((line) => ({
+      id: line.id,
+      quantity: line.quantity,
+      merchandise: {
+        id: line.merchandise.id,
+        title: line.merchandise.title,
+        selectedOptions: line.merchandise.selectedOptions,
+        price: mapMoney(line.merchandise.price) ?? {
+          amount: "0.00",
+          currencyCode: "EUR",
+        },
+        image: mapImage(
+          line.merchandise.image,
+          line.merchandise.product?.title ?? line.merchandise.title,
+        ),
+        product: {
+          handle: line.merchandise.product?.handle ?? "",
+          title: line.merchandise.product?.title ?? line.merchandise.title,
+          visual: mapVisual(line.merchandise.product?.handle ?? line.merchandise.id),
+        },
+      },
+      cost: {
+        totalAmount: mapMoney(line.cost.totalAmount) ?? {
+          amount: "0.00",
+          currencyCode: "EUR",
+        },
+      },
+    })),
+    cost: {
+      subtotalAmount: mapMoney(node.cost.subtotalAmount) ?? {
+        amount: "0.00",
+        currencyCode: "EUR",
+      },
+      totalAmount: mapMoney(node.cost.totalAmount) ?? {
+        amount: "0.00",
+        currencyCode: "EUR",
+      },
+    },
+  };
+}
+
+export function buildShopifySearchQuery(input: {
+  query?: string;
+  species?: string[];
+  category?: string[];
+  brand?: string[];
+  availability?: string;
+}): string | undefined {
+  const parts: string[] = [];
+
+  if (input.query) {
+    parts.push(input.query);
+  }
+  if (input.species?.length) {
+    parts.push(`(${input.species.map((value) => `tag:${value}`).join(" OR ")})`);
+  }
+  if (input.category?.length) {
+    parts.push(
+      `(${input.category.map((value) => `product_type:${value}`).join(" OR ")})`,
+    );
+  }
+  if (input.brand?.length) {
+    parts.push(`(${input.brand.map((value) => `vendor:${value}`).join(" OR ")})`);
+  }
+  if (input.availability === "in-stock") {
+    parts.push("available_for_sale:true");
+  }
+
+  return parts.length > 0 ? parts.join(" ") : undefined;
+}
+
+export function toShopifyProductSort(sort?: string): {
+  sortKey: string;
+  reverse: boolean;
+} {
+  switch (sort) {
+    case "newest":
+      return { sortKey: "CREATED_AT", reverse: true };
+    case "price-asc":
+      return { sortKey: "PRICE", reverse: false };
+    case "price-desc":
+      return { sortKey: "PRICE", reverse: true };
+    default:
+      return { sortKey: "BEST_SELLING", reverse: false };
+  }
+}
+
+export function toShopifyCollectionSort(sort?: string): {
+  sortKey: string;
+  reverse: boolean;
+} {
+  switch (sort) {
+    case "newest":
+      return { sortKey: "CREATED", reverse: true };
+    case "price-asc":
+      return { sortKey: "PRICE", reverse: false };
+    case "price-desc":
+      return { sortKey: "PRICE", reverse: true };
+    default:
+      return { sortKey: "BEST_SELLING", reverse: false };
+  }
+}

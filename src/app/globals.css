@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --linen: #f3f0ea;
+  --paper: #fbf9f5;
+  --ink: #1a1814;
+  --muted: #6b6560;
+  --pine: #2c4538;
+  --pine-hover: #23382d;
+  --brass: #8a6d3b;
+  --border: #e4ddd2;
+  --stone: #d8d2c6;
+  --sale: #7a3e2e;
+}
+
+@theme inline {
+  --color-linen: var(--linen);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-pine: var(--pine);
+  --color-pine-hover: var(--pine-hover);
+  --color-brass: var(--brass);
+  --color-border: var(--border);
+  --color-stone: var(--stone);
+  --color-sale: var(--sale);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-fraunces);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--linen);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pine);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--pine) 18%, white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
