@@ -4,19 +4,23 @@ import { Footer } from "@/components/layout/Footer";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getCommerceMode, getGtmId } from "@/lib/env";
-import { siteMetadata, organizationJsonLd, serializeJsonLd } from "@/lib/seo";
+import { siteMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import type { RootLayoutProps } from "@/lib/page-props";
 import "./globals.css";
 
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
+  display: "swap",
 });
 
 const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
+  display: "swap",
 });
 
 export const metadata = siteMetadata();
@@ -28,11 +32,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={`${outfit.variable} ${fraunces.variable} h-full`}>
       <body className="flex min-h-full flex-col bg-linen font-sans text-ink antialiased">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd()) }}
-        />
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
         <AnalyticsScripts gtmId={gtmId} />
+        <PageViewTracker />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-paper focus:px-3 focus:py-2"

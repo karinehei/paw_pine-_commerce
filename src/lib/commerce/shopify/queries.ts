@@ -1,9 +1,18 @@
-const PRODUCT_FIELDS = `
+const VARIANT_LIST_FIELDS = `
+  id
+  title
+  availableForSale
+  quantityAvailable
+  selectedOptions { name value }
+  price { amount currencyCode }
+  compareAtPrice { amount currencyCode }
+`;
+
+const PRODUCT_CARD_FIELDS = `
   id
   handle
   title
   description
-  descriptionHtml
   vendor
   productType
   tags
@@ -14,14 +23,6 @@ const PRODUCT_FIELDS = `
     altText
     width
     height
-  }
-  images(first: 8) {
-    nodes {
-      url
-      altText
-      width
-      height
-    }
   }
   priceRange {
     minVariantPrice { amount currencyCode }
@@ -37,15 +38,19 @@ const PRODUCT_FIELDS = `
     values
   }
   variants(first: 50) {
+    nodes { ${VARIANT_LIST_FIELDS} }
+  }
+`;
+
+const PRODUCT_FIELDS = `
+  ${PRODUCT_CARD_FIELDS}
+  descriptionHtml
+  images(first: 8) {
     nodes {
-      id
-      title
-      availableForSale
-      quantityAvailable
-      selectedOptions { name value }
-      price { amount currencyCode }
-      compareAtPrice { amount currencyCode }
-      image { url altText width height }
+      url
+      altText
+      width
+      height
     }
   }
 `;
@@ -53,7 +58,7 @@ const PRODUCT_FIELDS = `
 export const PRODUCTS_QUERY = `
   query Products($query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(first: 50, query: $query, sortKey: $sortKey, reverse: $reverse) {
-      nodes { ${PRODUCT_FIELDS} }
+      nodes { ${PRODUCT_CARD_FIELDS} }
     }
   }
 `;
@@ -89,7 +94,7 @@ export const COLLECTION_BY_HANDLE_QUERY = `
       description
       image { url altText width height }
       products(first: 50, sortKey: $sortKey, reverse: $reverse) {
-        nodes { ${PRODUCT_FIELDS} }
+        nodes { ${PRODUCT_CARD_FIELDS} }
       }
     }
   }
@@ -99,7 +104,7 @@ export const SEARCH_QUERY = `
   query SearchProducts($query: String!) {
     search(query: $query, first: 50, types: PRODUCT) {
       nodes {
-        ... on Product { ${PRODUCT_FIELDS} }
+        ... on Product { ${PRODUCT_CARD_FIELDS} }
       }
     }
   }

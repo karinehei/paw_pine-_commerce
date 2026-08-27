@@ -53,12 +53,12 @@ export function NewsletterForm() {
           required
           autoComplete="email"
           placeholder="Email address"
-          className="flex-1 border border-border bg-linen px-3 py-2 text-sm"
+          className="min-h-11 flex-1 border border-border bg-linen px-3 py-2 text-sm"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="bg-ink px-4 py-2 text-sm tracking-[0.12em] text-paper uppercase disabled:opacity-60"
+          className="min-h-11 bg-ink px-4 text-sm tracking-[0.12em] text-paper uppercase disabled:opacity-60"
         >
           {status === "loading" ? "Sending" : "Join"}
         </button>

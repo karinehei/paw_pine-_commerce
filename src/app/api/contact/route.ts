@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const email = typeof record.email === "string" ? record.email.trim() : "";
   const message = typeof record.message === "string" ? record.message.trim() : "";
 
-  if (!name || !isEmail(email) || message.length < 10) {
+  if (!name || name.length > 120 || !isEmail(email) || message.length < 10 || message.length > 4000) {
     return NextResponse.json(
       { ok: false, message: "Please include your name, a valid email, and a short message." },
       { status: 400 },

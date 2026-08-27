@@ -45,7 +45,7 @@ export function ContactForm() {
           name="name"
           required
           autoComplete="name"
-          className="mt-1 w-full border border-border bg-paper px-3 py-2"
+          className="mt-1 min-h-11 w-full border border-border bg-paper px-3 py-2"
         />
       </div>
       <div>
@@ -58,7 +58,7 @@ export function ContactForm() {
           type="email"
           required
           autoComplete="email"
-          className="mt-1 w-full border border-border bg-paper px-3 py-2"
+          className="mt-1 min-h-11 w-full border border-border bg-paper px-3 py-2"
         />
       </div>
       <div>
@@ -70,13 +70,13 @@ export function ContactForm() {
           name="message"
           required
           rows={6}
-          className="mt-1 w-full border border-border bg-paper px-3 py-2"
+          className="mt-1 min-h-11 w-full border border-border bg-paper px-3 py-2"
         />
       </div>
       <button
         type="submit"
         disabled={status === "loading"}
-        className="bg-pine px-5 py-3 text-sm tracking-[0.14em] text-paper uppercase disabled:opacity-60"
+        className="bg-pine min-h-12 px-5 text-sm tracking-[0.14em] text-paper uppercase disabled:opacity-60"
       >
         {status === "loading" ? "Sending" : "Send"}
       </button>

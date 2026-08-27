@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     commerce.getCollections(),
   ]);
 
-  const staticRoutes = ["", "/about", "/shipping", "/returns", "/contact", "/search", "/cart"].map(
+  const staticRoutes = ["", "/about", "/shipping", "/returns", "/contact", "/search"].map(
     (path) => ({
       url: `${site}${path || "/"}`,
       lastModified: new Date(),

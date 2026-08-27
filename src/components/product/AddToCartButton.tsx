@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { addItemToCart } from "@/lib/cart/actions";
 import { track } from "@/lib/analytics/events";
+import { itemFromProduct } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
 import { toUserErrorMessage } from "@/lib/commerce/errors";
 import type { Product, ProductVariant } from "@/lib/commerce/types";
@@ -15,7 +16,7 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ product, variant, quantity }: AddToCartButtonProps) {
-  const { setCart, openCart } = useCart();
+  const { setCart, openCart, announce } = useCart();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const unavailable = !variant || !variant.availableForSale;
@@ -30,21 +31,14 @@ export function AddToCartButton({ product, variant, quantity }: AddToCartButtonP
       try {
         const cart = await addItemToCart(variant.id, quantity);
         setCart(cart);
+        const item = itemFromProduct(product, variant, quantity);
         track({
           name: "add_to_cart",
           currency: variant.price.currencyCode,
           value: parseAmount(variant.price) * quantity,
-          items: [
-            {
-              item_id: product.handle,
-              item_name: product.title,
-              item_brand: product.vendor,
-              item_category: product.category,
-              price: parseAmount(variant.price),
-              quantity,
-            },
-          ],
+          items: [item],
         });
+        announce(`${product.title} added to bag`);
         openCart();
       } catch (caught) {
         setError(toUserErrorMessage(caught));
@@ -58,7 +52,7 @@ export function AddToCartButton({ product, variant, quantity }: AddToCartButtonP
         type="button"
         onClick={handleClick}
         disabled={unavailable || pending}
-        className="w-full bg-pine px-6 py-3.5 text-sm tracking-[0.14em] text-paper uppercase transition-colors hover:bg-pine-hover disabled:cursor-not-allowed disabled:bg-stone disabled:text-muted"
+        className="btn-primary w-full disabled:cursor-not-allowed disabled:bg-stone disabled:text-muted"
       >
         {unavailable ? "Out of stock" : pending ? "Adding…" : "Add to bag"}
       </button>

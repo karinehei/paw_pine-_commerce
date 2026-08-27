@@ -18,6 +18,7 @@ import type {
   ShopifyProductNode,
   ShopifyVariantNode,
 } from "@/lib/commerce/shopify/storefront-types";
+import { quoteShopifySearchTerm } from "@/lib/security";
 
 const CATEGORIES: ProductCategory[] = [
   "toys",
@@ -148,7 +149,7 @@ function extractFeatures(description: string, tags: string[]): string[] {
 }
 
 export function mapProduct(node: ShopifyProductNode): Product {
-  const images = node.images.nodes
+  const images = (node.images?.nodes ?? [])
     .map((image) => mapImage(image, node.title))
     .filter((image): image is ProductImage => Boolean(image));
   const featured = mapImage(node.featuredImage, node.title) ?? images[0] ?? null;
@@ -159,7 +160,7 @@ export function mapProduct(node: ShopifyProductNode): Product {
     handle: node.handle,
     title: node.title,
     description: node.description,
-    descriptionHtml: node.descriptionHtml,
+    descriptionHtml: node.descriptionHtml ?? "",
     availableForSale: node.availableForSale,
     featuredImage: featured,
     images: images.length > 0 ? images : featured ? [featured] : [],
@@ -190,6 +191,9 @@ export function mapProduct(node: ShopifyProductNode): Product {
     features,
     createdAt: node.createdAt,
     visual: mapVisual(node.handle),
+    sku: tagValue(node.tags, "sku") || node.handle,
+    dimensions: tagValue(node.tags, "dimensions") || "See the product images for scale.",
+    care: tagValue(node.tags, "care") || "Wipe clean. Avoid harsh chemicals.",
   };
 }
 
@@ -259,18 +263,20 @@ export function buildShopifySearchQuery(input: {
   const parts: string[] = [];
 
   if (input.query) {
-    parts.push(input.query);
+    parts.push(quoteShopifySearchTerm(input.query));
   }
   if (input.species?.length) {
-    parts.push(`(${input.species.map((value) => `tag:${value}`).join(" OR ")})`);
+    parts.push(`(${input.species.map((value) => `tag:${quoteShopifySearchTerm(value)}`).join(" OR ")})`);
   }
   if (input.category?.length) {
     parts.push(
-      `(${input.category.map((value) => `product_type:${value}`).join(" OR ")})`,
+      `(${input.category.map((value) => `product_type:${quoteShopifySearchTerm(value)}`).join(" OR ")})`,
     );
   }
   if (input.brand?.length) {
-    parts.push(`(${input.brand.map((value) => `vendor:${value}`).join(" OR ")})`);
+    parts.push(
+      `(${input.brand.map((value) => `vendor:${quoteShopifySearchTerm(value)}`).join(" OR ")})`,
+    );
   }
   if (input.availability === "in-stock") {
     parts.push("available_for_sale:true");

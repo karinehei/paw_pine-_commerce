@@ -27,8 +27,28 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
     router.push(queryToHref(pathname, next));
   }
 
+  const hasFilters = Boolean(
+    current.species?.length ||
+      current.category?.length ||
+      current.brand?.length ||
+      current.material?.length ||
+      current.availability === "in-stock" ||
+      current.priceMin !== undefined ||
+      current.priceMax !== undefined ||
+      (current.sort && current.sort !== "featured"),
+  );
+
   return (
     <div className="space-y-8">
+      {hasFilters ? (
+        <button
+          type="button"
+          className="text-sm text-muted underline-offset-4 hover:underline"
+          onClick={() => push({ query: current.query })}
+        >
+          Clear filters
+        </button>
+      ) : null}
       <fieldset>
         <legend className="text-xs tracking-[0.16em] text-muted uppercase">Sort</legend>
         <label htmlFor={`${idPrefix}-sort`} className="sr-only">
@@ -36,7 +56,7 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
         </label>
         <select
           id={`${idPrefix}-sort`}
-          className="mt-2 w-full border border-border bg-paper px-3 py-2 text-sm"
+          className="mt-2 min-h-11 w-full border border-border bg-paper px-3 py-2 text-sm"
           value={current.sort ?? "featured"}
           onChange={(event) =>
             push({ ...current, sort: event.target.value as ProductQuery["sort"] })
@@ -104,12 +124,13 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
               max={facets.priceMax}
               defaultValue={current.priceMin ?? ""}
               className="mt-1 w-full border border-border bg-paper px-2 py-2 text-sm text-ink"
-              onBlur={(event) =>
+              onBlur={(event) => {
+                const parsed = Number.parseFloat(event.target.value);
                 push({
                   ...current,
-                  priceMin: event.target.value ? Number(event.target.value) : undefined,
-                })
-              }
+                  priceMin: Number.isFinite(parsed) ? parsed : undefined,
+                });
+              }}
             />
           </label>
           <label className="flex-1 text-xs text-muted">
@@ -120,12 +141,13 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
               max={facets.priceMax}
               defaultValue={current.priceMax ?? ""}
               className="mt-1 w-full border border-border bg-paper px-2 py-2 text-sm text-ink"
-              onBlur={(event) =>
+              onBlur={(event) => {
+                const parsed = Number.parseFloat(event.target.value);
                 push({
                   ...current,
-                  priceMax: event.target.value ? Number(event.target.value) : undefined,
-                })
-              }
+                  priceMax: Number.isFinite(parsed) ? parsed : undefined,
+                });
+              }}
             />
           </label>
         </div>
@@ -133,7 +155,7 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
 
       <fieldset className="space-y-2">
         <legend className="text-xs tracking-[0.16em] text-muted uppercase">Availability</legend>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex min-h-11 items-center gap-2 text-sm">
           <input
             id={`${idPrefix}-in-stock`}
             type="checkbox"
@@ -168,7 +190,7 @@ function FilterGroup({
     <fieldset className="space-y-2">
       <legend className="text-xs tracking-[0.16em] text-muted uppercase">{legend}</legend>
       {options.map((option) => (
-        <label key={option.value} className="flex items-center gap-2 text-sm">
+        <label key={option.value} className="flex min-h-11 items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={selected.includes(option.value)}

@@ -104,7 +104,64 @@ function buildProduct(draft: CatalogDraft): Product {
     features: draft.features,
     createdAt: draft.createdAt,
     visual: draft.visual,
+    sku: `PP-${draft.handle.replace(/-/g, "").slice(0, 12).toUpperCase()}`,
+    dimensions: dimensionsFor(draft),
+    care: careFor(draft.material),
   };
+}
+
+function careFor(material: string): string {
+  const value = material.toLowerCase();
+  if (value.includes("wool")) {
+    return "Spot clean or gentle wool wash. Dry flat, away from heat.";
+  }
+  if (value.includes("ceramic") || value.includes("stoneware")) {
+    return "Dishwasher safe. Avoid sudden temperature change and metal scourers.";
+  }
+  if (value.includes("oak") || value.includes("beech") || value.includes("wood")) {
+    return "Wipe with a dry cloth. Refresh with food-safe oil if the surface looks dry. Not dishwasher safe.";
+  }
+  if (value.includes("sisal")) {
+    return "Vacuum the sisal. Wipe timber with a dry cloth.";
+  }
+  if (value.includes("nylon")) {
+    return "Hand wash cold and line dry. Do not tumble dry.";
+  }
+  if (value.includes("cotton") || value.includes("linen") || value.includes("canvas")) {
+    return "Machine wash at 30°C. Line dry.";
+  }
+  if (value.includes("willow")) {
+    return "Keep dry. Replace the ribbon when it frays.";
+  }
+  return "Wipe clean. Avoid harsh chemicals.";
+}
+
+function dimensionsFor(draft: CatalogDraft): string {
+  if (draft.handle === "trail-harness") {
+    return "Neck 28–56 cm depending on size · chest 36–82 cm. Size guide on the harness label.";
+  }
+  if (draft.handle === "wool-nest-bed") {
+    return "S 55 cm · M 70 cm · L 90 cm diameter, 18 cm wall height.";
+  }
+  if (draft.handle === "window-perch") {
+    return "Seat 42 × 28 cm. Fits sills 2–4 cm thick.";
+  }
+  if (draft.handle === "sisal-scratch-column") {
+    return "Height 72 cm · base 32 × 32 cm.";
+  }
+  if (draft.sizes && draft.sizes.length > 1) {
+    return `Available in ${draft.sizes.join(", ")}. Measure before ordering.`;
+  }
+  switch (draft.category) {
+    case "feeding":
+      return "Diameter 16 cm · height 5 cm.";
+    case "toys":
+      return "Approximately 12 × 8 × 3 cm.";
+    case "beds":
+      return "Diameter 50 cm · height 20 cm.";
+    default:
+      return "See the product images for scale.";
+  }
 }
 
 const drafts: CatalogDraft[] = [

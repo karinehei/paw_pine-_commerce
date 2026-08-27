@@ -96,6 +96,9 @@ export interface Product {
   features: string[];
   createdAt: string;
   visual: ProductVisual;
+  sku: string;
+  dimensions: string;
+  care: string;
 }
 
 export interface Collection {

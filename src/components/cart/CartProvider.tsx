@@ -19,6 +19,7 @@ interface CartContextValue {
   openCart: () => void;
   closeCart: () => void;
   mode: CommerceMode;
+  announce: (message: string) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -32,6 +33,7 @@ export function CartProvider({
 }) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [liveMessage, setLiveMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -47,13 +49,24 @@ export function CartProvider({
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
+  const announce = useCallback((message: string) => {
+    setLiveMessage("");
+    requestAnimationFrame(() => setLiveMessage(message));
+  }, []);
 
   const value = useMemo(
-    () => ({ cart, setCart, isOpen, openCart, closeCart, mode }),
-    [cart, isOpen, openCart, closeCart, mode],
+    () => ({ cart, setCart, isOpen, openCart, closeCart, mode, announce }),
+    [cart, isOpen, openCart, closeCart, mode, announce],
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </div>
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart(): CartContextValue {

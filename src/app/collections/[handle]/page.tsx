@@ -5,10 +5,16 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
 import { parseProductQuery } from "@/lib/commerce/url-state";
-import { collectionMetadata } from "@/lib/seo";
-import { parseAmount } from "@/lib/format";
+import {
+  breadcrumbJsonLd,
+  collectionJsonLd,
+  collectionMetadata,
+} from "@/lib/seo";
+import { getSiteUrl } from "@/lib/env";
+import { itemFromProduct } from "@/lib/analytics/items";
 import type { HandlePageProps } from "@/lib/page-props";
 
 export async function generateStaticParams() {
@@ -38,9 +44,18 @@ export default async function CollectionPage({
   }
 
   const { collection, products, facets } = result;
+  const url = `${getSiteUrl()}/collections/${collection.handle}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
+      <JsonLd data={collectionJsonLd(collection, products, url)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: getSiteUrl() },
+          { name: "Shop", url: `${getSiteUrl()}/collections/all` },
+          { name: collection.title, url },
+        ])}
+      />
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },
@@ -57,10 +72,10 @@ export default async function CollectionPage({
           {products.length} {products.length === 1 ? "piece" : "pieces"}
         </p>
       </header>
-      <div className="mt-10 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
+      <div className="mt-10 grid gap-10 md:grid-cols-[200px_minmax(0,1fr)] lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside>
-          <details className="lg:hidden">
-            <summary className="cursor-pointer text-sm tracking-[0.12em] uppercase">
+          <details className="md:hidden">
+            <summary className="min-h-11 cursor-pointer text-sm tracking-[0.12em] uppercase">
               Filter and sort
             </summary>
             <div className="pt-6">
@@ -69,7 +84,7 @@ export default async function CollectionPage({
               </Suspense>
             </div>
           </details>
-          <div className="hidden lg:block">
+          <div className="hidden md:block">
             <Suspense>
               <FilterPanel facets={facets} />
             </Suspense>
@@ -83,20 +98,20 @@ export default async function CollectionPage({
               action={{ href: `/collections/${handle}`, label: "Reset filters" }}
             />
           ) : (
-            <ProductGrid products={products} />
+            <ProductGrid
+              products={products}
+              listId={collection.handle}
+              listName={collection.title}
+            />
           )}
         </div>
       </div>
       <AnalyticsListener
         event={{
           name: "view_item_list",
-          items: products.slice(0, 8).map((product) => ({
-            item_id: product.handle,
-            item_name: product.title,
-            item_brand: product.vendor,
-            item_category: product.category,
-            price: parseAmount(product.priceRange.minVariantPrice),
-          })),
+          item_list_id: collection.handle,
+          item_list_name: collection.title,
+          items: products.slice(0, 8).map((product) => itemFromProduct(product)),
         }}
       />
     </div>

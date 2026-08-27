@@ -1,0 +1,67 @@
+# Security notes
+
+This storefront is a portfolio prototype. It is not a claim that the application is secure in absolute terms. The notes below record what was checked and what was mitigated.
+
+## Secrets and environment
+
+- `SHOPIFY_STOREFRONT_ACCESS_TOKEN` is server-only (`src/lib/env.ts` imports `server-only`).
+- Store domain is accepted only if it matches `*.myshopify.com`. A poisoned env value cannot send the token to an arbitrary host.
+- API version must match `YYYY-MM`.
+- `.env*` is gitignored; `.env.example` has empty token fields.
+- CI runs in demo mode and does not inject Shopify secrets.
+
+## Browser bundle
+
+- No `SHOPIFY_*` variables are `NEXT_PUBLIC_`.
+- `NEXT_PUBLIC_GTM_ID` is interpolated into a script only after `/^GTM-[A-Z0-9]+$/i` validation.
+
+## Checkout redirects
+
+- `cart.checkoutUrl` is used as an `<a href>` only when it is `https:` and on a Shopify host.
+- Other values fall back to `/cart?checkout=demo`.
+- External checkout links set `rel="noopener noreferrer"`.
+- Filter `router.push` paths must be site-relative (`/` but not `//`).
+
+## XSS and HTML
+
+- Product copy is rendered as text, not `descriptionHtml`.
+- JSON-LD is serialised with `<` escaped before `dangerouslySetInnerHTML`.
+- Recently viewed handles must match `^[a-z0-9]+(?:-[a-z0-9]+)*$` before they become `/products/{handle}` links.
+
+## GraphQL
+
+- Query documents are static strings. User input is passed as variables.
+- Shopify product-search syntax is quoted (`quoteShopifySearchTerm`) so `OR` / `title:*` in `q` cannot widen the query.
+- Search `q` is clamped to 80 characters. Suggest API rejects longer strings.
+
+## Cart cookie
+
+- `httpOnly`, `sameSite=lax`, `secure` in production.
+- Shopify ids must be `gid://shopify/Cart/…`.
+- Demo lines must use `demo-line-` ids and quantities 1–99.
+
+## Forms
+
+- Contact and newsletter validate email server-side. Contact messages are length-capped.
+- These routes acknowledge receipt only; they do not persist PII. Add a provider and rate limits before production use.
+
+## Logging
+
+- GraphQL error bodies and tokens are not returned to the client.
+- The only console sink is the optional analytics debug adapter, which logs event names and typed payloads — not secrets.
+
+## Headers
+
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `X-Frame-Options: DENY`
+- `Permissions-Policy` disables camera, microphone, geolocation
+
+A Content-Security-Policy is not set: GTM/GA4 would need a carefully maintained allowlist. That is a follow-up, not a silent false sense of safety.
+
+## Residual risk
+
+- Storefront tokens are still powerful; leak of `.env.local` is a shop compromise.
+- Demo cart cookies are unsigned; they can only add known demo variants.
+- No rate limiting on `/api/contact` or `/api/newsletter`.
+- Dependency audit is not automated beyond `npm ci` of a short lockfile.

@@ -18,7 +18,7 @@ export interface ShopifyVariantNode {
   selectedOptions: Array<{ name: string; value: string }>;
   price: ShopifyMoney;
   compareAtPrice: ShopifyMoney | null;
-  image: ShopifyImage | null;
+  image?: ShopifyImage | null;
   product?: { handle: string; title: string };
 }
 
@@ -27,14 +27,14 @@ export interface ShopifyProductNode {
   handle: string;
   title: string;
   description: string;
-  descriptionHtml: string;
+  descriptionHtml?: string;
   vendor: string;
   productType: string;
   tags: string[];
   createdAt: string;
   availableForSale: boolean;
   featuredImage: ShopifyImage | null;
-  images: { nodes: ShopifyImage[] };
+  images?: { nodes: ShopifyImage[] };
   priceRange: {
     minVariantPrice: ShopifyMoney;
     maxVariantPrice: ShopifyMoney;

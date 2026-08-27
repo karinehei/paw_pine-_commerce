@@ -5,7 +5,9 @@ export const SITE_DESCRIPTION =
 
 export const DEFAULT_CURRENCY = "EUR";
 export const FREE_SHIPPING_THRESHOLD = 75;
-export const ESTIMATED_SHIPPING_AMOUNT = 5.9;
+export const ESTIMATED_SHIPPING_AMOUNT = 6;
+export const DISPATCH_MIN_DAYS = 2;
+export const DISPATCH_MAX_DAYS = 4;
 
 export const CART_COOKIE_NAME = "paw_pine_cart";
 export const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
@@ -47,5 +49,6 @@ export const FOOTER_LINKS = {
     { href: "/about", label: "About" },
     { href: "/search", label: "Search" },
     { href: "/cart", label: "Cart" },
+    { href: "/demo/analytics", label: "Demo analytics" },
   ],
 } as const;

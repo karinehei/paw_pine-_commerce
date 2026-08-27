@@ -1,20 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ProductGallery } from "@/components/product/ProductGallery";
-import { ProductPrice } from "@/components/product/ProductPrice";
 import { ProductPurchase } from "@/components/product/ProductPurchase";
 import { ProductGrid } from "@/components/product/ProductGrid";
+import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
-import {
-  breadcrumbJsonLd,
-  productJsonLd,
-  productMetadata,
-  serializeJsonLd,
-} from "@/lib/seo";
+import { breadcrumbJsonLd, productJsonLd, productMetadata } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/env";
+import { itemFromProduct } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import type { HandlePageProps } from "@/lib/page-props";
 
 export async function generateStaticParams() {
@@ -42,35 +40,23 @@ export default async function ProductPage({ params }: HandlePageProps) {
 
   const recommended = await commerce.getRecommendations(handle);
   const url = `${getSiteUrl()}/products/${product.handle}`;
+  const speciesHref = `/collections/${product.species === "dog" ? "dogs" : "cats"}`;
+  const speciesLabel = product.species === "dog" ? "Dogs" : "Cats";
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(productJsonLd(product, url)) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: serializeJsonLd(
-            breadcrumbJsonLd([
-              { name: "Home", url: getSiteUrl() },
-              {
-                name: product.species === "dog" ? "Dogs" : "Cats",
-                url: `${getSiteUrl()}/collections/${product.species === "dog" ? "dogs" : "cats"}`,
-              },
-              { name: product.title, url },
-            ]),
-          ),
-        }}
+      <JsonLd data={productJsonLd(product, url)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: getSiteUrl() },
+          { name: speciesLabel, url: `${getSiteUrl()}${speciesHref}` },
+          { name: product.title, url },
+        ])}
       />
       <Breadcrumbs
         items={[
           { href: "/", label: "Home" },
-          {
-            href: `/collections/${product.species === "dog" ? "dogs" : "cats"}`,
-            label: product.species === "dog" ? "Dogs" : "Cats",
-          },
+          { href: speciesHref, label: speciesLabel },
           { label: product.title },
         ]}
       />
@@ -78,39 +64,50 @@ export default async function ProductPage({ params }: HandlePageProps) {
         <ProductGallery product={product} />
         <div>
           <p className="text-xs tracking-[0.16em] text-muted uppercase">{product.vendor}</p>
-          <h1 className="mt-2 font-display text-4xl md:text-5xl">{product.title}</h1>
-          <ProductPrice
-            price={product.priceRange.minVariantPrice}
-            compareAtPrice={product.compareAtPriceRange.minVariantPrice}
-            className="mt-4 text-lg"
-          />
-          <p className="mt-6 max-w-lg text-muted">{product.description}</p>
+          <h1 className="mt-2 font-display text-[2.25rem] leading-[1.1] md:text-5xl">{product.title}</h1>
+          <div className="mt-6 max-w-lg space-y-3 text-muted">
+            {product.description
+              .split(/\n\n+/)
+              .map((paragraph) => (
+                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+              ))}
+          </div>
           <div className="mt-8">
             <ProductPurchase product={product} />
           </div>
+          <ul className="mt-8 grid gap-3 sm:grid-cols-3">
+            {product.features.slice(0, 3).map((feature) => (
+              <li key={feature} className="border border-border bg-paper px-4 py-3 text-sm">
+                {feature}
+              </li>
+            ))}
+          </ul>
           <dl className="mt-10 space-y-4 border-t border-border pt-8 text-sm">
             <div>
               <dt className="tracking-[0.14em] text-muted uppercase">Materials</dt>
               <dd className="mt-1">{product.material}</dd>
             </div>
             <div>
-              <dt className="tracking-[0.14em] text-muted uppercase">Details</dt>
-              <dd className="mt-1">
-                <ul className="list-disc space-y-1 pl-4">
-                  {product.features.map((feature) => (
-                    <li key={feature}>{feature}</li>
-                  ))}
-                </ul>
-              </dd>
+              <dt className="tracking-[0.14em] text-muted uppercase">Dimensions</dt>
+              <dd className="mt-1">{product.dimensions}</dd>
             </div>
             <div>
-              <dt className="tracking-[0.14em] text-muted uppercase">Delivery</dt>
+              <dt className="tracking-[0.14em] text-muted uppercase">Care</dt>
+              <dd className="mt-1">{product.care}</dd>
+            </div>
+            <div>
+              <dt className="tracking-[0.14em] text-muted uppercase">Shipping and returns</dt>
               <dd className="mt-1 text-muted">
-                Dispatched in 2–4 working days. Complimentary shipping over €75. See{" "}
+                Complimentary shipping over €{FREE_SHIPPING_THRESHOLD}. Unused items may be returned
+                within 30 days. See{" "}
                 <Link href="/shipping" className="underline-offset-4 hover:underline">
                   shipping
                 </Link>{" "}
-                for returns and lead times.
+                and{" "}
+                <Link href="/returns" className="underline-offset-4 hover:underline">
+                  returns
+                </Link>
+                .
               </dd>
             </div>
           </dl>
@@ -119,23 +116,22 @@ export default async function ProductPage({ params }: HandlePageProps) {
       {recommended.length > 0 ? (
         <section className="mt-20">
           <h2 className="mb-8 font-display text-3xl">You may also like</h2>
-          <ProductGrid products={recommended} />
+          <ProductGrid
+            products={recommended}
+            listId="related"
+            listName="Related products"
+          />
         </section>
       ) : null}
+      <RecentlyViewed
+        current={{ handle: product.handle, title: product.title, vendor: product.vendor }}
+      />
       <AnalyticsListener
         event={{
           name: "view_item",
           currency: product.priceRange.minVariantPrice.currencyCode,
           value: parseAmount(product.priceRange.minVariantPrice),
-          items: [
-            {
-              item_id: product.handle,
-              item_name: product.title,
-              item_brand: product.vendor,
-              item_category: product.category,
-              price: parseAmount(product.priceRange.minVariantPrice),
-            },
-          ],
+          items: [itemFromProduct(product)],
         }}
       />
     </div>

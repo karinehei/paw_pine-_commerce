@@ -1,8 +1,10 @@
 "use server";
 
 import { CommerceError } from "@/lib/commerce/errors";
+import { clampQuantity, isShopifyCartGid, MAX_LINE_QUANTITY } from "@/lib/security";
 import { getCommerceProvider } from "@/lib/commerce/provider";
 import {
+  clearCartCookie,
   cookieMatchesMode,
   readCartCookie,
   writeCartCookie,
@@ -18,13 +20,29 @@ export async function getCart(): Promise<Cart | null> {
   }
 
   try {
-    return await getCommerceProvider().getCart(cookie.id);
+    const cart = await getCommerceProvider().getCart(cookie.id);
+    if (!cart) {
+      await clearCartCookie();
+      return null;
+    }
+    return cart;
   } catch (error) {
     if (error instanceof CommerceError && error.code === "invalid_cart") {
+      await clearCartCookie();
       return null;
     }
     throw error;
   }
+}
+
+async function persistShopifyCart(cart: Cart): Promise<void> {
+  if (getCommerceMode() !== "shopify") {
+    return;
+  }
+  if (!isShopifyCartGid(cart.id)) {
+    throw new CommerceError("invalid_cart");
+  }
+  await writeCartCookie({ mode: "shopify", id: cart.id });
 }
 
 async function ensureCartId(): Promise<string> {
@@ -35,26 +53,32 @@ async function ensureCartId(): Promise<string> {
   }
 
   const cart = await getCommerceProvider().createCart();
-  if (mode === "shopify") {
-    await writeCartCookie({ mode: "shopify", id: cart.id });
-  }
+  await persistShopifyCart(cart);
   return cart.id;
 }
 
 export async function addItemToCart(variantId: string, quantity: number): Promise<Cart> {
-  if (quantity < 1) {
+  const safeQuantity = clampQuantity(quantity);
+  if (safeQuantity < 1 || safeQuantity > MAX_LINE_QUANTITY) {
     throw new CommerceError("invalid_cart");
   }
 
   const provider = getCommerceProvider();
   const cartId = await ensureCartId();
-  const cart = await provider.addToCart(cartId, variantId, quantity);
 
-  if (getCommerceMode() === "shopify") {
-    await writeCartCookie({ mode: "shopify", id: cart.id });
+  try {
+    const cart = await provider.addToCart(cartId, variantId, safeQuantity);
+    await persistShopifyCart(cart);
+    return cart;
+  } catch (error) {
+    if (error instanceof CommerceError && error.code === "invalid_cart") {
+      await clearCartCookie();
+      const cart = await provider.createCart([{ variantId, quantity: safeQuantity }]);
+      await persistShopifyCart(cart);
+      return cart;
+    }
+    throw error;
   }
-
-  return cart;
 }
 
 export async function updateCartItem(lineId: string, quantity: number): Promise<Cart> {
@@ -64,7 +88,14 @@ export async function updateCartItem(lineId: string, quantity: number): Promise<
     throw new CommerceError("invalid_cart");
   }
 
-  return getCommerceProvider().updateCart(cookie.id, lineId, quantity);
+  try {
+    return await getCommerceProvider().updateCart(cookie.id, lineId, quantity <= 0 ? 0 : clampQuantity(quantity));
+  } catch (error) {
+    if (error instanceof CommerceError && error.code === "invalid_cart") {
+      await clearCartCookie();
+    }
+    throw error;
+  }
 }
 
 export async function removeCartItem(lineId: string): Promise<Cart> {
@@ -74,5 +105,12 @@ export async function removeCartItem(lineId: string): Promise<Cart> {
     throw new CommerceError("invalid_cart");
   }
 
-  return getCommerceProvider().removeFromCart(cookie.id, lineId);
+  try {
+    return await getCommerceProvider().removeFromCart(cookie.id, lineId);
+  } catch (error) {
+    if (error instanceof CommerceError && error.code === "invalid_cart") {
+      await clearCartCookie();
+    }
+    throw error;
+  }
 }

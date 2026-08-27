@@ -1,0 +1,86 @@
+import type { AnalyticsEvent } from "@/lib/analytics/types";
+import { SESSION_EVENTS_KEY } from "@/lib/analytics/types";
+
+export interface AnalyticsAdapter {
+  readonly name: string;
+  track(event: AnalyticsEvent): void;
+}
+
+export function createConsoleAdapter(): AnalyticsAdapter {
+  return {
+    name: "console",
+    track(event) {
+      console.info("[analytics]", event.name, event);
+    },
+  };
+}
+
+export function createDataLayerAdapter(): AnalyticsAdapter {
+  return {
+    name: "dataLayer",
+    track(event) {
+      if (typeof window === "undefined") {
+        return;
+      }
+      window.dataLayer = window.dataLayer ?? [];
+      window.dataLayer.push({ ecommerce: null });
+      window.dataLayer.push(toDataLayerPayload(event));
+    },
+  };
+}
+
+export function createSessionAdapter(): AnalyticsAdapter {
+  return {
+    name: "session",
+    track(event) {
+      if (typeof window === "undefined") {
+        return;
+      }
+      try {
+        const raw = window.sessionStorage.getItem(SESSION_EVENTS_KEY);
+        const existing: AnalyticsEvent[] = raw ? (JSON.parse(raw) as AnalyticsEvent[]) : [];
+        existing.push(event);
+        window.sessionStorage.setItem(SESSION_EVENTS_KEY, JSON.stringify(existing.slice(-200)));
+      } catch {
+        // Private browsing or blocked storage should not break checkout.
+      }
+    },
+  };
+}
+
+function toDataLayerPayload(event: AnalyticsEvent): Record<string, unknown> {
+  switch (event.name) {
+    case "page_view":
+      return {
+        event: event.name,
+        page_path: event.page_path,
+        page_title: event.page_title,
+      };
+    case "search":
+      return {
+        event: event.name,
+        search_term: event.search_term,
+        results_count: event.results_count,
+      };
+    case "newsletter_signup":
+      return { event: event.name };
+    default:
+      return {
+        event: event.name,
+        ecommerce: {
+          currency: "currency" in event ? event.currency : undefined,
+          value: "value" in event ? event.value : undefined,
+          transaction_id: event.name === "purchase" ? event.transaction_id : undefined,
+          items: "items" in event ? event.items : undefined,
+          item_list_id: "item_list_id" in event ? event.item_list_id : undefined,
+          item_list_name: "item_list_name" in event ? event.item_list_name : undefined,
+        },
+      };
+  }
+}
+
+declare global {
+  interface Window {
+    dataLayer?: Array<Record<string, unknown>>;
+  }
+}

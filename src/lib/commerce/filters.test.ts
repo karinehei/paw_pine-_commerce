@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyProductQuery, buildFacets, filterByCollection } from "@/lib/commerce/filters";
 import { demoProducts } from "@/lib/commerce/demo/catalog";
-import { parseProductQuery, serializeProductQuery } from "@/lib/commerce/url-state";
+import { parseProductQuery, queryToHref, serializeProductQuery } from "@/lib/commerce/url-state";
 
 describe("applyProductQuery", () => {
   it("filters by species and category", () => {
@@ -53,6 +53,18 @@ describe("url state", () => {
     expect(params.get("species")).toBe("dog,cat");
     expect(params.get("sort")).toBe("price-desc");
     expect(params.get("priceMin")).toBe("20");
+  });
+
+  it("ignores unknown sort keys so URLs stay safe to share", () => {
+    const query = parseProductQuery({ sort: "not-a-sort" });
+    expect(query.sort).toBeUndefined();
+    expect(serializeProductQuery(query).get("sort")).toBeNull();
+  });
+
+  it("refuses protocol-relative filter pathnames", () => {
+    const href = queryToHref("//evil.example", { query: "oak" });
+    expect(href.startsWith("//")).toBe(false);
+    expect(href.startsWith("/")).toBe(true);
   });
 });
 

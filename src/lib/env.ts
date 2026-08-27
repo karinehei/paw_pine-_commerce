@@ -1,6 +1,9 @@
 import "server-only";
 
 import type { CommerceMode } from "@/lib/commerce/types";
+import { isShopifyApiVersion, normaliseShopifyDomain } from "@/lib/security";
+
+export { getGtmId, getSiteUrl } from "@/lib/env-public";
 
 export function getShopifyConfig(): {
   domain: string;
@@ -15,10 +18,10 @@ export function getShopifyConfig(): {
     return null;
   }
 
-  const normalised = domain
-    .replace(/^https?:\/\//, "")
-    .replace(/\/$/, "")
-    .replace(/\.myshopify\.com.*/i, ".myshopify.com");
+  const normalised = normaliseShopifyDomain(domain);
+  if (!normalised || !isShopifyApiVersion(version)) {
+    return null;
+  }
 
   return { domain: normalised, token, version };
 }
@@ -31,15 +34,3 @@ export function isShopifyMode(): boolean {
   return getCommerceMode() === "shopify";
 }
 
-export function getSiteUrl(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (!url) {
-    return "http://localhost:3000";
-  }
-  return url.replace(/\/$/, "");
-}
-
-export function getGtmId(): string | undefined {
-  const id = process.env.NEXT_PUBLIC_GTM_ID?.trim();
-  return id || undefined;
-}

@@ -1,33 +1,27 @@
-export type AnalyticsEventName =
-  | "view_item"
-  | "view_item_list"
-  | "add_to_cart"
-  | "remove_from_cart"
-  | "begin_checkout"
-  | "search"
-  | "newsletter_signup";
+import {
+  createConsoleAdapter,
+  createDataLayerAdapter,
+  createSessionAdapter,
+  type AnalyticsAdapter,
+} from "@/lib/analytics/adapters";
+import type { AnalyticsEvent } from "@/lib/analytics/types";
 
-export interface AnalyticsItem {
-  item_id: string;
-  item_name: string;
-  item_brand?: string;
-  item_category?: string;
-  price?: number;
-  quantity?: number;
-}
+let adapters: AnalyticsAdapter[] | undefined;
 
-export interface AnalyticsEvent {
-  name: AnalyticsEventName;
-  items?: AnalyticsItem[];
-  search_term?: string;
-  value?: number;
-  currency?: string;
-}
-
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
+function getAdapters(): AnalyticsAdapter[] {
+  if (adapters) {
+    return adapters;
   }
+
+  const next: AnalyticsAdapter[] = [createDataLayerAdapter(), createSessionAdapter()];
+  const debug =
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ANALYTICS_DEBUG === "true";
+  if (debug) {
+    next.push(createConsoleAdapter());
+  }
+  adapters = next;
+  return next;
 }
 
 export function track(event: AnalyticsEvent): void {
@@ -35,21 +29,9 @@ export function track(event: AnalyticsEvent): void {
     return;
   }
 
-  const payload: Record<string, unknown> = {
-    event: event.name,
-    ecommerce: {
-      currency: event.currency,
-      value: event.value,
-      items: event.items,
-    },
-    search_term: event.search_term,
-  };
-
-  window.dataLayer = window.dataLayer ?? [];
-  window.dataLayer.push({ ecommerce: null });
-  window.dataLayer.push(payload);
-
-  if (process.env.NODE_ENV === "development") {
-    console.info("[analytics]", event.name, payload);
+  for (const adapter of getAdapters()) {
+    adapter.track(event);
   }
 }
+
+export type { AnalyticsEvent, AnalyticsItem } from "@/lib/analytics/types";

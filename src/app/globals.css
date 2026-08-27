@@ -55,6 +55,36 @@ h3,
   background: color-mix(in srgb, var(--pine) 18%, white);
 }
 
+@utility btn-primary {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  background: var(--pine);
+  padding-inline: 1.25rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.btn-primary:hover {
+  background: var(--pine-hover);
+}
+
+@utility btn-secondary {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ink);
+  padding-inline: 1.25rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

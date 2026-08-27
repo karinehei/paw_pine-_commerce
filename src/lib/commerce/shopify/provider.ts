@@ -40,8 +40,12 @@ import type {
 function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
   if (payload?.userErrors?.length) {
     const message = payload.userErrors[0]?.message ?? "";
-    if (message.toLowerCase().includes("stock")) {
+    const lower = message.toLowerCase();
+    if (lower.includes("stock")) {
       throw new CommerceError("out_of_stock");
+    }
+    if (lower.includes("not found") || lower.includes("does not exist") || lower.includes("expired")) {
+      throw new CommerceError("invalid_cart");
     }
     throw new CommerceError("invalid_cart");
   }

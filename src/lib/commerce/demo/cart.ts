@@ -72,11 +72,17 @@ export function addDemoLine(
     throw new CommerceError("out_of_stock");
   }
 
+  const available = match.variant.quantityAvailable;
   const existing = records.find((line) => line.merchandiseId === input.variantId);
+  const nextQuantity = (existing?.quantity ?? 0) + input.quantity;
+  if (available !== null && nextQuantity > available) {
+    throw new CommerceError("out_of_stock");
+  }
+
   if (existing) {
     return records.map((line) =>
       line.merchandiseId === input.variantId
-        ? { ...line, quantity: line.quantity + input.quantity }
+        ? { ...line, quantity: nextQuantity }
         : line,
     );
   }
@@ -100,12 +106,17 @@ export function updateDemoLine(
     return records.filter((line) => line.id !== lineId);
   }
 
-  const exists = records.some((line) => line.id === lineId);
-  if (!exists) {
+  const match = records.find((line) => line.id === lineId);
+  if (!match) {
     throw new CommerceError("invalid_cart");
   }
 
-  return records.map((line) => (line.id === lineId ? { ...line, quantity } : line));
+  const found = findDemoVariant(match.merchandiseId);
+  const available = found?.variant.quantityAvailable;
+  const nextQuantity =
+    available !== null && available !== undefined ? Math.min(quantity, available) : quantity;
+
+  return records.map((line) => (line.id === lineId ? { ...line, quantity: nextQuantity } : line));
 }
 
 export function emptyDemoCart(): Cart {

@@ -1,20 +1,21 @@
 "use client";
 
 import { cn } from "@/lib/format";
+import type { OptionValueState } from "@/lib/commerce/variants";
 import type { ProductOption } from "@/lib/commerce/types";
 
 interface VariantSelectorProps {
   options: ProductOption[];
   selected: Record<string, string>;
   onChange: (name: string, value: string) => void;
-  unavailableValues?: Record<string, string[]>;
+  valueStates?: Record<string, Record<string, OptionValueState>>;
 }
 
 export function VariantSelector({
   options,
   selected,
   onChange,
-  unavailableValues = {},
+  valueStates = {},
 }: VariantSelectorProps) {
   if (options.length === 0) {
     return null;
@@ -30,20 +31,31 @@ export function VariantSelector({
               <span className="ml-2 text-ink">{selected[option.name]}</span>
             ) : null}
           </legend>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={option.name}>
             {option.values.map((value) => {
-              const unavailable = unavailableValues[option.name]?.includes(value);
+              const state = valueStates[option.name]?.[value] ?? "available";
               const checked = selected[option.name] === value;
+              const invalid = state === "invalid";
               return (
                 <button
                   key={value}
                   type="button"
-                  onClick={() => onChange(option.name, value)}
-                  aria-pressed={checked}
+                  role="radio"
+                  aria-checked={checked}
+                  onClick={() => {
+                    if (!invalid) {
+                      onChange(option.name, value);
+                    }
+                  }}
+                  disabled={invalid}
+                  aria-label={`${option.name} ${value}${
+                    state === "out_of_stock" ? ", out of stock" : invalid ? ", unavailable" : ""
+                  }`}
                   className={cn(
-                    "min-w-12 border px-3 py-2 text-sm",
+                    "min-h-11 min-w-11 border px-3 py-2 text-sm",
                     checked ? "border-ink bg-ink text-paper" : "border-border bg-paper text-ink",
-                    unavailable && "opacity-40",
+                    state === "out_of_stock" && "opacity-50",
+                    invalid && "cursor-not-allowed line-through opacity-30",
                   )}
                 >
                   {value}

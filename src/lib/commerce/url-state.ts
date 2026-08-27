@@ -5,6 +5,7 @@ import type {
   SortKey,
   Species,
 } from "@/lib/commerce/types";
+import { clampSearchQuery, sanitiseFilterValue } from "@/lib/security";
 
 const SPECIES: Species[] = ["dog", "cat"];
 const CATEGORIES: ProductCategory[] = [
@@ -61,11 +62,15 @@ export function parseProductQuery(searchParams: SearchParams): ProductQuery {
   const availabilityValue = first(searchParams.availability);
 
   return {
-    query: first(searchParams.q)?.trim() || undefined,
+    query: clampSearchQuery(first(searchParams.q)),
     species: species.length > 0 ? species : undefined,
     category: category.length > 0 ? category : undefined,
-    brand: list(searchParams.brand),
-    material: list(searchParams.material),
+    brand: list(searchParams.brand)
+      .map(sanitiseFilterValue)
+      .filter((item): item is string => Boolean(item)),
+    material: list(searchParams.material)
+      .map(sanitiseFilterValue)
+      .filter((item): item is string => Boolean(item)),
     availability:
       availabilityValue && AVAILABILITY.includes(availabilityValue as AvailabilityFilter)
         ? (availabilityValue as AvailabilityFilter | "all")
@@ -111,9 +116,11 @@ export function serializeProductQuery(query: ProductQuery): URLSearchParams {
 }
 
 export function queryToHref(pathname: string, query: ProductQuery): string {
+  const safePath =
+    pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/";
   const params = serializeProductQuery(query);
   const search = params.toString();
-  return search ? `${pathname}?${search}` : pathname;
+  return search ? `${safePath}?${search}` : safePath;
 }
 
 export { SPECIES as SPECIES_OPTIONS, CATEGORIES as CATEGORY_OPTIONS, SORTS as SORT_OPTIONS };

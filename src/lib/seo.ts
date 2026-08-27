@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
-import { getSiteUrl } from "@/lib/env";
+import { getSiteUrl } from "@/lib/env-public";
 import { formatMoney } from "@/lib/format";
 import type { Collection, Product } from "@/lib/commerce/types";
 
@@ -33,59 +33,101 @@ export function siteMetadata(overrides: Metadata = {}): Metadata {
 
 export function productMetadata(product: Product): Metadata {
   const title = product.title;
-  const description = product.description.slice(0, 160);
-  const image = product.featuredImage?.url;
+  const description = product.description.replace(/\s+/g, " ").slice(0, 160);
+  const path = `/products/${product.handle}`;
+  const image = product.featuredImage;
 
   return {
     title,
     description,
-    alternates: { canonical: `/products/${product.handle}` },
+    alternates: { canonical: path },
     openGraph: {
       type: "website",
       title,
       description,
-      url: `/products/${product.handle}`,
-      images: image ? [{ url: image, alt: product.featuredImage?.altText ?? title }] : undefined,
+      url: path,
+      images: image
+        ? [{ url: image.url, alt: image.altText || title, width: image.width, height: image.height }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: image ? [image.url] : undefined,
     },
   };
 }
 
 export function collectionMetadata(collection: Collection): Metadata {
+  const path = `/collections/${collection.handle}`;
+  const description =
+    collection.description || `Shop ${collection.title} at ${SITE_NAME}.`;
+
   return {
     title: collection.title,
-    description: collection.description,
-    alternates: { canonical: `/collections/${collection.handle}` },
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      title: collection.title,
+      description,
+      url: path,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: collection.title,
+      description,
+    },
+  };
+}
+
+export function searchMetadata(term?: string): Metadata {
+  const title = term ? `Search: ${term}` : "Search";
+  const description = term
+    ? `Results for “${term}” in the ${SITE_NAME} edit.`
+    : `Search the ${SITE_NAME} edit by product, material, or maker.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: term ? `/search?q=${encodeURIComponent(term)}` : "/search" },
+    robots: { index: !term, follow: true },
   };
 }
 
 export function productJsonLd(product: Product, url: string): Record<string, unknown> {
+  const images = product.images.map((image) => image.url).filter(Boolean);
+  const availability = product.availableForSale
+    ? "https://schema.org/InStock"
+    : "https://schema.org/OutOfStock";
+
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
     description: product.description,
-    image: product.images.map((image) => image.url),
+    image: images.length > 0 ? images : undefined,
+    url,
+    sku: product.sku,
     brand: {
       "@type": "Brand",
       name: product.vendor,
     },
-    sku: product.handle,
+    material: product.material,
     offers: {
       "@type": "Offer",
       url,
       priceCurrency: product.priceRange.minVariantPrice.currencyCode,
       price: product.priceRange.minVariantPrice.amount,
-      availability: product.availableForSale
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      priceValidUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-        .toISOString()
-        .slice(0, 10),
+      availability,
+      itemCondition: "https://schema.org/NewCondition",
     },
   };
 }
 
-export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>): Record<string, unknown> {
+export function breadcrumbJsonLd(
+  items: Array<{ name: string; url: string }>,
+): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -106,6 +148,45 @@ export function organizationJsonLd(): Record<string, unknown> {
     name: SITE_NAME,
     url: siteUrl,
     description: SITE_DESCRIPTION,
+  };
+}
+
+export function websiteJsonLd(): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: siteUrl,
+    description: SITE_DESCRIPTION,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export function collectionJsonLd(
+  collection: Collection,
+  products: Product[],
+  url: string,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: collection.title,
+    description: collection.description,
+    url,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: products.slice(0, 16).map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${getSiteUrl()}/products/${product.handle}`,
+        name: product.title,
+      })),
+    },
   };
 }
 

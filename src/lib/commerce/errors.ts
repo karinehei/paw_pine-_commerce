@@ -4,7 +4,8 @@ export class CommerceError extends Error {
     | "not_found"
     | "invalid_cart"
     | "out_of_stock"
-    | "network";
+    | "network"
+    | "rate_limited";
 
   constructor(
     code: CommerceError["code"],
@@ -29,6 +30,8 @@ export function toUserErrorMessage(error: unknown): string {
         return "That option is currently out of stock.";
       case "network":
         return "A network error interrupted the request. Please try again.";
+      case "rate_limited":
+        return "The shop is busy. Please wait a moment and try again.";
     }
   }
 

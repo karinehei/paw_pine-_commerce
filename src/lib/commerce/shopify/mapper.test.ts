@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapProduct } from "@/lib/commerce/shopify/mapper";
+import { mapProduct, buildShopifySearchQuery } from "@/lib/commerce/shopify/mapper";
 import type { ShopifyProductNode } from "@/lib/commerce/shopify/storefront-types";
 
 const fixture: ShopifyProductNode = {
@@ -46,7 +46,16 @@ describe("Shopify product mapper", () => {
     expect(product.species).toBe("dog");
     expect(product.category).toBe("toys");
     expect(product.material).toBe("Oak");
+    expect(product.sku).toBe("oakwood-chew-ring");
+    expect(product.dimensions).toBe("See the product images for scale.");
+    expect(product.care).toBe("Wipe clean. Avoid harsh chemicals.");
     expect(product.visual.shape).toBeTruthy();
     expect(product.featuredImage).toBeNull();
+  });
+
+  it("quotes user search input for Shopify query syntax", () => {
+    const query = buildShopifySearchQuery({ query: 'oak" OR title:*' });
+    expect(query).toBe('"oak OR title:*"');
+    expect(query).not.toContain('oak"');
   });
 });

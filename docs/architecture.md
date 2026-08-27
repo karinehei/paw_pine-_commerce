@@ -45,14 +45,23 @@ If a collection handle such as `dogs` does not exist in the connected shop, the 
 
 ## Caching
 
-- Product and collection GraphQL reads use `revalidate: 60`.
-- Cart queries and mutations do not cache.
-- Root layout does not call `cookies()`, so product pages are not opted into dynamic rendering solely because of the bag.
+Catalogue reads are cacheable. Cart state is not.
+
+- **Product, collection, and search GraphQL** use `fetch` with `revalidate: 60` (search `30`). Reviewers see a fresh-enough catalogue without hammering Shopify.
+- Listing queries request `PRODUCT_CARD_FIELDS` only: no `descriptionHtml`, gallery images, or variant images. Product detail adds those fields.
+- **Cart queries and mutations** use `cache: "no-store"`. Cart IDs live in an httpOnly cookie; the cookie is not read in the root layout, so product pages are not forced into dynamic rendering just because a bag exists.
+- **Demo cart** hydrates from that cookie on demand. It is never stored in the Next.js Data Cache.
+- **Search suggestions** (`/api/search/suggest`) are `private, max-age=30` — they may include query text and should not be shared at a CDN.
+- **`/cart` and `/demo/analytics`** are `noindex`. Analytics session events live in `sessionStorage` on the device, not on the server.
+- Root layout still reads commerce **mode** (credentials present or not). That is a deploy-time switch, not shopper-specific cart data.
+
+Do not add `cookies()` to catalogue pages. Do not cache Shopify cart payloads.
 
 ## Errors
 
-`CommerceError` carries a stable `code`. User-facing copy is mapped in `toUserErrorMessage`. GraphQL error bodies and tokens are never sent to the client.
+`CommerceError` carries a stable `code` (`unavailable`, `not_found`, `invalid_cart`, `out_of_stock`, `network`, `rate_limited`). Shopper copy is mapped in `toUserErrorMessage`. GraphQL error bodies, HTTP payloads, and Storefront tokens never reach the browser. Expired Shopify carts (`cart: null` or “does not exist”) clear the cart cookie so the next add creates a new cart.
 
 ## Analytics
 
-`track()` is a single function. Pages and buttons emit ecommerce events. GTM is optional. Replacing the sink does not require touching product components.
+`track()` is a single function. Pages and buttons emit a typed ecommerce event union. Adapters can target GTM, a console debugger, or sessionStorage. See [analytics.md](./analytics.md).
+

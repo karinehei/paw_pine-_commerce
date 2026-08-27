@@ -34,7 +34,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
                 aria-label={`View image ${index + 1}`}
                 aria-current={index === active}
                 className={cn(
-                  "h-16 w-14 overflow-hidden bg-stone",
+                  "min-h-11 min-w-11 overflow-hidden bg-stone",
                   index === active ? "ring-2 ring-pine ring-offset-2" : "opacity-70",
                 )}
               >

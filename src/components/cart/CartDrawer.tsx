@@ -7,6 +7,8 @@ import { useCart } from "@/components/cart/CartProvider";
 import { CartLineItem } from "@/components/cart/CartLineItem";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { track } from "@/lib/analytics/events";
+import { itemsFromCart } from "@/lib/analytics/items";
+import { resolveCheckoutHref } from "@/lib/commerce/checkout";
 import {
   ESTIMATED_SHIPPING_AMOUNT,
   FREE_SHIPPING_THRESHOLD,
@@ -16,7 +18,9 @@ import { formatMoney, moneyFromNumber, parseAmount } from "@/lib/format";
 export function CartDrawer() {
   const { cart, isOpen, closeCart, mode } = useCart();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  const trackedOpen = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -25,6 +29,7 @@ export function CartDrawer() {
     }
     if (isOpen && !dialog.open) {
       dialog.showModal();
+      closeRef.current?.focus();
     }
     if (!isOpen && dialog.open) {
       dialog.close();
@@ -32,15 +37,39 @@ export function CartDrawer() {
   }, [isOpen]);
 
   useEffect(() => {
+    if (isOpen && cart && !trackedOpen.current) {
+      trackedOpen.current = true;
+      track({
+        name: "view_cart",
+        currency: cart.cost.subtotalAmount.currencyCode,
+        value: parseAmount(cart.cost.subtotalAmount),
+        items: itemsFromCart(cart),
+      });
+    }
+    if (!isOpen) {
+      trackedOpen.current = false;
+    }
+  }, [isOpen, cart]);
+
+  useEffect(() => {
     closeCart();
   }, [pathname, closeCart]);
 
   const subtotal = cart ? parseAmount(cart.cost.subtotalAmount) : 0;
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const checkoutHref =
-    mode === "shopify" && cart?.checkoutUrl.startsWith("http")
-      ? cart.checkoutUrl
-      : "/cart?checkout=demo";
+  const checkout = resolveCheckoutHref(mode, cart?.checkoutUrl);
+
+  function beginCheckout() {
+    if (!cart) {
+      return;
+    }
+    track({
+      name: "begin_checkout",
+      currency: cart.cost.subtotalAmount.currencyCode,
+      value: parseAmount(cart.cost.subtotalAmount),
+      items: itemsFromCart(cart),
+    });
+  }
 
   return (
     <dialog
@@ -54,7 +83,12 @@ export function CartDrawer() {
           <h2 id="cart-drawer-title" className="font-display text-2xl">
             Bag
           </h2>
-          <button type="button" onClick={closeCart} className="text-sm text-muted">
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={closeCart}
+            className="min-h-11 text-sm text-muted"
+          >
             Close
           </button>
         </div>
@@ -94,22 +128,23 @@ export function CartDrawer() {
               )}{" "}
               before the complimentary threshold.
             </p>
-            {checkoutHref.startsWith("http") ? (
+            {checkout.external ? (
               <a
-                href={checkoutHref}
-                onClick={() => track({ name: "begin_checkout" })}
-                className="block bg-pine px-4 py-3 text-center text-sm tracking-[0.14em] text-paper uppercase hover:bg-pine-hover"
+                href={checkout.href}
+                rel="noopener noreferrer"
+                onClick={beginCheckout}
+                className="btn-primary w-full"
               >
                 Checkout
               </a>
             ) : (
               <Link
-                href={checkoutHref}
+                href={checkout.href}
                 onClick={() => {
-                  track({ name: "begin_checkout" });
+                  beginCheckout();
                   closeCart();
                 }}
-                className="block bg-pine px-4 py-3 text-center text-sm tracking-[0.14em] text-paper uppercase hover:bg-pine-hover"
+                className="btn-primary w-full"
               >
                 Checkout
               </Link>
@@ -117,7 +152,7 @@ export function CartDrawer() {
             <Link
               href="/cart"
               onClick={closeCart}
-              className="block text-center text-sm text-muted underline-offset-4 hover:underline"
+              className="block min-h-11 text-center text-sm text-muted underline-offset-4 hover:underline"
             >
               View bag
             </Link>

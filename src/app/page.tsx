@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { NewsletterForm } from "@/components/commerce/NewsletterForm";
+import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
+import { itemFromProduct } from "@/lib/analytics/items";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
 export default async function HomePage() {
@@ -17,23 +19,23 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="mx-auto grid max-w-6xl items-end gap-10 px-4 py-16 md:grid-cols-2 md:px-6 md:py-24">
+      <section className="mx-auto grid max-w-6xl items-end gap-10 px-4 py-12 sm:py-16 md:grid-cols-2 md:px-6 md:py-24">
         <div>
           <p className="text-xs tracking-[0.2em] text-muted uppercase">Oslo / the house</p>
-          <h1 className="mt-4 font-display text-5xl leading-[1.05] text-balance md:text-6xl">
+          <h1 className="mt-4 font-display text-4xl leading-[1.08] text-balance sm:text-5xl md:text-6xl">
             Quiet objects for dogs and cats.
           </h1>
           <p className="mt-6 max-w-md text-lg text-muted">{SITE_TAGLINE}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/collections/dogs"
-              className="bg-pine px-5 py-3 text-sm tracking-[0.14em] text-paper uppercase hover:bg-pine-hover"
+              className="btn-primary"
             >
               Shop dogs
             </Link>
             <Link
               href="/collections/cats"
-              className="border border-ink px-5 py-3 text-sm tracking-[0.14em] uppercase"
+              className="btn-secondary"
             >
               Shop cats
             </Link>
@@ -66,12 +68,20 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
         <SectionHeading title="Best sellers" href="/collections/best-sellers" />
-        <ProductGrid products={(bestsellers?.products ?? featured).slice(0, 4)} />
+        <ProductGrid
+          products={(bestsellers?.products ?? featured).slice(0, 4)}
+          listId="home-best-sellers"
+          listName="Best sellers"
+        />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 md:px-6">
         <SectionHeading title="New in the house" href="/collections/new-arrivals" />
-        <ProductGrid products={(newest?.products ?? all.products).slice(0, 4)} />
+        <ProductGrid
+          products={(newest?.products ?? all.products).slice(0, 4)}
+          listId="home-new"
+          listName="New arrivals"
+        />
       </section>
 
       <section className="bg-pine text-paper">
@@ -117,6 +127,16 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      <AnalyticsListener
+        event={{
+          name: "view_item_list",
+          item_list_id: "home-best-sellers",
+          item_list_name: "Best sellers",
+          items: (bestsellers?.products ?? featured).slice(0, 4).map((product) =>
+            itemFromProduct(product),
+          ),
+        }}
+      />
     </>
   );
 }

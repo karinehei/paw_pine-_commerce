@@ -13,10 +13,7 @@ export function ErrorState({
     <div className="mx-auto max-w-lg py-24 text-center">
       <h1 className="font-display text-4xl">{title}</h1>
       <p className="mt-4 text-muted">{description}</p>
-      <Link
-        href="/"
-        className="mt-8 inline-block bg-pine px-5 py-3 text-sm tracking-[0.14em] text-paper uppercase"
-      >
+      <Link href="/" className="btn-primary mt-8">
         Back to home
       </Link>
     </div>

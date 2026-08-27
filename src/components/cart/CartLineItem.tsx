@@ -11,7 +11,7 @@ import { selectedOptionsLabel } from "@/lib/format";
 import type { CartLine } from "@/lib/commerce/types";
 
 export function CartLineItem({ line }: { line: CartLine }) {
-  const { setCart } = useCart();
+  const { setCart, announce } = useCart();
   const [pending, startTransition] = useTransition();
 
   function update(quantity: number) {
@@ -34,6 +34,7 @@ export function CartLineItem({ line }: { line: CartLine }) {
           },
         ],
       });
+      announce(`${line.merchandise.product.title} removed from bag`);
       setCart(cart);
     });
   }
@@ -67,16 +68,18 @@ export function CartLineItem({ line }: { line: CartLine }) {
             <button
               type="button"
               aria-label="Decrease quantity"
-              className="px-2 py-1"
+              className="min-h-11 min-w-11 px-2"
               onClick={() => update(line.quantity - 1)}
             >
               −
             </button>
-            <span className="min-w-6 text-center text-sm">{line.quantity}</span>
+            <span className="min-w-6 text-center text-sm" aria-live="polite">
+              {line.quantity}
+            </span>
             <button
               type="button"
               aria-label="Increase quantity"
-              className="px-2 py-1"
+              className="min-h-11 min-w-11 px-2"
               onClick={() => update(line.quantity + 1)}
             >
               +
@@ -85,7 +88,7 @@ export function CartLineItem({ line }: { line: CartLine }) {
           <button
             type="button"
             onClick={remove}
-            className="text-sm text-muted underline-offset-4 hover:underline"
+            className="min-h-11 text-sm text-muted underline-offset-4 hover:underline"
           >
             Remove
           </button>

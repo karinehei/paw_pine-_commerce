@@ -1,54 +1,34 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { Navigation } from "@/components/layout/Navigation";
 import { MobileMenu } from "@/components/layout/MobileMenu";
-import { SearchInput } from "@/components/commerce/SearchInput";
-import { useCart } from "@/components/cart/CartProvider";
+import { SearchBox } from "@/components/commerce/SearchBox";
+import { CartButton } from "@/components/layout/CartButton";
 import { SITE_NAME } from "@/lib/constants";
 
 export function Header() {
-  const { cart, openCart } = useCart();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const count = cart?.totalQuantity ?? 0;
-
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-linen/95 backdrop-blur-sm">
       <p className="border-b border-border py-2 text-center text-xs tracking-[0.16em] text-muted uppercase">
         Complimentary shipping over €75
       </p>
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-4 md:px-6">
-        <button
-          type="button"
-          className="text-sm tracking-[0.12em] uppercase lg:hidden"
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-          onClick={() => setMenuOpen(true)}
+      <div className="mx-auto grid max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 md:flex md:gap-6 md:px-6 md:py-4">
+        <MobileMenu />
+        <Link
+          href="/"
+          className="justify-self-center text-center font-display text-2xl tracking-tight md:shrink-0 md:justify-self-start md:text-left md:text-3xl"
         >
-          Menu
-        </button>
-        <Link href="/" className="font-display text-2xl tracking-tight md:text-3xl">
           {SITE_NAME}
         </Link>
-        <div className="flex-1">
+        <div className="hidden flex-1 md:block">
           <Navigation />
         </div>
-        <div className="ml-auto flex items-center gap-4">
-          <div className="hidden w-40 sm:block">
-            <SearchInput id="header-search" />
+        <div className="flex items-center justify-end gap-3 sm:gap-4">
+          <div className="hidden w-40 sm:block lg:w-48">
+            <SearchBox id="header-search" />
           </div>
-          <button
-            type="button"
-            onClick={openCart}
-            className="text-sm tracking-[0.12em] uppercase"
-            aria-label={`Open bag, ${count} items`}
-          >
-            Bag{count > 0 ? ` (${count})` : ""}
-          </button>
+          <CartButton />
         </div>
       </div>
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
   );
 }

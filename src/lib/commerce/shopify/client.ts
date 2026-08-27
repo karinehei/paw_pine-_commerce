@@ -5,7 +5,7 @@ import { getShopifyConfig } from "@/lib/env";
 
 interface ShopifyGraphQLResponse<T> {
   data?: T;
-  errors?: Array<{ message: string }>;
+  errors?: Array<{ message: string; extensions?: { code?: string } }>;
 }
 
 interface ShopifyFetchOptions {
@@ -44,6 +44,10 @@ export async function shopifyFetch<T>({
     throw new CommerceError("network");
   }
 
+  if (response.status === 429) {
+    throw new CommerceError("rate_limited");
+  }
+
   if (!response.ok) {
     throw new CommerceError("unavailable");
   }
@@ -55,7 +59,17 @@ export async function shopifyFetch<T>({
     throw new CommerceError("unavailable");
   }
 
-  if (payload.errors?.length || !payload.data) {
+  if (payload.errors?.length) {
+    const throttled = payload.errors.some(
+      (error) => error.extensions?.code === "THROTTLED" || /throttl/i.test(error.message),
+    );
+    if (throttled) {
+      throw new CommerceError("rate_limited");
+    }
+    throw new CommerceError("unavailable");
+  }
+
+  if (!payload.data) {
     throw new CommerceError("unavailable");
   }
 
