@@ -14,7 +14,7 @@ export interface ShopifyVariantNode {
   id: string;
   title: string;
   availableForSale: boolean;
-  quantityAvailable: number | null;
+  quantityAvailable?: number | null;
   selectedOptions: Array<{ name: string; value: string }>;
   price: ShopifyMoney;
   compareAtPrice: ShopifyMoney | null;

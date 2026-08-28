@@ -2,7 +2,6 @@ const VARIANT_LIST_FIELDS = `
   id
   title
   availableForSale
-  quantityAvailable
   selectedOptions { name value }
   price { amount currencyCode }
   compareAtPrice { amount currencyCode }

@@ -123,7 +123,7 @@ function mapVariant(node: ShopifyVariantNode, productTitle: string): ProductVari
     id: node.id,
     title: node.title,
     availableForSale: node.availableForSale,
-    quantityAvailable: node.quantityAvailable,
+    quantityAvailable: node.quantityAvailable ?? null,
     selectedOptions: node.selectedOptions,
     price: mapMoney(node.price) ?? { amount: "0.00", currencyCode: "EUR" },
     compareAtPrice: mapMoney(node.compareAtPrice),
