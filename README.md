@@ -2,7 +2,7 @@
 
 Headless Shopify storefront for a small Scandinavian pet accessories house — built to be reviewed without a Shopify account.
 
-**Live demo:** _add production URL here_
+**Live demo:** [paw-pine-commerce.vercel.app](https://paw-pine-commerce.vercel.app/)
 
 ![Home — 1440px](docs/screenshots/home-1440.png)
 
@@ -76,6 +76,25 @@ npm run test
 npm run test:e2e
 npm run build
 ```
+
+## Seed the Dev Store (CLI, no Admin UI)
+
+The Storefront token cannot create products. Seeding uses the **Admin API** and the existing demo catalogue.
+
+1. In Shopify admin: **Settings → Apps and sales channels → Develop apps → Create an app**.
+2. Enable Admin API scopes: `write_products`, `read_products`, `write_publications`, `read_publications`.
+3. Install the app and copy the **Admin API access token** (`shpat_…`).
+4. Put it in `.env.local` as `SHOPIFY_ADMIN_ACCESS_TOKEN` (same `SHOPIFY_STORE_DOMAIN` as the storefront).
+5. Run:
+
+```bash
+npm run seed:shopify
+npm run seed:shopify -- --archive-samples
+```
+
+The second command archives Shopify’s sample snowboards and gift card. Redeploy, or wait about a minute for Storefront cache.
+
+Do not put the Admin token in Vercel. It is only for this local seed script.
 
 Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on the server. Never commit `.env.local`. Never use `NEXT_PUBLIC_` for Shopify secrets.
 

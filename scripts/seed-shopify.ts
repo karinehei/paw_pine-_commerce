@@ -1,0 +1,350 @@
+/**
+ * Seed the Shopify Dev Store from the Paw & Pine demo catalogue.
+ * Uses the Admin GraphQL API (not Storefront). Requires a custom-app Admin token.
+ *
+ *   npm run seed:shopify
+ *   npm run seed:shopify -- --archive-samples
+ */
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { demoCollections, demoProducts } from "../src/lib/commerce/demo/catalog";
+import { parseAmount } from "../src/lib/format";
+import { normaliseShopifyDomain } from "../src/lib/security";
+import type { Product } from "../src/lib/commerce/types";
+
+const API_VERSION = "2026-07";
+
+function loadEnvLocal(): void {
+  try {
+    const text = readFileSync(resolve(process.cwd(), ".env.local"), "utf8");
+    for (const raw of text.split("\n")) {
+      const line = raw.trim();
+      if (!line || line.startsWith("#")) {
+        continue;
+      }
+      const eq = line.indexOf("=");
+      if (eq < 1) {
+        continue;
+      }
+      const key = line.slice(0, eq).trim();
+      let value = line.slice(eq + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // Env can also come from the shell.
+  }
+}
+
+loadEnvLocal();
+
+interface GraphQLResponse<T> {
+  data?: T;
+  errors?: Array<{ message: string }>;
+}
+
+async function adminFetch<T>(
+  domain: string,
+  token: string,
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T> {
+  const response = await fetch(`https://${domain}/admin/api/${API_VERSION}/graphql.json`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": token,
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  const payload = (await response.json()) as GraphQLResponse<T>;
+  if (!response.ok || payload.errors?.length) {
+    throw new Error(payload.errors?.[0]?.message ?? `Admin API HTTP ${response.status}`);
+  }
+  if (!payload.data) {
+    throw new Error("Admin API returned no data.");
+  }
+  return payload.data;
+}
+
+function userErrorMessage(errors?: Array<{ message: string }>): string | undefined {
+  return errors?.[0]?.message;
+}
+
+function tagsFor(product: Product): string[] {
+  const tags = new Set<string>([
+    "paw-pine",
+    `species:${product.species}`,
+    `category:${product.category}`,
+    `material:${product.material}`,
+    `sku:${product.sku}`,
+    ...product.tags,
+    ...product.features.slice(0, 3).map((feature) => `feature:${feature.slice(0, 80)}`),
+  ]);
+  return [...tags];
+}
+
+function productInput(product: Product) {
+  const optionName = product.options[0]?.name ?? "Title";
+  const values = product.variants.map((variant) => variant.selectedOptions[0]?.value ?? variant.title);
+
+  return {
+    title: product.title,
+    handle: product.handle,
+    descriptionHtml: product.descriptionHtml,
+    vendor: product.vendor,
+    productType: product.category,
+    status: "ACTIVE",
+    tags: tagsFor(product),
+    productOptions: [
+      {
+        name: optionName,
+        values: [...new Set(values)].map((name) => ({ name })),
+      },
+    ],
+    variants: product.variants.map((variant) => ({
+      optionValues: [
+        {
+          optionName,
+          name: variant.selectedOptions[0]?.value ?? variant.title,
+        },
+      ],
+      price: parseAmount(variant.price),
+      compareAtPrice: variant.compareAtPrice ? parseAmount(variant.compareAtPrice) : undefined,
+      sku: `${product.sku}-${(variant.selectedOptions[0]?.value ?? "default").replace(/\s+/g, "-")}`,
+    })),
+  };
+}
+
+const PRODUCT_SET = `
+  mutation ProductSet($synchronous: Boolean!, $input: ProductSetInput!) {
+    productSet(synchronous: $synchronous, input: $input) {
+      product { id handle }
+      userErrors { field message }
+    }
+  }
+`;
+
+const PRODUCT_BY_HANDLE = `
+  query ProductByHandle($query: String!) {
+    products(first: 1, query: $query) {
+      nodes { id handle }
+    }
+  }
+`;
+
+const COLLECTION_CREATE = `
+  mutation CollectionCreate($input: CollectionInput!) {
+    collectionCreate(input: $input) {
+      collection { id handle }
+      userErrors { field message }
+    }
+  }
+`;
+
+const COLLECTION_BY_HANDLE = `
+  query CollectionByHandle($query: String!) {
+    collections(first: 1, query: $query) {
+      nodes { id handle }
+    }
+  }
+`;
+
+const PUBLICATIONS = `
+  query Publications {
+    publications(first: 25) {
+      nodes { id }
+    }
+  }
+`;
+
+const PUBLISH = `
+  mutation Publish($id: ID!, $input: [PublicationInput!]!) {
+    publishablePublish(id: $id, input: $input) {
+      userErrors { field message }
+    }
+  }
+`;
+
+const ARCHIVE = `
+  mutation Archive($input: ProductSetInput!, $synchronous: Boolean!) {
+    productSet(synchronous: $synchronous, input: $input) {
+      product { id handle status }
+      userErrors { field message }
+    }
+  }
+`;
+
+const SAMPLE_HANDLES = new Set([
+  "gift-card",
+  "selling-plans-ski-wax",
+  "the-3p-fulfilled-snowboard",
+  "the-archived-snowboard",
+  "the-collection-snowboard-hydrogen",
+  "the-compare-at-price-snowboard",
+  "the-complete-snowboard",
+  "the-hidden-snowboard",
+  "the-inventory-not-tracked-snowboard",
+  "the-multi-location-snowboard",
+  "the-out-of-stock-snowboard",
+  "the-snowboard-liquid",
+  "the-videographer-snowboard",
+]);
+
+async function main(): Promise<void> {
+  const archiveSamples = process.argv.includes("--archive-samples");
+  const domain = normaliseShopifyDomain(process.env.SHOPIFY_STORE_DOMAIN ?? "");
+  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
+
+  if (!domain || !token) {
+    throw new Error(
+      "Set SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_ACCESS_TOKEN (custom app Admin API token, shpat_…).",
+    );
+  }
+  if (!/^(shpat_|shpca_|shppa_)/i.test(token)) {
+    console.warn(
+      "[seed] This should be an Admin API token from Settings → Apps → Develop apps, not the Headless Storefront token.",
+    );
+  }
+
+  const { publications } = await adminFetch<{
+    publications: { nodes: Array<{ id: string }> };
+  }>(domain, token, PUBLICATIONS);
+  const publicationInput = publications.nodes.map((node) => ({ publicationId: node.id }));
+  console.log(`[seed] ${publicationInput.length} publication(s)`);
+
+  for (const product of demoProducts) {
+    const existing = await adminFetch<{
+      products: { nodes: Array<{ id: string }> };
+    }>(domain, token, PRODUCT_BY_HANDLE, { query: `handle:${product.handle}` });
+
+    const existingId = existing.products.nodes[0]?.id;
+    const input = {
+      ...(existingId ? { identifier: { id: existingId } } : {}),
+      ...productInput(product),
+    };
+
+    const result = await adminFetch<{
+      productSet: {
+        product: { id: string; handle: string } | null;
+        userErrors: Array<{ message: string }>;
+      };
+    }>(domain, token, PRODUCT_SET, { synchronous: true, input });
+
+    const error = userErrorMessage(result.productSet.userErrors);
+    if (error || !result.productSet.product) {
+      throw new Error(`product ${product.handle}: ${error ?? "no product returned"}`);
+    }
+
+    if (publicationInput.length > 0) {
+      const published = await adminFetch<{
+        publishablePublish: { userErrors: Array<{ message: string }> };
+      }>(domain, token, PUBLISH, { id: result.productSet.product.id, input: publicationInput });
+      const publishError = userErrorMessage(published.publishablePublish.userErrors);
+      if (publishError) {
+        console.warn(`[seed] publish ${product.handle}: ${publishError}`);
+      }
+    }
+
+    console.log(`[seed] product ${result.productSet.product.handle}`);
+  }
+
+  for (const collection of demoCollections) {
+    const existing = await adminFetch<{
+      collections: { nodes: Array<{ id: string }> };
+    }>(domain, token, COLLECTION_BY_HANDLE, { query: `handle:${collection.handle}` });
+
+    let collectionId = existing.collections.nodes[0]?.id;
+    if (!collectionId) {
+      const tag =
+        collection.handle === "all"
+          ? "paw-pine"
+          : collection.handle === "dogs"
+            ? "species:dog"
+            : collection.handle === "cats"
+              ? "species:cat"
+              : collection.handle === "new-arrivals"
+                ? "new"
+                : collection.handle === "best-sellers"
+                  ? "bestseller"
+                  : `category:${collection.handle}`;
+
+      const created = await adminFetch<{
+        collectionCreate: {
+          collection: { id: string; handle: string } | null;
+          userErrors: Array<{ message: string }>;
+        };
+      }>(domain, token, COLLECTION_CREATE, {
+        input: {
+          title: collection.title,
+          handle: collection.handle,
+          descriptionHtml: collection.description ? `<p>${collection.description}</p>` : "",
+          ruleSet: {
+            appliedDisjunctively: false,
+            rules: [{ column: "TAG", relation: "EQUALS", condition: tag }],
+          },
+        },
+      });
+
+      const error = userErrorMessage(created.collectionCreate.userErrors);
+      if (error || !created.collectionCreate.collection) {
+        throw new Error(`collection ${collection.handle}: ${error ?? "no collection returned"}`);
+      }
+      collectionId = created.collectionCreate.collection.id;
+    }
+
+    if (publicationInput.length > 0 && collectionId) {
+      const published = await adminFetch<{
+        publishablePublish: { userErrors: Array<{ message: string }> };
+      }>(domain, token, PUBLISH, { id: collectionId, input: publicationInput });
+      const publishError = userErrorMessage(published.publishablePublish.userErrors);
+      if (publishError) {
+        console.warn(`[seed] publish ${collection.handle}: ${publishError}`);
+      }
+    }
+
+    console.log(`[seed] collection ${collection.handle}`);
+  }
+
+  if (archiveSamples) {
+    const listed = await adminFetch<{
+      products: { nodes: Array<{ id: string; handle: string }> };
+    }>(
+      domain,
+      token,
+      `query { products(first: 50) { nodes { id handle } } }`,
+    );
+    for (const product of listed.products.nodes) {
+      if (!SAMPLE_HANDLES.has(product.handle)) {
+        continue;
+      }
+      const archived = await adminFetch<{
+        productSet: { userErrors: Array<{ message: string }> };
+      }>(domain, token, ARCHIVE, {
+        synchronous: true,
+        input: { identifier: { id: product.id }, status: "ARCHIVED" },
+      });
+      const error = userErrorMessage(archived.productSet.userErrors);
+      if (error) {
+        console.warn(`[seed] archive ${product.handle}: ${error}`);
+      } else {
+        console.log(`[seed] archived ${product.handle}`);
+      }
+    }
+  }
+
+  console.log("[seed] done. Redeploy or wait ~60s for Storefront cache.");
+}
+
+main().catch((error: unknown) => {
+  console.error("[seed]", error instanceof Error ? error.message : "failed");
+  process.exit(1);
+});
