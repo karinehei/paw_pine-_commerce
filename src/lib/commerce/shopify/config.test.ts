@@ -76,6 +76,34 @@ describe("Shopify Storefront config", () => {
     expect(storefrontRequestHeaders(config!)["Shopify-Storefront-Private-Token"]).toBe("private");
   });
 
+  it("strips quotes copied from Vercel or .env files", () => {
+    const config = resolveShopifyConfig({
+      SHOPIFY_STORE_DOMAIN: "paw-pine.myshopify.com",
+      SHOPIFY_STOREFRONT_PRIVATE_TOKEN: '"shfpt_test"',
+    });
+    expect(config?.token).toBe("shfpt_test");
+    expect(config?.tokenKind).toBe("private");
+  });
+
+  it("treats a quoted Headless public token as Shopify mode, not demo", () => {
+    const token = "a".repeat(32);
+    const config = resolveShopifyConfig({
+      SHOPIFY_STORE_DOMAIN: "paw-pine.myshopify.com",
+      SHOPIFY_STOREFRONT_PRIVATE_TOKEN: `"${token}"`,
+    });
+    expect(config?.token).toBe(token);
+    expect(config?.tokenKind).toBe("private");
+  });
+
+  it("rejects Admin API tokens", () => {
+    expect(() =>
+      resolveShopifyConfig({
+        SHOPIFY_STORE_DOMAIN: "paw-pine.myshopify.com",
+        SHOPIFY_STOREFRONT_PRIVATE_TOKEN: "shpat_admin",
+      }),
+    ).toThrow(/Storefront API token/i);
+  });
+
   it("rejects an injected buyer IP", () => {
     expect(sanitiseBuyerIp("1.2.3.4, 5.6.7.8")).toBe("1.2.3.4");
     expect(sanitiseBuyerIp("1.2.3.4\r\nX-Evil: 1")).toBeUndefined();

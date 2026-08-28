@@ -6,6 +6,7 @@ import {
   sanitiseBuyerIp,
   storefrontEndpoint,
   storefrontRequestHeaders,
+  type StorefrontTokenKind,
 } from "@/lib/commerce/shopify/config";
 import { logStorefrontFailure, toStorefrontError } from "@/lib/commerce/shopify/log";
 
@@ -22,7 +23,14 @@ interface ShopifyFetchOptions {
   revalidate?: number;
 }
 
+function isProductionBuild(): boolean {
+  return process.env.NEXT_PHASE === "phase-production-build";
+}
+
 async function buyerIp(): Promise<string | undefined> {
+  if (isProductionBuild()) {
+    return undefined;
+  }
   try {
     const { headers } = await import("next/headers");
     const store = await headers();
@@ -30,6 +38,22 @@ async function buyerIp(): Promise<string | undefined> {
   } catch {
     return undefined;
   }
+}
+
+async function postStorefront(
+  endpoint: string,
+  requestHeaders: Record<string, string>,
+  body: string,
+  cache?: RequestCache,
+  revalidate = 60,
+): Promise<Response> {
+  return fetch(endpoint, {
+    method: "POST",
+    headers: requestHeaders,
+    body,
+    cache: cache ?? (revalidate === 0 ? "no-store" : undefined),
+    next: cache === "no-store" || revalidate === 0 ? undefined : { revalidate },
+  });
 }
 
 export async function shopifyFetch<T>({
@@ -45,24 +69,51 @@ export async function shopifyFetch<T>({
   }
 
   const endpoint = storefrontEndpoint(config);
-  const requestHeaders = storefrontRequestHeaders(config, await buyerIp());
+  const ip = await buyerIp();
+  const body = JSON.stringify({ query, variables });
+  let usedKind: StorefrontTokenKind = config.tokenKind;
 
   let response: Response;
   try {
-    response = await fetch(endpoint, {
-      method: "POST",
-      headers: requestHeaders,
-      body: JSON.stringify({ query, variables }),
-      cache: cache ?? (revalidate === 0 ? "no-store" : undefined),
-      next: cache === "no-store" || revalidate === 0 ? undefined : { revalidate },
-    });
+    response = await postStorefront(
+      endpoint,
+      storefrontRequestHeaders(config, ip),
+      body,
+      cache,
+      revalidate,
+    );
   } catch {
     logStorefrontFailure({ operation, code: "network" });
     throw new CommerceError("network");
   }
 
+  if (
+    (response.status === 401 || response.status === 403) &&
+    usedKind === "private"
+  ) {
+    logStorefrontFailure({
+      operation,
+      code: "unauthorized_retry_public",
+      status: response.status,
+      detail: "header=private",
+    });
+    try {
+      usedKind = "public";
+      response = await postStorefront(
+        endpoint,
+        storefrontRequestHeaders(config, undefined, "public"),
+        body,
+        "no-store",
+        0,
+      );
+    } catch {
+      logStorefrontFailure({ operation, code: "network" });
+      throw new CommerceError("network");
+    }
+  }
+
   if (!response.ok) {
-    throw toStorefrontError(operation, response.status);
+    throw toStorefrontError(operation, response.status, `header=${usedKind}`);
   }
 
   let payload: ShopifyGraphQLResponse<T>;

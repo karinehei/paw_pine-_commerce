@@ -4,8 +4,9 @@ This storefront is a portfolio prototype. It is not a claim that the application
 
 ## Secrets and environment
 
-- `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` is server-only (`src/lib/env.ts` imports `server-only`). It is sent as `Shopify-Storefront-Private-Token`, never as a `NEXT_PUBLIC_*` variable.
-- A legacy `SHOPIFY_STOREFRONT_ACCESS_TOKEN` is still accepted for public Storefront tokens (`X-Shopify-Storefront-Access-Token`) if the private token is unset. Do not put either on the client.
+- `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` is server-only (`src/lib/env.ts` imports `server-only`). Private tokens are sent as `Shopify-Storefront-Private-Token`. If Shopify responds 401, the client retries once with `X-Shopify-Storefront-Access-Token` (Headless public tokens are often pasted into this env var). The retry is not cached and is not a demo-catalogue fallback. Never `NEXT_PUBLIC_*`.
+- Admin API tokens (`shpat_`) are rejected at config time. They cannot call the Storefront API.
+- A legacy `SHOPIFY_STOREFRONT_ACCESS_TOKEN` is still accepted if the private env var is unset. Do not put either on the client.
 - Store domain is accepted only if it matches `*.myshopify.com`. A poisoned env value cannot send the token to an arbitrary host.
 - API version must match `YYYY-MM`.
 - `.env*` is gitignored; `.env.example` has empty token fields.

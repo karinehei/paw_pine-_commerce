@@ -90,7 +90,7 @@ Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on t
 
 Shopify mode uses the Storefront GraphQL API at `/api/2026-07/graphql.json` for products, collections, search, and cart mutations. If those credentials are missing, the local demo catalogue is used. If they are present and Shopify fails, the shop shows an error — it does not swap in mock products.
 
-On Vercel, set `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` on the server Environment Variables (Production). Leave them empty for a demo-only deploy.
+On Vercel, set `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` for **Production** (available at build and runtime). A `401` from Shopify almost always means the token is an Admin API token (`shpat_…`), belongs to a different shop, or was wrapped in quotes. Use a Storefront token from **Headless → Storefront API** — the public 32-character token or the private token. Never `NEXT_PUBLIC_`.
 
 Expected Shopify tags when connecting a live shop: `species:dog|cat`, `category:toys|harnesses|beds|feeding|scratching`, `material:…`, optional `sku:`, `dimensions:`, `care:`, `feature:`.
 
