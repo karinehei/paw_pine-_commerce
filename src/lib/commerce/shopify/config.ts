@@ -51,12 +51,6 @@ export function resolveShopifyConfig(env: {
     return null;
   }
 
-  if (isShopifyAdminApiToken(token)) {
-    throw new Error(
-      "Shopify is misconfigured: use a Storefront API token from the Headless channel, not an Admin API token.",
-    );
-  }
-
   const normalised = normaliseShopifyDomain(domain);
   if (!normalised || !isShopifyApiVersion(version)) {
     throw new Error("Shopify is misconfigured: store domain or API version is invalid.");

@@ -3,6 +3,7 @@ import "server-only";
 import { CommerceError } from "@/lib/commerce/errors";
 import { getShopifyConfig } from "@/lib/env";
 import {
+  isShopifyAdminApiToken,
   sanitiseBuyerIp,
   storefrontEndpoint,
   storefrontRequestHeaders,
@@ -113,7 +114,13 @@ export async function shopifyFetch<T>({
   }
 
   if (!response.ok) {
-    throw toStorefrontError(operation, response.status, `header=${usedKind}`);
+    const detail = [
+      `header=${usedKind}`,
+      isShopifyAdminApiToken(config.token) ? "hint=use_headless_storefront_private_token" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    throw toStorefrontError(operation, response.status, detail);
   }
 
   let payload: ShopifyGraphQLResponse<T>;

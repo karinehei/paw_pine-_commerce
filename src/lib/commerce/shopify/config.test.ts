@@ -95,13 +95,13 @@ describe("Shopify Storefront config", () => {
     expect(config?.tokenKind).toBe("private");
   });
 
-  it("rejects Admin API tokens", () => {
-    expect(() =>
-      resolveShopifyConfig({
-        SHOPIFY_STORE_DOMAIN: "paw-pine.myshopify.com",
-        SHOPIFY_STOREFRONT_PRIVATE_TOKEN: "shpat_admin",
-      }),
-    ).toThrow(/Storefront API token/i);
+  it("does not fall back to demo when the token has an Admin API prefix", () => {
+    const config = resolveShopifyConfig({
+      SHOPIFY_STORE_DOMAIN: "paw-pine.myshopify.com",
+      SHOPIFY_STOREFRONT_PRIVATE_TOKEN: "shpat_admin",
+    });
+    expect(config).not.toBeNull();
+    expect(config?.tokenKind).toBe("private");
   });
 
   it("rejects an injected buyer IP", () => {

@@ -85,12 +85,14 @@ Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on t
 | `NEXT_PUBLIC_GTM_ID` | No | Optional `GTM-…` container |
 | `NEXT_PUBLIC_ANALYTICS_DEBUG` | No | Console-log analytics events |
 | `SHOPIFY_STORE_DOMAIN` | Live catalogue | `your-store.myshopify.com` |
-| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Live catalogue | Headless **private** Storefront token (server only) |
+| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Live catalogue | Headless **private access token** (server only). Not the Admin API token. |
 | `SHOPIFY_STOREFRONT_API_VERSION` | No | Defaults to `2026-07` |
 
 Shopify mode uses the Storefront GraphQL API at `/api/2026-07/graphql.json` for products, collections, search, and cart mutations. If those credentials are missing, the local demo catalogue is used. If they are present and Shopify fails, the shop shows an error — it does not swap in mock products.
 
-On Vercel, set `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` for **Production** (available at build and runtime). A `401` from Shopify almost always means the token is an Admin API token (`shpat_…`), belongs to a different shop, or was wrapped in quotes. Use a Storefront token from **Headless → Storefront API** — the public 32-character token or the private token. Never `NEXT_PUBLIC_`.
+On Vercel, set `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` for **Production** (build and runtime).
+
+**Which token:** in Shopify admin, **Sales channels → Headless → your storefront**. Copy **private access token**. That value is not an Admin API token and does not start with `shpat_` or `shpca_`. If you created a custom app, use its **Storefront API access token**, not **Admin API access token**. Never wrap the value in quotes. Never `NEXT_PUBLIC_`.
 
 Expected Shopify tags when connecting a live shop: `species:dog|cat`, `category:toys|harnesses|beds|feeding|scratching`, `material:…`, optional `sku:`, `dimensions:`, `care:`, `feature:`.
 
