@@ -77,12 +77,13 @@ export function CookieConsent() {
         </div>
       ) : null}
 
-      <dialog
-        ref={dialogRef}
-        aria-labelledby={titleId}
-        onClose={() => setPreferencesOpen(false)}
-        className="bg-paper text-ink border-border w-full max-w-lg border p-0 shadow-2xl"
-      >
+      {preferencesOpen ? (
+        <dialog
+          ref={dialogRef}
+          aria-labelledby={titleId}
+          onClose={() => setPreferencesOpen(false)}
+          className="bg-paper text-ink border-border w-full max-w-lg border p-0 shadow-2xl"
+        >
         <form
           className="space-y-6 p-6"
           onSubmit={(event) => {
@@ -140,6 +141,7 @@ export function CookieConsent() {
           </div>
         </form>
       </dialog>
+      ) : null}
     </>
   );
 }

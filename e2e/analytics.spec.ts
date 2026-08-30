@@ -22,16 +22,17 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
   page,
 }) => {
   await page.goto("/products/oakwood-chew-ring");
-  await page.getByRole("button", { name: /add to bag/i }).click();
-  const bag = page.getByRole("dialog", { name: "Bag" });
-  await expect(bag).toBeVisible();
-  await bag.getByRole("button", { name: "Close" }).click();
 
   const before = await page.evaluate(() => window.dataLayer ?? []);
   expect(before.some((entry) => entry.event === "add_to_cart")).toBe(false);
+  expect(before.some((entry) => entry.event === "begin_checkout")).toBe(false);
+  expect(before.some((entry) => entry.event === "page_view")).toBe(false);
 
-  await page.getByRole("button", { name: "Accept analytics" }).click();
-  await page.getByRole("button", { name: /add to bag/i }).click();
+  const banner = page.getByRole("region", { name: "Cookies" });
+  await banner.getByRole("button", { name: "Accept analytics" }).click();
+  await expect(banner).toBeHidden();
+
+  await page.getByRole("main").getByRole("button", { name: /add to bag/i }).click();
 
   await expect
     .poll(async () =>
@@ -43,10 +44,9 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
     )
     .toBe(1);
 
-  await page
-    .getByRole("dialog", { name: "Bag" })
-    .getByRole("link", { name: "Checkout" })
-    .click();
+  const bag = page.getByRole("dialog", { name: "Bag" });
+  await expect(bag).toBeVisible();
+  await bag.getByRole("link", { name: "Checkout" }).click();
   await expect(page).toHaveURL(/checkout=demo/);
 
   await expect
@@ -62,7 +62,8 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
 
 test("cookie preferences remain available from the footer", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Necessary only" }).click();
+  await page.getByRole("region", { name: "Cookies" }).getByRole("button", { name: "Necessary only" }).click();
+  await expect(page.getByRole("region", { name: "Cookies" })).toBeHidden();
   await page.getByRole("button", { name: "Cookie preferences" }).click();
   const dialog = page.getByRole("dialog", { name: "Cookie preferences" });
   await expect(dialog).toBeVisible();
