@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { demoProducts } from "@/lib/commerce/demo/catalog";
 import { backInStockEligibility } from "@/lib/notifications/eligibility";
 import { MockNotificationProvider } from "@/lib/notifications/mock";
+import type { NotificationProvider } from "@/lib/notifications/types";
 import { MockNewsletterProvider } from "@/lib/newsletter/mock";
+import type { NewsletterProvider } from "@/lib/newsletter/types";
 import { isEmail } from "@/lib/validation";
 
 function trailHarness() {
@@ -29,7 +31,8 @@ describe("unavailable product back-in-stock", () => {
   it("validates email before a simulated subscription", async () => {
     expect(isEmail("")).toBe(false);
     expect(isEmail("wait@example.com")).toBe(true);
-    const result = await new MockNotificationProvider().subscribeBackInStock({
+    const notifications: NotificationProvider = new MockNotificationProvider();
+    const result = await notifications.subscribeBackInStock({
       email: "wait@example.com",
       handle: "trail-harness",
     });
@@ -39,7 +42,8 @@ describe("unavailable product back-in-stock", () => {
 
 describe("newsletter provider", () => {
   it("acknowledges a simulated subscribe without sending mail", async () => {
-    const result = await new MockNewsletterProvider().subscribe({
+    const newsletter: NewsletterProvider = new MockNewsletterProvider();
+    const result = await newsletter.subscribe({
       email: "reader@example.com",
     });
     expect(result).toEqual({ ok: true, demo: true });

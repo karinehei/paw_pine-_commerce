@@ -1,8 +1,4 @@
-import type {
-  NewsletterProvider,
-  NewsletterSubscribeInput,
-  NewsletterSubscribeResult,
-} from "@/lib/newsletter/types";
+import type { NewsletterProvider, NewsletterSubscribeResult } from "@/lib/newsletter/types";
 
 /**
  * Acknowledges the address and does not send mail.
@@ -10,7 +6,7 @@ import type {
  * with server-only credentials. Do not import those SDKs here.
  */
 export class MockNewsletterProvider implements NewsletterProvider {
-  async subscribe(_input: NewsletterSubscribeInput): Promise<NewsletterSubscribeResult> {
+  async subscribe(): Promise<NewsletterSubscribeResult> {
     return { ok: true, demo: true };
   }
 }

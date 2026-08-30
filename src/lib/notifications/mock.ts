@@ -1,5 +1,4 @@
 import type {
-  BackInStockInput,
   BackInStockResult,
   NotificationProvider,
 } from "@/lib/notifications/types";
@@ -10,7 +9,7 @@ import type {
  * from the server only.
  */
 export class MockNotificationProvider implements NotificationProvider {
-  async subscribeBackInStock(_input: BackInStockInput): Promise<BackInStockResult> {
+  async subscribeBackInStock(): Promise<BackInStockResult> {
     return { ok: true, demo: true };
   }
 }
