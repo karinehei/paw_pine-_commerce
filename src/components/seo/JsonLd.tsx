@@ -1,6 +1,6 @@
 import { serializeJsonLd } from "@/lib/seo";
 
-export function JsonLd({ data }: { data: Record<string, unknown> }) {
+export function JsonLd({ data }: { data: object }) {
   return (
     <script
       type="application/ld+json"

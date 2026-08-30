@@ -70,6 +70,7 @@ export function collectionMetadata(collection: Collection): Metadata {
   const path = `/collections/${collection.handle}`;
   const description =
     collection.description || `Shop ${collection.title} at ${SITE_NAME}.`;
+  const image = collection.image;
 
   return {
     title: collection.title,
@@ -80,10 +81,45 @@ export function collectionMetadata(collection: Collection): Metadata {
       title: collection.title,
       description,
       url: path,
+      images: image
+        ? [
+            {
+              url: image.url,
+              alt: image.altText || collection.title,
+              width: image.width,
+              height: image.height,
+            },
+          ]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: collection.title,
+      description,
+      images: image ? [image.url] : undefined,
+    },
+  };
+}
+
+export function contentMetadata(options: {
+  title: string;
+  description: string;
+  path: string;
+}): Metadata {
+  const { title, description, path } = options;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: path,
+    },
+    twitter: {
+      card: "summary",
+      title,
       description,
     },
   };
@@ -102,39 +138,79 @@ export function searchMetadata(term?: string): Metadata {
   };
 }
 
-export function productJsonLd(product: Product, url: string): Record<string, unknown> {
-  const images = product.images.map((image) => image.url).filter(Boolean);
-  const availability = product.availableForSale
-    ? "https://schema.org/InStock"
-    : "https://schema.org/OutOfStock";
+export interface ProductJsonLd {
+  "@context": "https://schema.org";
+  "@type": "Product";
+  name: string;
+  description?: string;
+  image?: string[];
+  url: string;
+  sku?: string;
+  brand?: { "@type": "Brand"; name: string };
+  material?: string;
+  offers: {
+    "@type": "Offer";
+    url: string;
+    priceCurrency: string;
+    price: string;
+    availability: "https://schema.org/InStock" | "https://schema.org/OutOfStock";
+    itemCondition: "https://schema.org/NewCondition";
+  };
+}
 
-  return {
+export interface BreadcrumbListJsonLd {
+  "@context": "https://schema.org";
+  "@type": "BreadcrumbList";
+  itemListElement: Array<{
+    "@type": "ListItem";
+    position: number;
+    name: string;
+    item: string;
+  }>;
+}
+
+export function productJsonLd(product: Product, url: string): ProductJsonLd {
+  const images = product.images.map((image) => image.url).filter(Boolean);
+  const sku = product.sku.trim();
+  const brand = product.vendor.trim();
+  const description = product.description.trim();
+  const json: ProductJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
-    description: product.description,
-    image: images.length > 0 ? images : undefined,
     url,
-    sku: product.sku,
-    brand: {
-      "@type": "Brand",
-      name: product.vendor,
-    },
-    material: product.material,
     offers: {
       "@type": "Offer",
       url,
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
+      priceCurrency: product.priceRange.minVariantPrice.currencyCode || "EUR",
       price: product.priceRange.minVariantPrice.amount,
-      availability,
+      availability: product.availableForSale
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
     },
   };
+  if (description) {
+    json.description = description;
+  }
+  if (images.length > 0) {
+    json.image = images;
+  }
+  if (sku) {
+    json.sku = sku;
+  }
+  if (brand) {
+    json.brand = { "@type": "Brand", name: brand };
+  }
+  if (product.material.trim()) {
+    json.material = product.material;
+  }
+  return json;
 }
 
 export function breadcrumbJsonLd(
   items: Array<{ name: string; url: string }>,
-): Record<string, unknown> {
+): BreadcrumbListJsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -197,7 +273,7 @@ export function collectionJsonLd(
   };
 }
 
-export function serializeJsonLd(data: Record<string, unknown>): string {
+export function serializeJsonLd(data: object): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 

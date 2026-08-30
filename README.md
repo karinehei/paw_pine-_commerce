@@ -134,11 +134,16 @@ The storefront emits a typed `EcommerceEvent` union (`page_view`, `view_item_lis
 
 Longer write-up: [docs/analytics.md](docs/analytics.md).
 
+## Technical SEO and product discovery
+
+SSR metadata, canonicals, JSON-LD (no fake reviews), sitemap, and robots are documented in [docs/seo.md](docs/seo.md). `/api/feeds/google-shopping.xml` is a Merchant-shaped product feed generated from the live or demo catalogue. **The feed endpoint works without requiring a paid Google service or ad campaign.** It is not submitted to Merchant Center from this repository.
+
 ## Further reading
 
 - [Case study](docs/case-study.md)
 - [Architecture and caching](docs/architecture.md)
 - [Analytics events](docs/analytics.md)
+- [Technical SEO and product discovery](docs/seo.md)
 - [Security notes](docs/security.md)
 - [Interview answers](docs/interview-notes.md)
 - [Future: shipping adapters and AI search](docs/future-architecture.md)

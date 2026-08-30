@@ -56,6 +56,7 @@ Catalogue reads are cacheable. Cart state is not.
 - **Cart queries and mutations** use `cache: "no-store"`. Cart IDs live in an httpOnly cookie; the cookie is not read in the root layout, so product pages are not forced into dynamic rendering just because a bag exists.
 - **Demo cart** hydrates from that cookie on demand. It is never stored in the Next.js Data Cache.
 - **Search suggestions** (`/api/search/suggest`) are `private, max-age=30` — they may include query text and should not be shared at a CDN.
+- **Google Shopping feed** (`/api/feeds/google-shopping.xml`) uses `s-maxage=3600`. Catalogue GraphQL for the feed still uses the provider’s 60s revalidate. Failures return 503 with well-formed XML, `no-store`.
 - **`/cart` and `/demo/analytics`** are `noindex`. Analytics session events live in `sessionStorage` on the device, not on the server.
 - Root layout still reads commerce **mode** (credentials present or not). That is a deploy-time switch, not shopper-specific cart data.
 

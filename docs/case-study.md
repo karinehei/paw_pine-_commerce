@@ -34,7 +34,7 @@ Shopify remains the system of record. Next.js owns merchandising, URLs, SEO, ana
 
 **Caching is split on purpose.** Catalogue GraphQL uses `revalidate: 60`. Cart queries are `no-store`. The root layout does not read the cart cookie, so product pages are not forced dynamic.
 
-**SEO is a first-class output.** Unique titles, canonicals, Open Graph, robots, a dynamic sitemap, and JSON-LD for Organization, WebSite, Product, and BreadcrumbList. Review ratings are not fabricated.
+**SEO is a first-class output.** Unique titles, canonicals, Open Graph, robots, a dynamic sitemap, and JSON-LD for Organization, WebSite, Product, and BreadcrumbList. Review ratings are not fabricated. `/api/feeds/google-shopping.xml` is a free Merchant-shaped product feed; it is not submitted to Google from this repo.
 
 **Analytics is vendor-neutral.** A typed ecommerce event union fans out to providers (dataLayer, sessionStorage, optional console). GA4/GTM can be connected later without rewriting product components. Optional analytics stay off until cookie consent.
 

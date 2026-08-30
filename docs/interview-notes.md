@@ -40,7 +40,7 @@ Funnel events: `view_item` → `add_to_cart` → `begin_checkout` → `purchase`
 
 ## 10. How did you implement SEO?
 
-Metadata API (titles, descriptions, canonicals, OG/Twitter), `sitemap.ts`, `robots.ts`, semantic headings, crawlable nav, image alt, and JSON-LD for Organization, WebSite, Product, and BreadcrumbList. No fake aggregate ratings.
+Metadata API (titles, descriptions, canonicals, OG/Twitter), `sitemap.ts`, `robots.ts`, semantic headings, crawlable nav, image alt, and JSON-LD for Organization, WebSite, Product, and BreadcrumbList. No fake aggregate ratings. `/api/feeds/google-shopping.xml` is a no-cost product feed for review; it does not require Merchant Center or ads.
 
 ## 11. What are the main Core Web Vitals risks?
 

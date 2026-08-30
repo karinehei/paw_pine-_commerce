@@ -1,11 +1,16 @@
 import { ContactForm } from "@/components/commerce/ContactForm";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
+import { contentMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getMessages(await getLocale());
-  return { title: t.contactTitle, description: t.contactMeta };
+  return contentMetadata({
+    title: t.contactTitle,
+    description: t.contactMeta,
+    path: "/contact",
+  });
 }
 
 export default async function ContactPage() {

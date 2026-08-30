@@ -1,10 +1,15 @@
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
+import { contentMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getMessages(await getLocale());
-  return { title: t.shippingTitle, description: t.shippingMeta };
+  return contentMetadata({
+    title: t.shippingTitle,
+    description: t.shippingMeta,
+    path: "/shipping",
+  });
 }
 
 export default async function ShippingPage() {

@@ -1,10 +1,15 @@
+import { contentMetadata } from "@/lib/seo";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getMessages(await getLocale());
-  return { title: t.about, description: t.aboutMeta };
+  return contentMetadata({
+    title: t.about,
+    description: t.aboutMeta,
+    path: "/about",
+  });
 }
 
 export default async function AboutPage() {
