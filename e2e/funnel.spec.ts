@@ -33,7 +33,12 @@ test("search suggestions appear for a short query", async ({ page }) => {
   await page.goto("/en");
   await page.locator("#header-search").fill("har");
   await expect(page.getByRole("listbox")).toBeVisible();
-  await expect(page.getByRole("option").filter({ hasText: /harness/i }).first()).toBeVisible();
+  await expect(
+    page
+      .getByRole("option")
+      .filter({ hasText: /harness/i })
+      .first(),
+  ).toBeVisible();
 });
 
 test("demo analytics page is labelled as demo data", async ({ page }) => {

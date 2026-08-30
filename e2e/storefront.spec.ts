@@ -52,5 +52,7 @@ test("empty search shows an empty state", async ({ page }) => {
 test("cookie preferences page is reachable", async ({ page }) => {
   await page.goto("/en/cookies");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cookie preferences");
-  await expect(page.getByRole("button", { name: /open cookie preferences/i })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /open cookie preferences/i }),
+  ).toBeVisible();
 });

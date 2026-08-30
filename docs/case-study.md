@@ -120,15 +120,15 @@ The goal is to demonstrate integration architecture — typed providers, validat
 
 ## Production path
 
-| Mock | Replacement |
-| --- | --- |
-| `MockShippingProvider` | `PostiShippingProvider` / `MatkahuoltoShippingProvider` with server-only credentials, typically as a Shopify carrier service or checkout extension. Final rates stay Shopify’s. |
-| `MockNewsletterProvider` | Shopify Email, Klaviyo, Mailchimp, or Brevo behind `NewsletterProvider` |
-| `MockNotificationProvider` | Same ESP or Shopify Customer API for back-in-stock |
-| Contact POST | Helpdesk or transactional mail |
-| dataLayer + empty GTM id | `NEXT_PUBLIC_GTM_ID` + GA4 tags after consent |
-| `purchase` type only | Order status script or webhook + Measurement Protocol |
-| Merchant XML endpoint | Scheduled fetch or Content API into Merchant Center |
+| Mock                       | Replacement                                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MockShippingProvider`     | `PostiShippingProvider` / `MatkahuoltoShippingProvider` with server-only credentials, typically as a Shopify carrier service or checkout extension. Final rates stay Shopify’s. |
+| `MockNewsletterProvider`   | Shopify Email, Klaviyo, Mailchimp, or Brevo behind `NewsletterProvider`                                                                                                         |
+| `MockNotificationProvider` | Same ESP or Shopify Customer API for back-in-stock                                                                                                                              |
+| Contact POST               | Helpdesk or transactional mail                                                                                                                                                  |
+| dataLayer + empty GTM id   | `NEXT_PUBLIC_GTM_ID` + GA4 tags after consent                                                                                                                                   |
+| `purchase` type only       | Order status script or webhook + Measurement Protocol                                                                                                                           |
+| Merchant XML endpoint      | Scheduled fetch or Content API into Merchant Center                                                                                                                             |
 
 ## Why standard Shopify might be preferable initially
 

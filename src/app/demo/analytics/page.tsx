@@ -22,7 +22,9 @@ export default async function DemoAnalyticsPage() {
     <article className="mx-auto max-w-4xl px-4 py-16 md:px-6">
       <p className="text-sale text-xs tracking-[0.2em] uppercase">{t.demoData}</p>
       <h1 className="font-display mt-3 text-4xl md:text-5xl">{t.demoAnalyticsTitle}</h1>
-      <p className="text-muted mt-4 max-w-2xl text-sm md:text-base">{t.demoAnalyticsIntro}</p>
+      <p className="text-muted mt-4 max-w-2xl text-sm md:text-base">
+        {t.demoAnalyticsIntro}
+      </p>
       <div className="mt-12">
         <DemoAnalyticsDashboard />
       </div>

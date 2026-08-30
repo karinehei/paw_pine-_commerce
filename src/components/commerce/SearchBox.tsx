@@ -50,10 +50,9 @@ export function SearchBox({
     }
 
     const handle = window.setTimeout(() => {
-      void fetch(
-        `/api/search/suggest?q=${encodeURIComponent(query)}&locale=${locale}`,
-        { headers: { [LOCALE_HEADER]: locale } },
-      )
+      void fetch(`/api/search/suggest?q=${encodeURIComponent(query)}&locale=${locale}`, {
+        headers: { [LOCALE_HEADER]: locale },
+      })
         .then((response) => response.json() as Promise<SearchSuggestions>)
         .then((payload) => {
           setFetched(payload);

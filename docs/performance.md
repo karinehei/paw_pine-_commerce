@@ -28,14 +28,14 @@ Cart GraphQL stays `cache: "no-store"` and is not used on catalogue pages.
 
 ## Caching
 
-| Data                                 | Cache                 |
-| ------------------------------------ | --------------------- |
-| Product, collection, listing GraphQL | `revalidate: 60`      |
-| Search GraphQL                       | `revalidate: 30`      |
-| Cart queries and mutations           | `no-store`            |
-| `/api/health`, `/api/vitals`         | `no-store`            |
+| Data                                 | Cache               |
+| ------------------------------------ | ------------------- |
+| Product, collection, listing GraphQL | `revalidate: 60`    |
+| Search GraphQL                       | `revalidate: 30`    |
+| Cart queries and mutations           | `no-store`          |
+| `/api/health`, `/api/vitals`         | `no-store`          |
 | Search suggestions                   | `private, no-store` |
-| Google Shopping feed                 | `s-maxage=3600`       |
+| Google Shopping feed                 | `s-maxage=3600`     |
 
 Do not call `cookies()` on catalogue pages. Do not put the cart cookie in the root layout. Do not cache cart payloads in the Next Data Cache.
 

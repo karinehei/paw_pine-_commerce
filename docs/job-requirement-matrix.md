@@ -4,21 +4,21 @@ Hiring audit of Paw & Pine Commerce against a typical ecommerce web-developer br
 
 Locales are prefixed (`/fi`, `/en`, `/sv`). Routes below omit the locale.
 
-| Requirement | Evidence | Route | Code / module | Tests | Type | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| Ecommerce development | Commerce provider switch, product/collection/cart types, Shopify GraphQL + demo fallback | `/`, `/collections/[handle]`, `/products/[handle]`, `/cart` | `src/lib/commerce/`, `src/lib/commerce/shopify/`, `src/lib/commerce/demo/` | `src/lib/commerce/*.test.ts`, `e2e/storefront.spec.ts` | Real (Shopify when credentials set; demo catalogue otherwise) | Strong |
-| Website maintenance | Health probe, ISR catalogue cache, structured logs, CI on every push | `/api/health` | `src/app/api/health/route.ts`, `.github/workflows/ci.yml`, `docs/performance.md` | `src/app/api/health/route.test.ts` | Real | Strong |
-| Performance optimization | Slim GraphQL cards, parallel PDP fetches, `next/image`, CWV beacon, Footer as RSC | Catalogue pages | `src/lib/commerce/shopify/`, `src/app/api/vitals/route.ts`, `docs/performance.md` | `src/lib/commerce/shopify/*.test.ts`, `src/app/api/vitals/route.test.ts` | Real architecture (no paid RUM) | Strong |
-| UX improvement | Filters, search, cart drawer, empty/error states, 44px targets, reduced motion | `/collections/*`, `/search`, `/cart` | `src/components/commerce/FilterPanel.tsx`, `EmptyState`, `ErrorState` | `e2e/storefront.spec.ts`, `e2e/wishlist.spec.ts` | Real | Strong |
-| Product pages | Gallery, variants, stock, JSON-LD, related products, recently viewed | `/products/[handle]` | `src/app/products/[handle]/page.tsx`, `src/components/product/` | `e2e/storefront.spec.ts`, `src/lib/seo.test.ts`, `src/lib/commerce/related.test.ts` | Real | Strong |
-| New ecommerce features | Wishlist, recently viewed, related ranking, delivery estimator, restock form, newsletter, cookie preferences page | `/wishlist`, `/cart`, `/cookies` | `src/lib/wishlist.ts`, `src/lib/recently-viewed.ts`, `src/lib/commerce/related.ts` | `src/lib/wishlist.test.ts`, `src/lib/recently-viewed.test.ts`, `e2e/simulated-adapters.spec.ts` | Mixed (wishlist real on-device; shipping/email mocked) | Partial |
-| Integrations | Shopify Storefront API; provider adapters for shipping, newsletter, restock | Checkout URL, `/api/shipping/rates` | `src/lib/commerce/shopify/`, `src/lib/shipping/`, `src/lib/newsletter/`, `src/lib/notifications/` | Shopify mapper tests, `src/lib/shipping/mock.test.ts`, `e2e/simulated-adapters.spec.ts` | Real Shopify + mock adapters | Partial |
-| Technical growth optimization | Typed funnel events, demo analytics page, Merchant-shaped feed | `/demo/analytics`, `/api/feeds/google-shopping.xml` | `src/lib/analytics/`, `src/lib/feeds/` | `src/lib/analytics/*.test.ts`, `src/lib/feeds/*.test.ts` | Real architecture (no live ads account) | Partial |
-| SEO | Metadata, canonicals, hreflang, sitemap, robots, JSON-LD | All indexable pages, `/sitemap.xml`, `/robots.txt` | `src/lib/seo.ts`, `src/lib/seo-routes.ts`, `src/app/sitemap.ts` | `src/lib/seo.test.ts`, `src/lib/seo-routes.test.ts`, `e2e/i18n.spec.ts` | Real | Strong |
-| Analytics | `track()` union, dataLayer adapter, consent gate, optional GTM snippet | Storefront + `/demo/analytics` | `src/lib/analytics/`, `src/components/consent/` | `src/lib/analytics/*.test.ts`, `src/lib/analytics/consent.test.ts` | Real architecture (not production GA4) | Strong |
-| Conversion tracking | Funnel through `begin_checkout`; `purchase` typed but not fired | Cart CTAs | `src/lib/analytics/types.ts`, `CheckoutCta`, `CartDrawer` | `src/lib/analytics/events.test.ts`, `e2e/funnel.spec.ts` | Architecture-only for purchase | Partial |
-| Visual implementation | Nordic type, linen/pine palette, still-life product art, responsive layout | `/`, collections, PDP | `src/app/globals.css`, `src/components/layout/`, `docs/screenshots/` | `e2e/screenshots.spec.ts` | Real UI (illustration, not photography) | Partial |
-| Digital customer experience | FI/EN/SV routing, GDPR consent, empty/error states, demo shipping estimator | `/fi`, `/en`, `/sv`, `/cookies` | `src/lib/i18n/`, `CookieConsent`, `DeliveryEstimate` | `src/lib/i18n/*.test.ts`, `e2e/i18n.spec.ts` | Real i18n + consent; mock delivery | Strong |
+| Requirement                   | Evidence                                                                                                          | Route                                                       | Code / module                                                                                     | Tests                                                                                           | Type                                                          | Status  |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------- |
+| Ecommerce development         | Commerce provider switch, product/collection/cart types, Shopify GraphQL + demo fallback                          | `/`, `/collections/[handle]`, `/products/[handle]`, `/cart` | `src/lib/commerce/`, `src/lib/commerce/shopify/`, `src/lib/commerce/demo/`                        | `src/lib/commerce/*.test.ts`, `e2e/storefront.spec.ts`                                          | Real (Shopify when credentials set; demo catalogue otherwise) | Strong  |
+| Website maintenance           | Health probe, ISR catalogue cache, structured logs, CI on every push                                              | `/api/health`                                               | `src/app/api/health/route.ts`, `.github/workflows/ci.yml`, `docs/performance.md`                  | `src/app/api/health/route.test.ts`                                                              | Real                                                          | Strong  |
+| Performance optimization      | Slim GraphQL cards, parallel PDP fetches, `next/image`, CWV beacon, Footer as RSC                                 | Catalogue pages                                             | `src/lib/commerce/shopify/`, `src/app/api/vitals/route.ts`, `docs/performance.md`                 | `src/lib/commerce/shopify/*.test.ts`, `src/app/api/vitals/route.test.ts`                        | Real architecture (no paid RUM)                               | Strong  |
+| UX improvement                | Filters, search, cart drawer, empty/error states, 44px targets, reduced motion                                    | `/collections/*`, `/search`, `/cart`                        | `src/components/commerce/FilterPanel.tsx`, `EmptyState`, `ErrorState`                             | `e2e/storefront.spec.ts`, `e2e/wishlist.spec.ts`                                                | Real                                                          | Strong  |
+| Product pages                 | Gallery, variants, stock, JSON-LD, related products, recently viewed                                              | `/products/[handle]`                                        | `src/app/products/[handle]/page.tsx`, `src/components/product/`                                   | `e2e/storefront.spec.ts`, `src/lib/seo.test.ts`, `src/lib/commerce/related.test.ts`             | Real                                                          | Strong  |
+| New ecommerce features        | Wishlist, recently viewed, related ranking, delivery estimator, restock form, newsletter, cookie preferences page | `/wishlist`, `/cart`, `/cookies`                            | `src/lib/wishlist.ts`, `src/lib/recently-viewed.ts`, `src/lib/commerce/related.ts`                | `src/lib/wishlist.test.ts`, `src/lib/recently-viewed.test.ts`, `e2e/simulated-adapters.spec.ts` | Mixed (wishlist real on-device; shipping/email mocked)        | Partial |
+| Integrations                  | Shopify Storefront API; provider adapters for shipping, newsletter, restock                                       | Checkout URL, `/api/shipping/rates`                         | `src/lib/commerce/shopify/`, `src/lib/shipping/`, `src/lib/newsletter/`, `src/lib/notifications/` | Shopify mapper tests, `src/lib/shipping/mock.test.ts`, `e2e/simulated-adapters.spec.ts`         | Real Shopify + mock adapters                                  | Partial |
+| Technical growth optimization | Typed funnel events, demo analytics page, Merchant-shaped feed                                                    | `/demo/analytics`, `/api/feeds/google-shopping.xml`         | `src/lib/analytics/`, `src/lib/feeds/`                                                            | `src/lib/analytics/*.test.ts`, `src/lib/feeds/*.test.ts`                                        | Real architecture (no live ads account)                       | Partial |
+| SEO                           | Metadata, canonicals, hreflang, sitemap, robots, JSON-LD                                                          | All indexable pages, `/sitemap.xml`, `/robots.txt`          | `src/lib/seo.ts`, `src/lib/seo-routes.ts`, `src/app/sitemap.ts`                                   | `src/lib/seo.test.ts`, `src/lib/seo-routes.test.ts`, `e2e/i18n.spec.ts`                         | Real                                                          | Strong  |
+| Analytics                     | `track()` union, dataLayer adapter, consent gate, optional GTM snippet                                            | Storefront + `/demo/analytics`                              | `src/lib/analytics/`, `src/components/consent/`                                                   | `src/lib/analytics/*.test.ts`, `src/lib/analytics/consent.test.ts`                              | Real architecture (not production GA4)                        | Strong  |
+| Conversion tracking           | Funnel through `begin_checkout`; `purchase` typed but not fired                                                   | Cart CTAs                                                   | `src/lib/analytics/types.ts`, `CheckoutCta`, `CartDrawer`                                         | `src/lib/analytics/events.test.ts`, `e2e/funnel.spec.ts`                                        | Architecture-only for purchase                                | Partial |
+| Visual implementation         | Nordic type, linen/pine palette, still-life product art, responsive layout                                        | `/`, collections, PDP                                       | `src/app/globals.css`, `src/components/layout/`, `docs/screenshots/`                              | `e2e/screenshots.spec.ts`                                                                       | Real UI (illustration, not photography)                       | Partial |
+| Digital customer experience   | FI/EN/SV routing, GDPR consent, empty/error states, demo shipping estimator                                       | `/fi`, `/en`, `/sv`, `/cookies`                             | `src/lib/i18n/`, `CookieConsent`, `DeliveryEstimate`                                              | `src/lib/i18n/*.test.ts`, `e2e/i18n.spec.ts`                                                    | Real i18n + consent; mock delivery                            | Strong  |
 
 ## Responsibility detail
 
@@ -58,16 +58,16 @@ Wishlist and recently viewed are complete on-device features. Delivery estimate,
 
 ### Integrations — Partial
 
-| Integration | Type |
-| --- | --- |
-| Shopify Storefront GraphQL | Real |
-| Shopify cart + hosted checkout | Real when a Dev Store is connected |
-| ShippingProvider | Mock integration (`MockShippingProvider`) |
-| NewsletterProvider | Mock integration |
-| NotificationProvider | Mock integration |
-| Contact POST | Mock integration |
-| GTM snippet | Optional; shop runs without it |
-| Google Merchant Center | Feed generator only — not submitted |
+| Integration                    | Type                                      |
+| ------------------------------ | ----------------------------------------- |
+| Shopify Storefront GraphQL     | Real                                      |
+| Shopify cart + hosted checkout | Real when a Dev Store is connected        |
+| ShippingProvider               | Mock integration (`MockShippingProvider`) |
+| NewsletterProvider             | Mock integration                          |
+| NotificationProvider           | Mock integration                          |
+| Contact POST                   | Mock integration                          |
+| GTM snippet                    | Optional; shop runs without it            |
+| Google Merchant Center         | Feed generator only — not submitted       |
 
 ### Technical growth optimization — Partial
 
@@ -99,18 +99,18 @@ Three languages in the repository. Shopify `@inContext` is used for Storefront c
 
 ## Missing (honest)
 
-| Gap | Why it is missing |
-| --- | --- |
-| Collection pagination | Catalogue cap 50; not built |
-| Customer accounts / order history | Would need Shopify Customer Account API |
-| Live Posti / Matkahuolto labels | Paid merchant contracts; mock adapter instead |
-| Live email (newsletter, restock, contact) | No ESP; mock adapters |
-| Production GA4 property | Optional `NEXT_PUBLIC_GTM_ID` only |
-| `purchase` event in this app | Shopify-hosted checkout boundary |
-| Merchant Center submission | XML generator only |
-| Studio product photography | Original still-life art |
-| Content-Security-Policy | GTM would need an allowlist; not faked |
-| Rate limiting | Documented follow-up in `docs/security.md` |
+| Gap                                       | Why it is missing                             |
+| ----------------------------------------- | --------------------------------------------- |
+| Collection pagination                     | Catalogue cap 50; not built                   |
+| Customer accounts / order history         | Would need Shopify Customer Account API       |
+| Live Posti / Matkahuolto labels           | Paid merchant contracts; mock adapter instead |
+| Live email (newsletter, restock, contact) | No ESP; mock adapters                         |
+| Production GA4 property                   | Optional `NEXT_PUBLIC_GTM_ID` only            |
+| `purchase` event in this app              | Shopify-hosted checkout boundary              |
+| Merchant Center submission                | XML generator only                            |
+| Studio product photography                | Original still-life art                       |
+| Content-Security-Policy                   | GTM would need an allowlist; not faked        |
+| Rate limiting                             | Documented follow-up in `docs/security.md`    |
 
 ## Verdict for this brief
 
