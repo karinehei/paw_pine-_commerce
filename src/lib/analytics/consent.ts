@@ -19,12 +19,26 @@ export const UNDECIDED_CONSENT: ConsentState = {
   decided: false,
 };
 
+const ANALYTICS_CONSENT: ConsentState = {
+  necessary: true,
+  analytics: true,
+  decided: true,
+};
+
+const NECESSARY_CONSENT: ConsentState = {
+  necessary: true,
+  analytics: false,
+  decided: true,
+};
+
 export function consentFromCookieValue(value: string | null | undefined): ConsentState {
+  // Stable references: ConsentProvider uses useSyncExternalStore, which
+  // re-renders forever if getSnapshot returns a new object each time.
   if (value === "analytics") {
-    return { necessary: true, analytics: true, decided: true };
+    return ANALYTICS_CONSENT;
   }
   if (value === "necessary") {
-    return { necessary: true, analytics: false, decided: true };
+    return NECESSARY_CONSENT;
   }
   return UNDECIDED_CONSENT;
 }

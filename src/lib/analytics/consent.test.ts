@@ -29,4 +29,10 @@ describe("analytics consent", () => {
     expect(hasAnalyticsConsent(refused)).toBe(false);
     expect(cookieValueFromConsent(refused)).toBe("necessary");
   });
+
+  it("returns the same snapshot object for a given cookie value", () => {
+    expect(consentFromCookieValue(undefined)).toBe(UNDECIDED_CONSENT);
+    expect(consentFromCookieValue("analytics")).toBe(consentFromCookieValue("analytics"));
+    expect(consentFromCookieValue("necessary")).toBe(consentFromCookieValue("necessary"));
+  });
 });

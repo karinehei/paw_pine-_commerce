@@ -1,7 +1,4 @@
-import type {
-  BackInStockResult,
-  NotificationProvider,
-} from "@/lib/notifications/types";
+import type { BackInStockResult, NotificationProvider } from "@/lib/notifications/types";
 
 /**
  * Records nothing durable and sends no email.

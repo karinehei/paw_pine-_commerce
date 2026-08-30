@@ -1,4 +1,7 @@
-import type { NewsletterProvider, NewsletterSubscribeResult } from "@/lib/newsletter/types";
+import type {
+  NewsletterProvider,
+  NewsletterSubscribeResult,
+} from "@/lib/newsletter/types";
 
 /**
  * Acknowledges the address and does not send mail.
