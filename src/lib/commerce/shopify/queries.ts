@@ -1,17 +1,18 @@
-const VARIANT_LIST_FIELDS = `
+const VARIANT_DETAIL_FIELDS = `
   id
   title
   availableForSale
+  quantityAvailable
   selectedOptions { name value }
   price { amount currencyCode }
   compareAtPrice { amount currencyCode }
 `;
 
-const PRODUCT_CARD_FIELDS = `
+/** Listing fields only: no body copy, gallery, options, or variants. */
+export const PRODUCT_CARD_FIELDS = `
   id
   handle
   title
-  description
   vendor
   productType
   tags
@@ -31,18 +32,11 @@ const PRODUCT_CARD_FIELDS = `
     minVariantPrice { amount currencyCode }
     maxVariantPrice { amount currencyCode }
   }
-  options {
-    id
-    name
-    values
-  }
-  variants(first: 50) {
-    nodes { ${VARIANT_LIST_FIELDS} }
-  }
 `;
 
 const PRODUCT_FIELDS = `
   ${PRODUCT_CARD_FIELDS}
+  description
   descriptionHtml
   images(first: 8) {
     nodes {
@@ -51,6 +45,14 @@ const PRODUCT_FIELDS = `
       width
       height
     }
+  }
+  options {
+    id
+    name
+    values
+  }
+  variants(first: 50) {
+    nodes { ${VARIANT_DETAIL_FIELDS} }
   }
 `;
 
@@ -106,6 +108,13 @@ export const SEARCH_QUERY = `
         ... on Product { ${PRODUCT_CARD_FIELDS} }
       }
     }
+  }
+`;
+
+/** Tiny probe for /api/health. Do not return shop fields to clients. */
+export const SHOPIFY_HEALTH_QUERY = `
+  query Health {
+    shop { id }
   }
 `;
 

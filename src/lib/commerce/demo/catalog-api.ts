@@ -13,6 +13,7 @@ import {
   localizeProduct,
   localizeProducts,
 } from "@/lib/commerce/demo/localize";
+import { getRelatedProducts } from "@/lib/commerce/related";
 import { getLocale } from "@/lib/i18n/locale";
 import type {
   CollectionResult,
@@ -74,15 +75,10 @@ export const demoCatalogApi = {
   async getRecommendations(handle: string) {
     const locale = await getLocale();
     const product = findDemoProduct(handle);
+    const catalogue = localizeProducts(demoProducts, locale);
     if (!product) {
-      return localizeProducts(demoProducts.slice(0, 4), locale);
+      return catalogue.slice(0, 4);
     }
-
-    return localizeProducts(
-      demoProducts
-        .filter((item) => item.handle !== handle && item.species === product.species)
-        .slice(0, 4),
-      locale,
-    );
+    return getRelatedProducts(localizeProduct(product, locale), catalogue, 4);
   },
 };

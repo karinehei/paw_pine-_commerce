@@ -3,8 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { track } from "@/lib/analytics/events";
 import { useMessages } from "@/components/i18n/LocaleProvider";
+import { isEmail } from "@/lib/validation";
 
-export function NewsletterForm() {
+export function NewsletterForm({ id = "newsletter-email" }: { id?: string }) {
   const t = useMessages();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -13,7 +14,9 @@ export function NewsletterForm() {
     event.preventDefault();
     const form = event.currentTarget;
     const email = new FormData(form).get("email");
-    if (typeof email !== "string") {
+    if (typeof email !== "string" || !isEmail(email)) {
+      setStatus("error");
+      setMessage(t.invalidEmail);
       return;
     }
 
@@ -29,7 +32,7 @@ export function NewsletterForm() {
       const payload = (await response.json()) as { ok?: boolean; message?: string };
       if (!response.ok || !payload.ok) {
         setStatus("error");
-        setMessage(payload.message ?? t.invalidEmail);
+        setMessage(t.invalidEmail);
         return;
       }
       setStatus("success");
@@ -43,20 +46,19 @@ export function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full max-w-md">
-      <label
-        htmlFor="newsletter-email"
-        className="text-muted text-xs tracking-[0.16em] uppercase"
-      >
+    <form noValidate onSubmit={onSubmit} className="w-full max-w-md">
+      <label htmlFor={id} className="text-muted text-xs tracking-[0.16em] uppercase">
         {t.notesFromTheHouse}
       </label>
       <div className="mt-3 flex gap-2">
         <input
-          id="newsletter-email"
+          id={id}
           name="email"
           type="email"
           required
           autoComplete="email"
+          aria-invalid={status === "error"}
+          aria-describedby={message ? `${id}-status` : undefined}
           placeholder={t.emailAddress}
           className="border-border bg-linen min-h-11 flex-1 border px-3 py-2 text-sm"
         />
@@ -70,6 +72,7 @@ export function NewsletterForm() {
       </div>
       {message ? (
         <p
+          id={`${id}-status`}
           className={`mt-2 text-sm ${status === "error" ? "text-sale" : "text-muted"}`}
           role="status"
         >

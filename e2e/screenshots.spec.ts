@@ -6,9 +6,14 @@ test("capture storefront screenshots", async ({ page }) => {
 
   const out = path.join(process.cwd(), "docs", "screenshots");
   const routes = [
-    { url: "/", name: "home" },
-    { url: "/collections/dogs", name: "collection" },
-    { url: "/products/trail-harness", name: "product" },
+    { url: "/en", name: "home" },
+    { url: "/en/collections/dogs", name: "collection" },
+    { url: "/en/products/trail-harness", name: "product" },
+    { url: "/en/cart", name: "cart" },
+    { url: "/en/wishlist", name: "wishlist" },
+    { url: "/en/search?q=oak", name: "search" },
+    { url: "/en/cookies", name: "cookies" },
+    { url: "/en/demo/analytics", name: "analytics" },
   ];
 
   for (const width of [375, 768, 1440] as const) {

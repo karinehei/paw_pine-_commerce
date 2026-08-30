@@ -46,7 +46,7 @@ export function CookieConsent() {
         <div
           role="region"
           aria-labelledby={bannerTitleId}
-          className="border-border bg-paper/95 fixed inset-x-0 bottom-0 z-40 border-t px-4 py-4 shadow-lg backdrop-blur-sm md:px-6"
+          className="border-border bg-paper/95 fixed inset-x-0 bottom-0 z-40 border-t px-4 py-4 md:px-6"
         >
           <div className="mx-auto flex max-w-6xl flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="max-w-xl">
@@ -82,7 +82,7 @@ export function CookieConsent() {
           ref={dialogRef}
           aria-labelledby={titleId}
           onClose={() => setPreferencesOpen(false)}
-          className="bg-paper text-ink border-border w-full max-w-lg border p-0 shadow-2xl"
+          className="bg-paper text-ink border-border w-full max-w-lg border p-0"
         >
           <form
             className="space-y-6 p-6"
@@ -107,17 +107,16 @@ export function CookieConsent() {
             </div>
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">{t.cookieNecessary}</legend>
-              <label className="text-muted flex items-start gap-3 text-sm">
-                <input type="checkbox" checked disabled className="mt-1" />
+              <label className="text-muted flex min-h-11 items-center gap-3 text-sm">
+                <input type="checkbox" checked disabled />
                 <span>{t.cookieNecessaryHelp}</span>
               </label>
             </fieldset>
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">{t.cookieAnalytics}</legend>
-              <label className="flex items-start gap-3 text-sm">
+              <label className="flex min-h-11 items-center gap-3 text-sm">
                 <input
                   type="checkbox"
-                  className="mt-1"
                   checked={analyticsDraft}
                   onChange={(event) => setAnalyticsDraft(event.target.checked)}
                 />

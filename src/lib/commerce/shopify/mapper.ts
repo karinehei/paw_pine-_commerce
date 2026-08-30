@@ -155,13 +155,14 @@ export function mapProduct(node: ShopifyProductNode): Product {
     .map((image) => mapImage(image, node.title))
     .filter((image): image is ProductImage => Boolean(image));
   const featured = mapImage(node.featuredImage, node.title) ?? images[0] ?? null;
-  const features = extractFeatures(node.description, node.tags);
+  const description = node.description ?? "";
+  const features = extractFeatures(description, node.tags);
 
   return {
     id: node.id,
     handle: node.handle,
     title: node.title,
-    description: node.description,
+    description,
     descriptionHtml: node.descriptionHtml ?? "",
     availableForSale: node.availableForSale,
     featuredImage: featured,
@@ -180,8 +181,12 @@ export function mapProduct(node: ShopifyProductNode): Product {
       minVariantPrice: mapMoney(node.compareAtPriceRange.minVariantPrice),
       maxVariantPrice: mapMoney(node.compareAtPriceRange.maxVariantPrice),
     },
-    variants: node.variants.nodes.map((variant) => mapVariant(variant, node.title)),
-    options: node.options.filter((option) => option.name.toLowerCase() !== "title"),
+    variants: (node.variants?.nodes ?? []).map((variant) =>
+      mapVariant(variant, node.title),
+    ),
+    options: (node.options ?? []).filter(
+      (option) => option.name.toLowerCase() !== "title",
+    ),
     tags: node.tags,
     vendor: node.vendor,
     productType: node.productType,

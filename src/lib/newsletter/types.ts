@@ -3,8 +3,9 @@ export interface NewsletterSubscribeInput {
 }
 
 export interface NewsletterSubscribeResult {
-  ok: true;
-  demo: true;
+  ok: boolean;
+  /** True on the mock adapter. A production ESP adapter omits this or sets false. */
+  demo?: boolean;
 }
 
 export interface NewsletterProvider {

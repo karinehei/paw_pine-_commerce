@@ -9,12 +9,13 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { ConsentProvider } from "@/components/consent/ConsentProvider";
 import { CookieConsent } from "@/components/consent/CookieConsent";
+import { WebVitalsBeacon } from "@/components/ops/WebVitalsBeacon";
 import { getCommerceMode, getGtmId } from "@/lib/env";
 import { siteMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
 import { htmlLang, openGraphLocale } from "@/lib/i18n/config";
-import { withLocale } from "@/lib/i18n/path";
+import { localizedAlternates, withLocale } from "@/lib/i18n/path";
 import { getSiteUrl } from "@/lib/env-public";
 import type { RootLayoutProps } from "@/lib/page-props";
 import type { Metadata } from "next";
@@ -36,7 +37,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = getMessages(locale);
   const siteUrl = getSiteUrl();
-  const canonical = withLocale("/", locale);
   return siteMetadata({
     description: t.description,
     title: {
@@ -49,16 +49,9 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Paw & Pine",
       title: "Paw & Pine",
       description: t.description,
-      url: siteUrl,
+      url: `${siteUrl}${withLocale("/", locale)}`,
     },
-    alternates: {
-      canonical,
-      languages: {
-        en: "/",
-        fi: "/fi",
-        "x-default": "/",
-      },
-    },
+    alternates: localizedAlternates("/", locale),
   });
 }
 
@@ -95,6 +88,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               <CartDrawer />
             </CartProvider>
             <CookieConsent />
+            <WebVitalsBeacon />
           </ConsentProvider>
         </LocaleProvider>
       </body>

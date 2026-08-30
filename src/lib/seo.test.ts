@@ -70,18 +70,26 @@ describe("structured data", () => {
 });
 
 describe("canonical URLs", () => {
-  it("sets a product canonical and Open Graph url", () => {
-    const metadata = productMetadata(oakwood());
-    expect(metadata.alternates?.canonical).toBe("/products/oakwood-chew-ring");
-    expect(metadata.openGraph?.url).toBe("/products/oakwood-chew-ring");
+  it("sets a product canonical and Open Graph url for the locale", () => {
+    const metadata = productMetadata(oakwood(), "en");
+    expect(metadata.alternates?.canonical).toBe("/en/products/oakwood-chew-ring");
+    expect(metadata.alternates?.languages).toMatchObject({
+      fi: "/fi/products/oakwood-chew-ring",
+      en: "/en/products/oakwood-chew-ring",
+      sv: "/sv/products/oakwood-chew-ring",
+      "x-default": "/fi/products/oakwood-chew-ring",
+    });
+    expect(metadata.openGraph?.url).toBe("/en/products/oakwood-chew-ring");
   });
 
-  it("sets a content-page canonical", () => {
+  it("sets a content-page canonical with hreflang", () => {
     const metadata = contentMetadata({
       title: "About",
       description: "The house",
       path: "/about",
+      locale: "sv",
     });
-    expect(metadata.alternates?.canonical).toBe("/about");
+    expect(metadata.alternates?.canonical).toBe("/sv/about");
+    expect(metadata.alternates?.languages?.fi).toBe("/fi/about");
   });
 });

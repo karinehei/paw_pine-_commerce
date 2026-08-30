@@ -3,6 +3,9 @@ import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import { getSiteUrl } from "@/lib/env-public";
 import { formatMoney } from "@/lib/format";
 import type { Collection, Product } from "@/lib/commerce/types";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getMessages } from "@/lib/i18n/messages";
+import { localizedAlternates, withLocale } from "@/lib/i18n/path";
 
 export function siteMetadata(overrides: Metadata = {}): Metadata {
   const siteUrl = getSiteUrl();
@@ -31,21 +34,22 @@ export function siteMetadata(overrides: Metadata = {}): Metadata {
   };
 }
 
-export function productMetadata(product: Product): Metadata {
+export function productMetadata(product: Product, locale: Locale): Metadata {
   const title = product.title;
   const description = product.description.replace(/\s+/g, " ").slice(0, 160);
   const path = `/products/${product.handle}`;
+  const localized = withLocale(path, locale);
   const image = product.featuredImage;
 
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: localizedAlternates(path, locale),
     openGraph: {
       type: "website",
       title,
       description,
-      url: path,
+      url: localized,
       images: image
         ? [
             {
@@ -66,21 +70,24 @@ export function productMetadata(product: Product): Metadata {
   };
 }
 
-export function collectionMetadata(collection: Collection): Metadata {
+export function collectionMetadata(collection: Collection, locale: Locale): Metadata {
+  const t = getMessages(locale);
   const path = `/collections/${collection.handle}`;
+  const localized = withLocale(path, locale);
   const description =
-    collection.description || `Shop ${collection.title} at ${SITE_NAME}.`;
+    collection.description ||
+    t.collectionMetaFallback.replace("{title}", collection.title);
   const image = collection.image;
 
   return {
     title: collection.title,
     description,
-    alternates: { canonical: path },
+    alternates: localizedAlternates(path, locale),
     openGraph: {
       type: "website",
       title: collection.title,
       description,
-      url: path,
+      url: localized,
       images: image
         ? [
             {
@@ -105,17 +112,19 @@ export function contentMetadata(options: {
   title: string;
   description: string;
   path: string;
+  locale: Locale;
 }): Metadata {
-  const { title, description, path } = options;
+  const { title, description, path, locale } = options;
+  const localized = withLocale(path, locale);
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: localizedAlternates(path, locale),
     openGraph: {
       type: "website",
       title,
       description,
-      url: path,
+      url: localized,
     },
     twitter: {
       card: "summary",
@@ -125,16 +134,23 @@ export function contentMetadata(options: {
   };
 }
 
-export function searchMetadata(term?: string): Metadata {
-  const title = term ? `Search: ${term}` : "Search";
+export function searchMetadata(term: string | undefined, locale: Locale): Metadata {
+  const t = getMessages(locale);
+  const title = term ? t.searchMetaTitleQuery.replace("{term}", term) : t.searchMetaTitle;
   const description = term
-    ? `Results for “${term}” in the ${SITE_NAME} edit.`
-    : `Search the ${SITE_NAME} edit by product, material, or maker.`;
+    ? t.searchMetaDescriptionQuery.replace("{term}", term)
+    : t.searchMetaDescription;
+  const path = term ? `/search?q=${encodeURIComponent(term)}` : "/search";
   return {
     title,
     description,
-    alternates: { canonical: term ? `/search?q=${encodeURIComponent(term)}` : "/search" },
+    alternates: localizedAlternates("/search", locale),
     robots: { index: !term, follow: true },
+    openGraph: {
+      title,
+      description,
+      url: withLocale(path, locale),
+    },
   };
 }
 
@@ -236,6 +252,7 @@ export function organizationJsonLd(): Record<string, unknown> {
 
 export function websiteJsonLd(): Record<string, unknown> {
   const siteUrl = getSiteUrl();
+  const searchPath = withLocale("/search", DEFAULT_LOCALE);
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -244,7 +261,7 @@ export function websiteJsonLd(): Record<string, unknown> {
     description: SITE_DESCRIPTION,
     potentialAction: {
       "@type": "SearchAction",
-      target: `${siteUrl}/search?q={search_term_string}`,
+      target: `${siteUrl}${searchPath}?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -254,6 +271,7 @@ export function collectionJsonLd(
   collection: Collection,
   products: Product[],
   url: string,
+  locale: Locale = DEFAULT_LOCALE,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -266,7 +284,7 @@ export function collectionJsonLd(
       itemListElement: products.slice(0, 16).map((product, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: `${getSiteUrl()}/products/${product.handle}`,
+        url: `${getSiteUrl()}${withLocale(`/products/${product.handle}`, locale)}`,
         name: product.title,
       })),
     },

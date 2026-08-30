@@ -4,20 +4,20 @@ The storefront is rendered with the App Router. Catalogue pages are Server Compo
 
 ## Metadata
 
-| Surface                           | Title / description                   | Canonical                 | Open Graph / Twitter                    |
-| --------------------------------- | ------------------------------------- | ------------------------- | --------------------------------------- |
-| Home                              | Locale tagline                        | `/` or `/fi`              | Site-wide OG                            |
-| Collections                       | Collection title and copy             | `/collections/{handle}`   | Image when the collection has one       |
-| Products                          | Product title and trimmed description | `/products/{handle}`      | Featured image when present             |
-| Search                            | Query in the title                    | `/search` or `/search?q=` | Result pages with a query are `noindex` |
-| About, shipping, returns, contact | Page copy                             | Matching path             | Summary card                            |
-| Cart, `/demo/analytics`           | —                                     | —                         | `noindex`                               |
+| Surface                              | Title / description                   | Canonical                        | Open Graph / Twitter                    |
+| ------------------------------------ | ------------------------------------- | -------------------------------- | --------------------------------------- |
+| Home                                 | Locale tagline                        | `/fi`, `/en`, `/sv`              | Site-wide OG                            |
+| Collections                          | Collection title and copy             | `/{locale}/collections/{handle}` | Image when the collection has one       |
+| Products                             | Product title and trimmed description | `/{locale}/products/{handle}`    | Featured image when present             |
+| Search                               | Query in the title                    | `/{locale}/search`               | Result pages with a query are `noindex` |
+| About, shipping, returns, contact    | Page copy                             | Matching path                    | Summary card                            |
+| Cart, `/wishlist`, `/demo/analytics` | —                                     | —                                | `noindex`                               |
 
 Copy is written for humans. There is no keyword stuffing.
 
 ## Canonical URLs
 
-`metadataBase` is `NEXT_PUBLIC_SITE_URL`. Product, collection, search, and content helpers set `alternates.canonical` to a site-relative path. Finnish URLs are the `/fi` prefix of the same English path; hreflang is declared on the root layout (`en`, `fi`, `x-default`).
+`metadataBase` is `NEXT_PUBLIC_SITE_URL`. Product, collection, search, and content helpers set `alternates.canonical` to the **prefixed** path (`/fi/about`, `/en/products/{handle}`). `hreflang` lists `fi`, `en`, `sv`, and `x-default` (Finnish). `/` 308-redirects to `/fi` (or the language cookie) so the same page is not indexed twice. See [i18n.md](./i18n.md).
 
 ## Structured data
 
@@ -32,9 +32,9 @@ Reviews, `aggregateRating`, and invented SKUs are never added.
 
 ## Sitemap and robots
 
-`/sitemap.xml` lists home, content pages, collections, and products (English and Finnish). It does not list `/cart`, `/demo/analytics`, or API routes.
+`/sitemap.xml` lists home, content pages, collections, and products in Finnish, English, and Swedish. It does not list `/cart`, `/wishlist`, `/demo/analytics`, or API routes. Unprefixed catalogue URLs are omitted because they redirect.
 
-`/robots.txt` allows `/`, points at the sitemap, and disallows `/cart`, `/demo/`, and `/api/`. `/api/feeds/` is allowed so a feed fetcher can read the shopping XML; that is not an invitation to index API JSON.
+`/robots.txt` allows `/`, points at the sitemap, and disallows `/cart`, `/wishlist`, `/demo/`, and `/api/`. `/api/feeds/` is allowed so a feed fetcher can read the shopping XML; that is not an invitation to index API JSON. `/api/health` stays disallowed; uptime monitors can still request it.
 
 ## Google Shopping feed
 

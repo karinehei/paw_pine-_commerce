@@ -25,6 +25,7 @@ interface ShopifyFetchOptions {
   variables?: Record<string, unknown>;
   cache?: RequestCache;
   revalidate?: number;
+  timeoutMs?: number;
 }
 
 function isProductionBuild(): boolean {
@@ -50,6 +51,7 @@ async function postStorefront(
   body: string,
   cache?: RequestCache,
   revalidate = 60,
+  timeoutMs?: number,
 ): Promise<Response> {
   return fetch(endpoint, {
     method: "POST",
@@ -57,6 +59,7 @@ async function postStorefront(
     body,
     cache: cache ?? (revalidate === 0 ? "no-store" : undefined),
     next: cache === "no-store" || revalidate === 0 ? undefined : { revalidate },
+    signal: timeoutMs ? AbortSignal.timeout(timeoutMs) : undefined,
   });
 }
 
@@ -66,6 +69,7 @@ export async function shopifyFetch<T>({
   variables,
   cache,
   revalidate = 60,
+  timeoutMs,
 }: ShopifyFetchOptions): Promise<T> {
   const config = getShopifyConfig();
   if (!config) {
@@ -89,6 +93,7 @@ export async function shopifyFetch<T>({
       body,
       cache,
       revalidate,
+      timeoutMs,
     );
   } catch {
     logStorefrontFailure({ operation, code: "network" });
@@ -110,6 +115,7 @@ export async function shopifyFetch<T>({
         body,
         "no-store",
         0,
+        timeoutMs,
       );
     } catch {
       logStorefrontFailure({ operation, code: "network" });

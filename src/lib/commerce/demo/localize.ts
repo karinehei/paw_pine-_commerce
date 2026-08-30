@@ -178,10 +178,7 @@ const collections: Record<string, { title: string; description: string }> = {
 };
 
 export function localizeProduct(product: Product, locale: Locale): Product {
-  if (locale !== "fi") {
-    return product;
-  }
-  const copy = products[product.handle];
+  const copy = catalogueCopy[locale]?.products[product.handle];
   if (!copy) {
     return product;
   }
@@ -196,15 +193,24 @@ export function localizeProduct(product: Product, locale: Locale): Product {
 }
 
 export function localizeCollection(collection: Collection, locale: Locale): Collection {
-  if (locale !== "fi") {
-    return collection;
-  }
-  const copy = collections[collection.handle];
+  const copy = catalogueCopy[locale]?.collections[collection.handle];
   if (!copy) {
     return collection;
   }
   return { ...collection, ...copy };
 }
+
+const catalogueCopy: Partial<
+  Record<
+    Locale,
+    {
+      products: typeof products;
+      collections: typeof collections;
+    }
+  >
+> = {
+  fi: { products, collections },
+};
 
 export function localizeProducts(list: Product[], locale: Locale): Product[] {
   return list.map((product) => localizeProduct(product, locale));

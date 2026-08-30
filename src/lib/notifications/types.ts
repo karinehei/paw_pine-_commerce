@@ -5,8 +5,9 @@ export interface BackInStockInput {
 }
 
 export interface BackInStockResult {
-  ok: true;
-  demo: true;
+  ok: boolean;
+  /** True on the mock adapter. A production notification adapter omits this or sets false. */
+  demo?: boolean;
 }
 
 export interface NotificationProvider {

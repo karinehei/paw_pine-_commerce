@@ -3,6 +3,7 @@ import { Navigation } from "@/components/layout/Navigation";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { SearchBox } from "@/components/commerce/SearchBox";
 import { CartButton } from "@/components/layout/CartButton";
+import { WishlistLink } from "@/components/wishlist/WishlistLink";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { LocaleLink } from "@/components/i18n/LocaleLink";
 import { getLocale } from "@/lib/i18n/locale";
@@ -14,9 +15,16 @@ export async function Header() {
 
   return (
     <header className="border-border bg-linen/95 sticky top-0 z-30 border-b backdrop-blur-sm">
-      <p className="border-border text-muted border-b py-2 text-center text-xs tracking-[0.16em] uppercase">
-        {t.shippingBanner}
-      </p>
+      <div className="border-border flex flex-col gap-2 border-b px-4 py-2 sm:flex-row sm:items-center sm:justify-between md:px-6">
+        <p className="text-muted text-center text-xs tracking-[0.16em] uppercase sm:flex-1">
+          {t.shippingBanner}
+        </p>
+        <div className="flex justify-center sm:justify-end">
+          <Suspense fallback={null}>
+            <LanguageSwitcher />
+          </Suspense>
+        </div>
+      </div>
       <div className="mx-auto grid max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 md:flex md:gap-6 md:px-6 md:py-4">
         <MobileMenu />
         <LocaleLink
@@ -29,13 +37,11 @@ export async function Header() {
           <Navigation />
         </div>
         <div className="flex items-center justify-end gap-2 sm:gap-4">
-          <Suspense fallback={null}>
-            <LanguageSwitcher />
-          </Suspense>
           <div className="hidden w-40 sm:block lg:w-48">
             <SearchBox id="header-search" />
           </div>
           <CartButton />
+          <WishlistLink />
         </div>
       </div>
     </header>

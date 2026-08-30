@@ -1,6 +1,8 @@
 import { DEFAULT_CURRENCY, SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
 import { xmlElement } from "@/lib/feeds/xml";
 import type { Money, Product } from "@/lib/commerce/types";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { withLocale } from "@/lib/i18n/path";
 
 export type GoogleAvailability = "in_stock" | "out_of_stock";
 
@@ -58,7 +60,7 @@ export function toGoogleShoppingItem(
     id: handle,
     title,
     description,
-    link: absoluteUrl(siteUrl, `/products/${handle}`),
+    link: absoluteUrl(siteUrl, withLocale(`/products/${handle}`, DEFAULT_LOCALE)),
     availability: product.availableForSale ? "in_stock" : "out_of_stock",
     price,
     condition: "new",

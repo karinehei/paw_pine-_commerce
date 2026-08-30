@@ -1,14 +1,13 @@
-"use client";
-
 import { NewsletterForm } from "@/components/commerce/NewsletterForm";
-import { openCookiePreferences } from "@/components/consent/CookieConsent";
+import { CookiePreferencesButton } from "@/components/consent/CookiePreferencesButton";
 import { LocaleLink } from "@/components/i18n/LocaleLink";
-import { useMessages } from "@/components/i18n/LocaleProvider";
 import { SITE_NAME } from "@/lib/constants";
 import type { CommerceMode } from "@/lib/commerce/types";
+import { getLocale } from "@/lib/i18n/locale";
+import { getMessages } from "@/lib/i18n/messages";
 
-export function Footer({ mode }: { mode: CommerceMode }) {
-  const t = useMessages();
+export async function Footer({ mode }: { mode: CommerceMode }) {
+  const t = getMessages(await getLocale());
   const shop = [
     { href: "/collections/all", label: t.allProducts },
     { href: "/collections/dogs", label: t.dogs },
@@ -19,11 +18,13 @@ export function Footer({ mode }: { mode: CommerceMode }) {
     { href: "/shipping", label: t.shipping },
     { href: "/returns", label: t.returns },
     { href: "/contact", label: t.contact },
+    { href: "/cookies", label: t.cookiePreferences },
   ];
   const house = [
     { href: "/about", label: t.about },
     { href: "/search", label: t.search },
     { href: "/cart", label: t.bag },
+    { href: "/wishlist", label: t.wishlist },
     { href: "/demo/analytics", label: t.demoAnalytics },
   ];
 
@@ -47,20 +48,14 @@ export function Footer({ mode }: { mode: CommerceMode }) {
               </li>
             ))}
             <li>
-              <button
-                type="button"
-                className="hover:text-pine min-h-11 text-left"
-                onClick={() => openCookiePreferences()}
-              >
-                {t.cookiePreferences}
-              </button>
+              <CookiePreferencesButton label={t.cookiePreferences} />
             </li>
           </ul>
         </div>
       </div>
       <div className="border-border border-t">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:flex-row md:items-end md:justify-between md:px-6">
-          <NewsletterForm />
+          <NewsletterForm id="footer-newsletter-email" />
           <p className="text-muted text-xs">
             {mode === "demo" ? t.demoCatalogue : t.liveCatalogue} ©{" "}
             {new Date().getFullYear()} {SITE_NAME}

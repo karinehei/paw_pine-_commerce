@@ -42,6 +42,17 @@ describe("typed ecommerce events", () => {
     expect(ecommerce.items[0]?.item_id).toBe("trail-harness");
   });
 
+  it("maps wishlist add and remove without extra vendor fields", () => {
+    const add = toDataLayerPayload({
+      name: "wishlist_add",
+      items: [itemFromProduct(trailHarness())],
+    });
+    expect(add.event).toBe("wishlist_add");
+    expect(toDataLayerPayload({ name: "wishlist_remove", items: [] }).event).toBe(
+      "wishlist_remove",
+    );
+  });
+
   it("computes funnel rates from typed events", () => {
     const events: EcommerceEvent[] = [
       { name: "page_view", page_path: "/", page_title: "Home" },

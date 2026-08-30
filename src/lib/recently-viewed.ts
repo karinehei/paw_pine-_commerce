@@ -68,14 +68,24 @@ export function readRecentlyViewed(): RecentProduct[] {
   return getRecentlyViewedSnapshot();
 }
 
-export function rememberProduct(product: RecentProduct): RecentProduct[] {
+export const RECENT_LIMIT = LIMIT;
+
+export function pushRecentlyViewed(
+  product: RecentProduct,
+  existing: RecentProduct[],
+  limit = LIMIT,
+): RecentProduct[] {
   if (!isProductHandle(product.handle)) {
-    return getRecentlyViewedSnapshot();
+    return existing.slice(0, limit);
   }
-  const next = [
-    product,
-    ...getRecentlyViewedSnapshot().filter((item) => item.handle !== product.handle),
-  ].slice(0, LIMIT);
+  return [product, ...existing.filter((item) => item.handle !== product.handle)].slice(
+    0,
+    limit,
+  );
+}
+
+export function rememberProduct(product: RecentProduct): RecentProduct[] {
+  const next = pushRecentlyViewed(product, getRecentlyViewedSnapshot());
 
   try {
     const serialized = JSON.stringify(next);

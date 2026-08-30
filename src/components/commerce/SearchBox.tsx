@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
+import { LOCALE_HEADER } from "@/lib/i18n/config";
 import { withLocale } from "@/lib/i18n/path";
 import type { SearchSuggestions } from "@/lib/commerce/suggest";
 
@@ -49,7 +50,10 @@ export function SearchBox({
     }
 
     const handle = window.setTimeout(() => {
-      void fetch(`/api/search/suggest?q=${encodeURIComponent(query)}`)
+      void fetch(
+        `/api/search/suggest?q=${encodeURIComponent(query)}&locale=${locale}`,
+        { headers: { [LOCALE_HEADER]: locale } },
+      )
         .then((response) => response.json() as Promise<SearchSuggestions>)
         .then((payload) => {
           setFetched(payload);
@@ -62,7 +66,7 @@ export function SearchBox({
     }, 250);
 
     return () => window.clearTimeout(handle);
-  }, [query, canSuggest]);
+  }, [query, canSuggest, locale]);
 
   useEffect(() => {
     if (!updateUrlOnIdle) {
@@ -172,13 +176,13 @@ export function SearchBox({
         <ul
           id={listId}
           role="listbox"
-          className="border-border bg-paper absolute z-40 mt-1 w-full min-w-56 border py-2 shadow-sm"
+          className="border-border bg-paper absolute z-40 mt-1 w-full min-w-56 border py-2"
         >
           {options.map((option, index) => (
             <li key={option.href} role="option" aria-selected={index === activeIndex}>
               <button
                 type="button"
-                className={`flex w-full flex-col px-3 py-2 text-left text-sm ${
+                className={`flex min-h-11 w-full flex-col justify-center px-3 py-2 text-left text-sm ${
                   index === activeIndex ? "bg-linen" : ""
                 }`}
                 onMouseDown={(event) => event.preventDefault()}

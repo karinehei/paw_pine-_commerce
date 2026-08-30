@@ -53,6 +53,19 @@ describe("Shopify product mapper", () => {
     expect(product.featuredImage).toBeNull();
   });
 
+  it("maps listing nodes that omit variants and description", () => {
+    const product = mapProduct({
+      ...fixture,
+      description: undefined,
+      options: undefined,
+      variants: undefined,
+    });
+    expect(product.variants).toEqual([]);
+    expect(product.options).toEqual([]);
+    expect(product.description).toBe("");
+    expect(product.species).toBe("dog");
+  });
+
   it("quotes user search input for Shopify query syntax", () => {
     const query = buildShopifySearchQuery({ query: 'oak" OR title:*' });
     expect(query).toBe('"oak OR title:*"');

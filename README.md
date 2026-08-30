@@ -1,27 +1,48 @@
-# Paw & Pine
+# Paw & Pine Commerce
 
-Headless Shopify storefront for a small Scandinavian pet accessories house — built to be reviewed without a Shopify account.
+A production-oriented headless Shopify ecommerce portfolio built with Next.js and TypeScript.
 
-**Live demo:** [paw-pine-commerce.vercel.app](https://paw-pine-commerce.vercel.app/)
+**Portfolio architecture: approximately €0 operating cost.**
+
+A live commercial shop would require a **paid Shopify plan** and potentially paid carrier, email, and ads integrations. This public demo does not.
+
+## Live demo
+
+[paw-pine-commerce.vercel.app](https://paw-pine-commerce.vercel.app/)
+
+## Screenshot
 
 ![Home — 1440px](docs/screenshots/home-1440.png)
 
 Mobile and tablet: [home-375](docs/screenshots/home-375.png) · [home-768](docs/screenshots/home-768.png) · more in [docs/screenshots](docs/screenshots/)
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Shopify Storefront GraphQL · Vitest · Playwright
+## Tech stack
 
-**What it does:** product discovery, product pages, cart, Shopify checkout boundary, technical SEO, typed ecommerce analytics, demo catalogue when credentials are missing.
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Shopify Storefront GraphQL · Vitest · Playwright · GitHub Actions · Vercel Hobby
 
-## Highlights
+## Key features
 
-- Headless Shopify architecture with a single commerce provider switch
-- Responsive collections, search, and product pages
-- Shopify cart + hosted checkout (validated HTTPS Shopify URLs)
-- Typed ecommerce analytics with a pluggable provider layer and GDPR consent
-- Technical SEO and JSON-LD (no fabricated ratings)
-- Accessible UI (keyboard, dialogs, 44px targets, reduced motion)
-- Playwright purchase-flow tests in demo mode
-- Demo mode requiring no Shopify account
+- Real Shopify Storefront GraphQL API
+- Real Shopify product catalogue
+- Shopify cart and checkout
+- Custom Next.js storefront
+- Technical SEO
+- Typed ecommerce analytics
+- GDPR-aware analytics consent
+- Conversion funnel demo
+- Google Shopping feed generation
+- Wishlist
+- Recently viewed
+- Rule-based recommendations
+- Finnish delivery integration architecture
+- FI / EN / SV localization
+- Automated Playwright tests
+- CI/CD
+- Core Web Vitals optimization
+
+Finnish delivery is a **provider adapter** with a **mock integration** (`MockShippingProvider`). It is not a live Posti or Matkahuolto connection. The shopping feed is generated in this app; it is not submitted to Google Merchant Center. Analytics are GTM-ready; they are not a production GA4 property unless you connect one.
+
+Hiring notes: [case study](docs/case-study.md) · [requirement matrix](docs/job-requirement-matrix.md) · [€0 cost audit](docs/free-tier-architecture.md) · [interview answers](docs/interview-notes.md)
 
 ## Architecture
 
@@ -67,7 +88,7 @@ npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No Shopify account is required. Finnish is available at [http://localhost:3000/fi](http://localhost:3000/fi) (EN | FI in the header).
+Open [http://localhost:3000](http://localhost:3000) (redirects to `/fi`). English: [http://localhost:3000/en](http://localhost:3000/en). Swedish: [http://localhost:3000/sv](http://localhost:3000/sv). No Shopify account is required. FI | EN | SV in the header keeps the current product, collection, or query.
 
 ```bash
 npm run lint
@@ -134,9 +155,21 @@ The storefront emits a typed `EcommerceEvent` union (`page_view`, `view_item_lis
 
 Longer write-up: [docs/analytics.md](docs/analytics.md).
 
+## Localization
+
+UI strings live in `locales/fi.json`, `locales/en.json`, and `locales/sv.json`. There is **no paid translation API**. Finnish is the default market (`/` → `/fi`). English and Swedish use `/en` and `/sv`. Shopify product copy is whatever Storefront `@inContext` returns; this repo does not invent live-catalogue translations. See [docs/i18n.md](docs/i18n.md).
+
 ## Technical SEO and product discovery
 
 SSR metadata, canonicals, JSON-LD (no fake reviews), sitemap, and robots are documented in [docs/seo.md](docs/seo.md). `/api/feeds/google-shopping.xml` is a Merchant-shaped product feed generated from the live or demo catalogue. **The feed endpoint works without requiring a paid Google service or ad campaign.** It is not submitted to Merchant Center from this repository.
+
+## Wishlist, recently viewed, and related products
+
+These stay on the device or in the catalogue. There is no Customer Account API, recommendation service, or database.
+
+- **Wishlist** — `localStorage`, `/wishlist`, header count. Empty until the client hydrates.
+- **Recently viewed** — up to 8 handles, newest first, deduped, shown on product, cart, and wishlist pages.
+- **Related products** — `getRelatedProducts(current, catalogue)` ranks by species, category, tags, collection membership, and price. Different species are excluded.
 
 ## Delivery, restock alerts, and newsletter
 
@@ -146,12 +179,34 @@ SSR metadata, canonicals, JSON-LD (no fake reviews), sitemap, and robots are doc
 
 **Future adapters (not in this repo):** `PostiShippingProvider`, `MatkahuoltoShippingProvider`, and a real ESP. See [docs/future-architecture.md](docs/future-architecture.md).
 
+## Performance & Operations
+
+The storefront is meant to stay on **free** hosting and logging. There is no paid APM, RUM, or synthetic monitor in this repository.
+
+**Core Web Vitals.** Catalogue HTML comes from Server Components. LCP work is `next/image` (priority on the home hero and the first collection row, AVIF/WebP, reserved 4:5 frames). CLS risks are the consent banner (after hydrate) and font swap (`next/font` `display: swap`). INP risks are cart, filters, and GTM — GTM loads only after analytics consent. Production posts LCP, INP, CLS, FCP, and TTFB to `POST /api/vitals` (pathname only). **Do not treat those logs as a Lighthouse score.**
+
+**GraphQL.** Listing queries request card fields only (no description, gallery, options, or variants). Detail queries add those fields, including `quantityAvailable`. Queries cap at 50 products. Home uses one catalogue fetch. Product pages fetch the product and related ranking in parallel. Cart stays `no-store` and is not read in the root layout.
+
+**Caching.** Catalogue `revalidate: 60` (search `30`). Cart `no-store`. Do not cache shopper-specific bags.
+
+**Health.** `GET /api/health` returns `{ "status": "ok", "dependencies": { "shopify": "ok" | "error" | "not_configured" } }`. Demo is `not_configured` with HTTP 200. A configured shop is probed with a tiny `shop { id }` query and a 2.5s timeout; failures are HTTP 503. No secrets, env, tokens, or stack traces.
+
+**Failure handling.** Shopify down in live mode shows an error, not the demo catalogue. Expired carts are cleared. Logs are Vercel stdout: `[storefront]`, `[health]`, `[cwv]`. Tokens and PII are never logged.
+
+**Vercel.** Next.js preset, image optimisation on `cdn.shopify.com`, Hobby is enough. Optional later (not installed): Speed Insights, Sentry, a free uptime ping at `/api/health`.
+
+Longer write-up: [docs/performance.md](docs/performance.md).
+
 ## Further reading
 
 - [Case study](docs/case-study.md)
+- [Job requirement matrix](docs/job-requirement-matrix.md)
+- [Free-tier architecture](docs/free-tier-architecture.md)
 - [Architecture and caching](docs/architecture.md)
+- [Performance and operations](docs/performance.md)
 - [Analytics events](docs/analytics.md)
 - [Technical SEO and product discovery](docs/seo.md)
+- [Localization (FI / EN / SV)](docs/i18n.md)
 - [Security notes](docs/security.md)
 - [Interview answers](docs/interview-notes.md)
 - [Future: shipping adapters and AI search](docs/future-architecture.md)

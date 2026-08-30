@@ -6,6 +6,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchase } from "@/components/product/ProductPurchase";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
+import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -15,6 +16,7 @@ import { getSiteUrl } from "@/lib/env";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
+import { withLocale } from "@/lib/i18n/path";
 import type { HandlePageProps } from "@/lib/page-props";
 
 export async function generateStaticParams() {
@@ -24,25 +26,29 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: HandlePageProps) {
   const { handle } = await params;
+  const locale = await getLocale();
   const product = await getCatalogProvider().getProduct(handle);
   if (!product) {
-    return { title: getMessages(await getLocale()).productFallback };
+    return { title: getMessages(locale).productFallback };
   }
-  return productMetadata(product);
+  return productMetadata(product, locale);
 }
 
 export default async function ProductPage({ params }: HandlePageProps) {
   const { handle } = await params;
   const commerce = getCatalogProvider();
-  const product = await commerce.getProduct(handle);
+  const [product, recommended] = await Promise.all([
+    commerce.getProduct(handle),
+    commerce.getRecommendations(handle),
+  ]);
 
   if (!product) {
     notFound();
   }
 
   const t = getMessages(await getLocale());
-  const recommended = await commerce.getRecommendations(handle);
-  const url = `${getSiteUrl()}/products/${product.handle}`;
+  const locale = await getLocale();
+  const url = `${getSiteUrl()}${withLocale(`/products/${product.handle}`, locale)}`;
   const speciesHref = `/collections/${product.species === "dog" ? "dogs" : "cats"}`;
   const speciesLabel = product.species === "dog" ? t.dogs : t.cats;
 
@@ -51,8 +57,11 @@ export default async function ProductPage({ params }: HandlePageProps) {
       <JsonLd data={productJsonLd(product, url)} />
       <JsonLd
         data={breadcrumbJsonLd([
-          { name: t.home, url: getSiteUrl() },
-          { name: speciesLabel, url: `${getSiteUrl()}${speciesHref}` },
+          { name: t.home, url: `${getSiteUrl()}${withLocale("/", locale)}` },
+          {
+            name: speciesLabel,
+            url: `${getSiteUrl()}${withLocale(speciesHref, locale)}`,
+          },
           { name: product.title, url },
         ])}
       />
@@ -72,6 +81,9 @@ export default async function ProductPage({ params }: HandlePageProps) {
           <h1 className="font-display mt-2 text-[2.25rem] leading-[1.1] md:text-5xl">
             {product.title}
           </h1>
+          <div className="mt-4">
+            <WishlistButton product={product} />
+          </div>
           <div className="text-muted mt-6 max-w-lg space-y-3">
             {product.description.split(/\n\n+/).map((paragraph) => (
               <p key={paragraph.slice(0, 40)}>{paragraph}</p>

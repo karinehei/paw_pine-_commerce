@@ -26,7 +26,7 @@ export interface ShopifyProductNode {
   id: string;
   handle: string;
   title: string;
-  description: string;
+  description?: string;
   descriptionHtml?: string;
   vendor: string;
   productType: string;
@@ -43,8 +43,8 @@ export interface ShopifyProductNode {
     minVariantPrice: ShopifyMoney;
     maxVariantPrice: ShopifyMoney;
   };
-  options: Array<{ id: string; name: string; values: string[] }>;
-  variants: { nodes: ShopifyVariantNode[] };
+  options?: Array<{ id: string; name: string; values: string[] }>;
+  variants?: { nodes: ShopifyVariantNode[] };
 }
 
 export interface ShopifyCollectionNode {

@@ -1,5 +1,5 @@
 import { getMessages } from "@/lib/i18n/messages";
-import type { Locale } from "@/lib/i18n/config";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 
 export class CommerceError extends Error {
   readonly code:
@@ -20,7 +20,10 @@ export class CommerceError extends Error {
   }
 }
 
-export function toUserErrorMessage(error: unknown, locale: Locale = "en"): string {
+export function toUserErrorMessage(
+  error: unknown,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   const t = getMessages(locale);
   if (error instanceof CommerceError) {
     switch (error.code) {

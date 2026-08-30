@@ -7,20 +7,25 @@ import {
   rememberProduct,
   subscribeRecentlyViewed,
   getRecentlyViewedExcept,
+  getRecentlyViewedSnapshot,
   type RecentProduct,
 } from "@/lib/recently-viewed";
 
 const EMPTY: RecentProduct[] = [];
 
-export function RecentlyViewed({ current }: { current: RecentProduct }) {
+export function RecentlyViewed({ current }: { current?: RecentProduct }) {
   const t = useMessages();
   useEffect(() => {
+    if (!current) {
+      return;
+    }
     rememberProduct(current);
   }, [current]);
 
   const items = useSyncExternalStore(
     subscribeRecentlyViewed,
-    () => getRecentlyViewedExcept(current.handle),
+    () =>
+      current ? getRecentlyViewedExcept(current.handle) : getRecentlyViewedSnapshot(),
     () => EMPTY,
   );
 

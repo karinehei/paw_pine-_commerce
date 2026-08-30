@@ -30,6 +30,7 @@ describe("unavailable product back-in-stock", () => {
 
   it("validates email before a simulated subscription", async () => {
     expect(isEmail("")).toBe(false);
+    expect(isEmail("not-an-email")).toBe(false);
     expect(isEmail("wait@example.com")).toBe(true);
     const notifications: NotificationProvider = new MockNotificationProvider();
     const result = await notifications.subscribeBackInStock({

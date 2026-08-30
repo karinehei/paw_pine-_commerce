@@ -48,12 +48,14 @@ This storefront is a portfolio prototype. It is not a claim that the application
 
 ## Forms
 
-- Contact, newsletter, and back-in-stock validate email server-side. Finnish postcodes must match `^[0-9]{5}$`. Product handles for restock alerts must match the handle pattern.
+- Contact, newsletter, and back-in-stock validate email server-side and acknowledge only. No mailbox or ESP is called. Finnish postcodes must match `^[0-9]{5}$`. Product handles for restock alerts must match the handle pattern.
+- Wishlist and recently viewed store only catalogue handles and merchandising fields in `localStorage`. Handles are validated before write. There is no Customer Account API and no wishlist database.
 - These routes acknowledge receipt only; they do not persist PII and do not log email addresses. Add a provider and rate limits before production use.
 
 ## Logging
 
-- Storefront failures log `[storefront] operation code http_status` only. Tokens, headers, query documents, and GraphQL bodies are never logged.
+- Storefront failures log `[storefront] operation code http_status` plus a JSON object with `event`, `operation`, `code`, and `http_status` only. Tokens, headers, query documents, GraphQL bodies, cart ids, emails, and buyer IPs are never logged.
+- Health logs `[health] {"status","shopify"}`. Web vitals log `[cwv] {"name","value","rating","path"}`. Paths are pathnames only.
 - GraphQL error bodies and tokens are not returned to the client.
 - Shopper-facing copy is mapped from `CommerceError.code` in `toUserErrorMessage`.
 - The analytics debug adapter logs event names and typed payloads — not secrets.
@@ -71,5 +73,5 @@ A Content-Security-Policy is not set: GTM/GA4 would need a carefully maintained 
 
 - Storefront tokens are still powerful; leak of `.env.local` is a shop compromise.
 - Demo cart cookies are unsigned; they can only add known demo variants.
-- No rate limiting on `/api/contact` or `/api/newsletter`.
+- No rate limiting on `/api/contact`, `/api/newsletter`, `/api/notify-stock`, or `/api/shipping/rates`.
 - Dependency audit is not automated beyond `npm ci` of a short lockfile.

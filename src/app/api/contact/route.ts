@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { isEmail } from "@/lib/validation";
 
+/**
+ * Validates the message and acknowledges it. No mailbox, helpdesk, or
+ * email vendor is called. Production would swap this for a ContactProvider.
+ */
 export async function POST(request: Request) {
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { ok: false, message: "Please complete the form." },
-      { status: 400 },
-    );
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 
   const record =
@@ -25,14 +26,8 @@ export async function POST(request: Request) {
     message.length < 10 ||
     message.length > 4000
   ) {
-    return NextResponse.json(
-      {
-        ok: false,
-        message: "Please include your name, a valid email, and a short message.",
-      },
-      { status: 400 },
-    );
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, demo: true });
 }

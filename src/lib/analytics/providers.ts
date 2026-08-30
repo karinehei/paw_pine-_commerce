@@ -72,6 +72,14 @@ export function toDataLayerPayload(event: EcommerceEvent): Record<string, unknow
       };
     case "newsletter_signup":
       return { event: event.name };
+    case "wishlist_add":
+    case "wishlist_remove":
+      return {
+        event: event.name,
+        ecommerce: {
+          items: event.items.map(toGa4Item),
+        },
+      };
     default:
       return {
         event: event.name,

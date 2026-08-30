@@ -9,6 +9,7 @@ import {
 describe("sitemap exclusions", () => {
   it("excludes cart, demo analytics, and API routes", () => {
     expect(isExcludedFromSitemap("/cart")).toBe(true);
+    expect(isExcludedFromSitemap("/wishlist")).toBe(true);
     expect(isExcludedFromSitemap("/demo/analytics")).toBe(true);
     expect(isExcludedFromSitemap("/api/feeds/google-shopping.xml")).toBe(true);
     expect(isExcludedFromSitemap("/products/oakwood-chew-ring")).toBe(false);
@@ -24,12 +25,18 @@ describe("sitemap exclusions", () => {
       now: new Date("2026-08-30"),
     });
     const urls = entries.map((entry) => entry.url);
-    expect(urls).toContain("https://example.com/");
-    expect(urls).toContain("https://example.com/about");
-    expect(urls).toContain("https://example.com/collections/dogs");
-    expect(urls).toContain("https://example.com/products/oakwood-chew-ring");
+    expect(urls).toContain("https://example.com/fi");
+    expect(urls).toContain("https://example.com/en");
+    expect(urls).toContain("https://example.com/sv");
+    expect(urls).toContain("https://example.com/en/about");
+    expect(urls).toContain("https://example.com/en/cookies");
+    expect(urls).toContain("https://example.com/sv/collections/dogs");
+    expect(urls).toContain("https://example.com/fi/products/oakwood-chew-ring");
+    expect(urls).not.toContain("https://example.com/");
+    expect(urls).not.toContain("https://example.com/about");
     expect(urls.some((url) => url.includes("/demo"))).toBe(false);
     expect(urls.some((url) => url.includes("/cart"))).toBe(false);
+    expect(urls.some((url) => url.includes("/wishlist"))).toBe(false);
     expect(urls.some((url) => url.includes("/api/"))).toBe(false);
   });
 

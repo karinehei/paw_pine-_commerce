@@ -18,20 +18,21 @@ export interface ShippingRate {
   currency: "EUR";
   minDays?: number;
   maxDays?: number;
-  demo: true;
+  /** True on the mock adapter. A production carrier adapter sets this false. */
+  demo: boolean;
 }
 
 export interface Shipment {
   id: string;
   trackingCode?: string;
   labelUrl?: string;
-  demo: true;
+  demo: boolean;
 }
 
 export interface TrackingSnapshot {
   status: string;
   events: string[];
-  demo: true;
+  demo: boolean;
 }
 
 export interface ShippingProvider {

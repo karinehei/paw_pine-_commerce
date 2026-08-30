@@ -45,3 +45,24 @@ export function itemFromCartLine(line: CartLine): AnalyticsItem {
 export function itemsFromCart(cart: Cart): AnalyticsItem[] {
   return cart.lines.map(itemFromCartLine);
 }
+
+export function itemFromWishlist(item: {
+  handle: string;
+  title: string;
+  vendor: string;
+  category: string;
+  species: string;
+  price: { amount: string; currencyCode: string };
+}): AnalyticsItem {
+  return {
+    id: item.handle,
+    handle: item.handle,
+    name: item.title,
+    brand: item.vendor,
+    category: item.category,
+    species: item.species,
+    price: parseAmount(item.price),
+    currency: item.price.currencyCode,
+    quantity: 1,
+  };
+}

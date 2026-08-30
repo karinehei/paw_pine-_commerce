@@ -52,7 +52,7 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
       {hasFilters ? (
         <button
           type="button"
-          className="text-muted text-sm underline-offset-4 hover:underline"
+          className="text-muted min-h-11 text-sm underline-offset-4 hover:underline"
           onClick={() => push({ query: current.query })}
         >
           {t.clearFilters}
@@ -140,7 +140,7 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
               min={facets.priceMin}
               max={facets.priceMax}
               defaultValue={current.priceMin ?? ""}
-              className="border-border bg-paper text-ink mt-1 w-full border px-2 py-2 text-sm"
+              className="border-border bg-paper text-ink mt-1 min-h-11 w-full border px-2 py-2 text-sm"
               onBlur={(event) => {
                 const parsed = Number.parseFloat(event.target.value);
                 push({
@@ -157,7 +157,7 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
               min={facets.priceMin}
               max={facets.priceMax}
               defaultValue={current.priceMax ?? ""}
-              className="border-border bg-paper text-ink mt-1 w-full border px-2 py-2 text-sm"
+              className="border-border bg-paper text-ink mt-1 min-h-11 w-full border px-2 py-2 text-sm"
               onBlur={(event) => {
                 const parsed = Number.parseFloat(event.target.value);
                 push({

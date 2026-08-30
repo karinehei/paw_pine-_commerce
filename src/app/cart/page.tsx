@@ -1,6 +1,7 @@
 import { CartLineItem } from "@/components/cart/CartLineItem";
 import { CheckoutCta } from "@/components/cart/CheckoutCta";
 import { DeliveryEstimate } from "@/components/commerce/DeliveryEstimate";
+import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { getCart } from "@/lib/cart/actions";
@@ -12,16 +13,18 @@ import { itemsFromCart } from "@/lib/analytics/items";
 import { firstSearchParam, type QueryPageProps } from "@/lib/page-props";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
+import { localizedAlternates } from "@/lib/i18n/path";
 import { numberLocale } from "@/lib/i18n/config";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = getMessages(await getLocale());
+  const locale = await getLocale();
+  const t = getMessages(locale);
   return {
     title: t.bag,
     description: t.bagMeta,
     robots: { index: false, follow: false },
-    alternates: { canonical: "/cart" },
+    alternates: localizedAlternates("/cart", locale),
   };
 }
 
@@ -89,6 +92,7 @@ export default async function CartPage({ searchParams }: QueryPageProps) {
           />
         </div>
       )}
+      <RecentlyViewed />
     </div>
   );
 }

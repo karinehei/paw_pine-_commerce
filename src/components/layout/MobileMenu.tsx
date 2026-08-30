@@ -56,7 +56,7 @@ export function MobileMenu() {
         id="mobile-menu"
         onClose={close}
         aria-label={t.menu}
-        className="bg-paper text-ink backdrop:bg-ink/40 fixed inset-y-0 left-0 m-0 h-full max-h-none w-full max-w-sm border-0 p-0 shadow-2xl"
+        className="bg-paper text-ink border-border backdrop:bg-ink/40 fixed inset-y-0 left-0 m-0 h-full max-h-none w-full max-w-sm border-r p-0"
       >
         <div className="flex h-full flex-col px-6 py-5">
           <div className="flex items-center justify-between">
@@ -125,6 +125,15 @@ export function MobileMenu() {
                   </LocaleLink>
                 </li>
               ))}
+              <li>
+                <LocaleLink
+                  href="/wishlist"
+                  onClick={close}
+                  className="inline-flex min-h-11 items-center"
+                >
+                  {t.wishlist}
+                </LocaleLink>
+              </li>
               <li>
                 <LocaleLink
                   href="/about"

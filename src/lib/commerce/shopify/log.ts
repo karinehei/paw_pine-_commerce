@@ -1,6 +1,6 @@
 import { CommerceError } from "@/lib/commerce/errors";
 
-/** Server logs only. Never include tokens, headers, or GraphQL bodies. */
+/** Server logs only. Never include tokens, headers, GraphQL bodies, or PII. */
 export function logStorefrontFailure(event: {
   operation: string;
   code: string;
@@ -13,7 +13,20 @@ export function logStorefrontFailure(event: {
     event.code,
     event.status !== undefined ? `http_${event.status}` : "",
     event.detail ?? "",
+    JSON.stringify({
+      event: "storefront_error",
+      operation: event.operation,
+      code: event.code,
+      http_status: event.status ?? null,
+    }),
   );
+}
+
+export function logOpsEvent(
+  channel: "health" | "cwv",
+  payload: Record<string, string | number | boolean | null>,
+): void {
+  console.info(`[${channel}]`, JSON.stringify(payload));
 }
 
 export function toStorefrontError(

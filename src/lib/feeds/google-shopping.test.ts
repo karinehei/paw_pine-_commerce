@@ -38,7 +38,7 @@ describe("Google Shopping feed", () => {
     expect(item).toMatchObject({
       id: "oakwood-chew-ring",
       title: "Oakwood Chew Ring",
-      link: "https://example.com/products/oakwood-chew-ring",
+      link: "https://example.com/fi/products/oakwood-chew-ring",
       availability: "in_stock",
       price: "28.00 EUR",
       condition: "new",

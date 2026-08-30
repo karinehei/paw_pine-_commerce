@@ -52,13 +52,15 @@ If a collection handle such as `dogs` does not exist in the connected shop, the 
 Catalogue reads are cacheable. Cart state is not.
 
 - **Product, collection, and search GraphQL** use `fetch` with `revalidate: 60` (search `30`). Reviewers see a fresh-enough catalogue without hammering Shopify.
-- Listing queries request `PRODUCT_CARD_FIELDS` only: no `descriptionHtml`, gallery images, or variant images. Product detail adds those fields.
+- Listing queries request `PRODUCT_CARD_FIELDS` only: no description, `descriptionHtml`, gallery images, options, or variants. Product detail adds those fields, including `quantityAvailable` on variants.
+- Home uses a single `getProducts()` and filters merchandising collections in process. Product pages start `getProduct` and `getRecommendations` together (recommendations also parallelise detail + listing).
 - **Cart queries and mutations** use `cache: "no-store"`. Cart IDs live in an httpOnly cookie; the cookie is not read in the root layout, so product pages are not forced into dynamic rendering just because a bag exists.
 - **Demo cart** hydrates from that cookie on demand. It is never stored in the Next.js Data Cache.
-- **Search suggestions** (`/api/search/suggest`) are `private, max-age=30` — they may include query text and should not be shared at a CDN.
+- **Search suggestions** (`/api/search/suggest`) are `private, no-store`. Client sends `x-paw-pine-locale` because `/api` is outside the locale middleware. Caching a Finnish payload onto an English page would mix languages.
 - **Google Shopping feed** (`/api/feeds/google-shopping.xml`) uses `s-maxage=3600`. Catalogue GraphQL for the feed still uses the provider’s 60s revalidate. Failures return 503 with well-formed XML, `no-store`.
-- **`/cart` and `/demo/analytics`** are `noindex`. Analytics session events live in `sessionStorage` on the device, not on the server.
+- `/cart` and `/wishlist` and `/demo/analytics` are `noindex`. Wishlist and recently viewed live in `localStorage` on the device, not on the server.
 - Root layout still reads commerce **mode** (credentials present or not). That is a deploy-time switch, not shopper-specific cart data.
+- **Health** (`/api/health`) and **web vitals** (`/api/vitals`) are `no-store`. See [performance.md](./performance.md).
 
 Do not add `cookies()` to catalogue pages. Do not cache Shopify cart payloads.
 
@@ -69,6 +71,10 @@ Do not add `cookies()` to catalogue pages. Do not cache Shopify cart payloads.
 ## Analytics
 
 `track()` is a single function gated on analytics consent. Pages and buttons emit a typed ecommerce event union. Providers can target GTM (`dataLayer`), a console debugger, or sessionStorage. GTM is not loaded before consent. See [analytics.md](./analytics.md).
+
+## Local merchandising (no account, no database)
+
+Wishlist and recently viewed live in `localStorage` on the device (`paw_pine_wishlist`, `paw_pine_recently_viewed`). The server never reads them. Related products are ranked in `getRelatedProducts(current, catalogue)` from species, category, tags, collection membership, and price proximity — not an API or model.
 
 ## Shipping and messaging adapters
 

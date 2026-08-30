@@ -74,6 +74,14 @@ export type EcommerceEvent =
     }
   | {
       name: "newsletter_signup";
+    }
+  | {
+      name: "wishlist_add";
+      items: AnalyticsItem[];
+    }
+  | {
+      name: "wishlist_remove";
+      items: AnalyticsItem[];
     };
 
 /** @deprecated Use EcommerceEvent. Kept so existing imports keep compiling. */

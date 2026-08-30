@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("cookie banner can accept analytics and persists", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/en");
   const banner = page.getByRole("region", { name: "Cookies" });
   await expect(banner).toBeVisible();
   await banner.getByRole("button", { name: "Accept analytics" }).click();
@@ -21,7 +21,7 @@ test("cookie banner can accept analytics and persists", async ({ page }) => {
 test("analytics events stay off until consent, then add_to_cart and begin_checkout fire once", async ({
   page,
 }) => {
-  await page.goto("/products/oakwood-chew-ring");
+  await page.goto("/en/products/oakwood-chew-ring");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
 
   const addToBag = page.getByRole("button", { name: /add to bag/i });
@@ -67,7 +67,7 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
 });
 
 test("cookie preferences remain available from the footer", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/en");
   await page
     .getByRole("region", { name: "Cookies" })
     .getByRole("button", { name: "Necessary only" })

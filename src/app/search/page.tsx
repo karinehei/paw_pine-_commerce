@@ -14,7 +14,7 @@ import type { QueryPageProps } from "@/lib/page-props";
 
 export async function generateMetadata({ searchParams }: QueryPageProps) {
   const query = parseProductQuery(await searchParams);
-  return searchMetadata(query.query);
+  return searchMetadata(query.query, await getLocale());
 }
 
 export default async function SearchPage({ searchParams }: QueryPageProps) {

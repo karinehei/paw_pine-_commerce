@@ -70,14 +70,14 @@ export function DeliveryEstimate() {
         {t.deliveryEstimate}
       </h2>
       <p className="text-muted text-xs">{t.deliveryDemoDisclaimer}</p>
-      <form onSubmit={onSubmit} className="space-y-2">
+      <form noValidate onSubmit={onSubmit} className="space-y-2">
         <label
           htmlFor="postal-code"
           className="text-muted text-xs tracking-[0.16em] uppercase"
         >
           {t.deliveryPostcode}
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             id="postal-code"
             name="postalCode"

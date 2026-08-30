@@ -4,6 +4,7 @@ import { LocaleLink } from "@/components/i18n/LocaleLink";
 import { useMessages } from "@/components/i18n/LocaleProvider";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProductPrice } from "@/components/product/ProductPrice";
+import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { track } from "@/lib/analytics/events";
 import { itemFromProduct } from "@/lib/analytics/items";
 import type { Product } from "@/lib/commerce/types";
@@ -12,12 +13,21 @@ interface ProductCardProps {
   product: Product;
   listId?: string;
   listName?: string;
+  priority?: boolean;
 }
 
-export function ProductCard({ product, listId, listName }: ProductCardProps) {
+export function ProductCard({
+  product,
+  listId,
+  listName,
+  priority = false,
+}: ProductCardProps) {
   const t = useMessages();
   return (
-    <article>
+    <article className="relative">
+      <div className="absolute top-3 right-3 z-10">
+        <WishlistButton product={product} compact />
+      </div>
       <LocaleLink
         href={`/products/${product.handle}`}
         className="group block min-h-11 focus-visible:outline-none"
@@ -31,7 +41,11 @@ export function ProductCard({ product, listId, listName }: ProductCardProps) {
         }
       >
         <div className="bg-stone relative aspect-[4/5] overflow-hidden">
-          <ProductMedia product={product} image={product.featuredImage} />
+          <ProductMedia
+            product={product}
+            image={product.featuredImage}
+            priority={priority}
+          />
           {!product.availableForSale ? (
             <span className="bg-paper text-muted absolute top-3 left-3 px-2 py-1 text-xs tracking-wide uppercase">
               {t.soldOut}

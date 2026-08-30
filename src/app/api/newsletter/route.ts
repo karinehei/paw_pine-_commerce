@@ -7,10 +7,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { ok: false, message: "Please enter a valid email." },
-      { status: 400 },
-    );
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 
   const email =
@@ -19,10 +16,7 @@ export async function POST(request: Request) {
       : "";
 
   if (!isEmail(email)) {
-    return NextResponse.json(
-      { ok: false, message: "Please enter a valid email." },
-      { status: 400 },
-    );
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 
   const result = await getNewsletterProvider().subscribe({ email });

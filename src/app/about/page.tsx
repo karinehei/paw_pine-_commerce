@@ -4,11 +4,13 @@ import { getMessages } from "@/lib/i18n/messages";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = getMessages(await getLocale());
+  const locale = await getLocale();
+  const t = getMessages(locale);
   return contentMetadata({
     title: t.about,
     description: t.aboutMeta,
     path: "/about",
+    locale,
   });
 }
 

@@ -17,6 +17,6 @@ export async function GET(request: Request) {
   ]);
 
   return NextResponse.json(buildSuggestions(query, products, collections), {
-    headers: { "Cache-Control": "private, max-age=30" },
+    headers: { "Cache-Control": "private, no-store" },
   });
 }

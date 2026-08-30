@@ -77,7 +77,7 @@ export function CartDrawer() {
       ref={dialogRef}
       onClose={closeCart}
       aria-labelledby="cart-drawer-title"
-      className="bg-paper text-ink backdrop:bg-ink/40 fixed inset-y-0 right-0 m-0 ml-auto h-full max-h-none w-full max-w-md border-0 p-0 shadow-2xl"
+      className="bg-paper text-ink border-border backdrop:bg-ink/40 fixed inset-y-0 right-0 m-0 ml-auto h-full max-h-none w-full max-w-md border-l p-0"
     >
       <div className="flex h-full flex-col">
         <div className="border-border flex items-center justify-between border-b px-5 py-4">

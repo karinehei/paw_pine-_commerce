@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
-import { LOCALES, type Locale } from "@/lib/i18n/config";
+import { htmlLang, LOCALES, LOCALE_SHORT_LABEL, type Locale } from "@/lib/i18n/config";
 import { switchLocaleHref } from "@/lib/i18n/path";
 
 export function LanguageSwitcher() {
@@ -27,10 +27,11 @@ export function LanguageSwitcher() {
             key={code}
             href={href}
             hrefLang={code}
+            lang={htmlLang(code)}
             aria-current={current ? "true" : undefined}
             className={`min-h-11 px-1.5 ${current ? "text-ink" : "text-muted hover:text-ink"}`}
           >
-            {code === "fi" ? t.languageFi : t.languageEn}
+            {LOCALE_SHORT_LABEL[code]}
           </Link>
         );
       })}

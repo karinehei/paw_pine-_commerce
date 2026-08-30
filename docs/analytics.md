@@ -32,6 +32,8 @@ The banner offers **Accept analytics**, **Necessary only**, and **Manage prefere
 | `begin_checkout`    | Checkout CTA                                     | `currency`, `value`, `items[]`                                          |
 | `purchase`          | Order confirmation only — not implemented here   | `transaction_id`, `currency`, `value`, `items[]`, optional `demo: true` |
 | `newsletter_signup` | Newsletter form success                          | none                                                                    |
+| `wishlist_add`      | Saved to the on-device wishlist                  | `items[]`                                                               |
+| `wishlist_remove`   | Removed from the on-device wishlist              | `items[]`                                                               |
 
 Item payloads use product handle as `id` / `handle` (stable across demo and Shopify GIDs), plus name, brand, category, species, variant, price, quantity, and currency when they exist. The dataLayer adapter maps those fields to GA4 `item_*` names.
 

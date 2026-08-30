@@ -20,7 +20,7 @@ export function Navigation() {
   };
 
   return (
-    <nav aria-label="Primary" className="hidden md:block">
+    <nav aria-label={t.primaryNav} className="hidden md:block">
       <ul className="flex items-center gap-4 text-sm tracking-[0.08em] uppercase lg:gap-8 lg:tracking-[0.12em]">
         <li className="group relative">
           <LocaleLink
@@ -29,7 +29,7 @@ export function Navigation() {
           >
             {t.dogs}
           </LocaleLink>
-          <div className="bg-paper invisible absolute top-full left-0 z-20 min-w-40 pt-3 opacity-0 shadow-sm group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+          <div className="bg-paper invisible absolute top-full left-0 z-20 min-w-40 pt-3 opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
             <ul className="border-border border p-3">
               {DOG_NAV.map((item) => (
                 <li key={item.href}>
@@ -51,7 +51,7 @@ export function Navigation() {
           >
             {t.cats}
           </LocaleLink>
-          <div className="bg-paper invisible absolute top-full left-0 z-20 min-w-40 pt-3 opacity-0 shadow-sm group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+          <div className="bg-paper invisible absolute top-full left-0 z-20 min-w-40 pt-3 opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
             <ul className="border-border border p-3">
               {CAT_NAV.map((item) => (
                 <li key={item.href}>

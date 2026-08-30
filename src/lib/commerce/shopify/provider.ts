@@ -4,6 +4,7 @@ import {
   buildFacets,
   filterByCollection,
 } from "@/lib/commerce/filters";
+import { getRelatedProducts } from "@/lib/commerce/related";
 import { shopifyFetch } from "@/lib/commerce/shopify/client";
 import { collectionOverlayFromHandle } from "@/lib/commerce/shopify/collection-overlay";
 import {
@@ -225,10 +226,13 @@ export const shopifyProvider: CommerceProvider = {
   },
 
   async getRecommendations(handle: string) {
-    const product = await this.getProduct(handle);
-    const { products } = await this.getProducts({
-      species: product ? [product.species] : undefined,
-    });
-    return products.filter((item) => item.handle !== handle).slice(0, 4);
+    const [product, listing] = await Promise.all([
+      this.getProduct(handle),
+      this.getProducts(),
+    ]);
+    if (!product) {
+      return [];
+    }
+    return getRelatedProducts(product, listing.products, 4);
   },
 };

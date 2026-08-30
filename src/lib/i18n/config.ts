@@ -1,26 +1,58 @@
-export const LOCALES = ["en", "fi"] as const;
+export const LOCALES = ["fi", "en", "sv"] as const;
 export type Locale = (typeof LOCALES)[number];
 
-export const DEFAULT_LOCALE: Locale = "en";
+/** Default market language. Every public URL is prefixed (`/fi`, `/en`, `/sv`). */
+export const DEFAULT_LOCALE: Locale = "fi";
+
 export const LOCALE_HEADER = "x-paw-pine-locale";
 export const LOCALE_COOKIE = "paw_pine_locale";
 
+export const NUMBER_LOCALES: Record<Locale, string> = {
+  fi: "fi-FI",
+  en: "en-GB",
+  sv: "sv-SE",
+};
+
+export const HTML_LANG: Record<Locale, string> = {
+  fi: "fi",
+  en: "en",
+  sv: "sv",
+};
+
+export const OPEN_GRAPH_LOCALE: Record<Locale, string> = {
+  fi: "fi_FI",
+  en: "en_GB",
+  sv: "sv_SE",
+};
+
+export const SHOPIFY_LANGUAGE: Record<Locale, "FI" | "EN" | "SV"> = {
+  fi: "FI",
+  en: "EN",
+  sv: "SV",
+};
+
+export const LOCALE_SHORT_LABEL: Record<Locale, string> = {
+  fi: "FI",
+  en: "EN",
+  sv: "SV",
+};
+
 export function isLocale(value: string | null | undefined): value is Locale {
-  return value === "en" || value === "fi";
+  return Boolean(value && (LOCALES as readonly string[]).includes(value));
 }
 
 export function numberLocale(locale: Locale): string {
-  return locale === "fi" ? "fi-FI" : "en-GB";
+  return NUMBER_LOCALES[locale];
 }
 
 export function htmlLang(locale: Locale): string {
-  return locale === "fi" ? "fi" : "en";
+  return HTML_LANG[locale];
 }
 
 export function openGraphLocale(locale: Locale): string {
-  return locale === "fi" ? "fi_FI" : "en_GB";
+  return OPEN_GRAPH_LOCALE[locale];
 }
 
-export function shopifyLanguage(locale: Locale): "EN" | "FI" {
-  return locale === "fi" ? "FI" : "EN";
+export function shopifyLanguage(locale: Locale): "EN" | "FI" | "SV" {
+  return SHOPIFY_LANGUAGE[locale];
 }

@@ -1,39 +1,53 @@
 import { NextResponse, type NextRequest } from "next/server";
-import {
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE,
-  LOCALE_HEADER,
-  type Locale,
-} from "@/lib/i18n/config";
+import { LOCALE_COOKIE, LOCALE_HEADER } from "@/lib/i18n/config";
+import { resolveLocaleRouting } from "@/lib/i18n/path";
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const locale: Locale =
-    pathname === "/fi" || pathname.startsWith("/fi/") ? "fi" : DEFAULT_LOCALE;
+  const { pathname, search } = request.nextUrl;
+  const routing = resolveLocaleRouting(
+    pathname,
+    request.cookies.get(LOCALE_COOKIE)?.value,
+  );
+
+  if (routing.kind === "not_found") {
+    return NextResponse.rewrite(new URL("/invalid-locale", request.url), {
+      status: 404,
+    });
+  }
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set(LOCALE_HEADER, locale);
 
-  const rewritePath = locale === "fi" ? pathname.slice(3) || "/" : null;
+  if (routing.kind === "redirect") {
+    const response = NextResponse.redirect(
+      new URL(`${routing.location}${search}`, request.url),
+      308,
+    );
+    const redirected = resolveLocaleRouting(routing.location);
+    if (redirected.kind === "rewrite") {
+      response.cookies.set(LOCALE_COOKIE, redirected.locale, {
+        path: "/",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+    return response;
+  }
 
-  const response = rewritePath
-    ? NextResponse.rewrite(
-        new URL(`${rewritePath}${request.nextUrl.search}`, request.url),
-        {
-          request: { headers: requestHeaders },
-        },
-      )
-    : NextResponse.next({ request: { headers: requestHeaders } });
-
-  response.cookies.set(LOCALE_COOKIE, locale, {
+  requestHeaders.set(LOCALE_HEADER, routing.locale);
+  const response = NextResponse.rewrite(
+    new URL(`${routing.rewritePath}${search}`, request.url),
+    { request: { headers: requestHeaders } },
+  );
+  response.cookies.set(LOCALE_COOKIE, routing.locale, {
     path: "/",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 365,
   });
-
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next|icon|opengraph-image|apple-icon|twitter-image|invalid-locale|.*\\..*).*)",
+  ],
 };

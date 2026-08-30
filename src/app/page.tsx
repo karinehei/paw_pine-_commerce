@@ -4,18 +4,16 @@ import { NewsletterForm } from "@/components/commerce/NewsletterForm";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { LocaleLink } from "@/components/i18n/LocaleLink";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
+import { filterByCollection } from "@/lib/commerce/filters";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
 
 export default async function HomePage() {
   const t = getMessages(await getLocale());
-  const commerce = getCatalogProvider();
-  const [all, bestsellers, newest] = await Promise.all([
-    commerce.getProducts(),
-    commerce.getCollection("best-sellers"),
-    commerce.getCollection("new-arrivals"),
-  ]);
+  const all = await getCatalogProvider().getProducts();
+  const bestsellers = filterByCollection(all.products, "best-sellers") ?? [];
+  const newest = filterByCollection(all.products, "new-arrivals") ?? [];
 
   const featured = all.products.slice(0, 4);
   const categories = [
@@ -84,7 +82,7 @@ export default async function HomePage() {
           viewAll={t.viewAll}
         />
         <ProductGrid
-          products={(bestsellers?.products ?? featured).slice(0, 4)}
+          products={(bestsellers.length > 0 ? bestsellers : featured).slice(0, 4)}
           listId="home-best-sellers"
           listName={t.bestSellers}
         />
@@ -97,7 +95,7 @@ export default async function HomePage() {
           viewAll={t.viewAll}
         />
         <ProductGrid
-          products={(newest?.products ?? all.products).slice(0, 4)}
+          products={(newest.length > 0 ? newest : all.products).slice(0, 4)}
           listId="home-new"
           listName={t.newArrivals}
         />
@@ -131,7 +129,7 @@ export default async function HomePage() {
           <h2 className="font-display text-3xl">{t.joinTheList}</h2>
           <p className="text-muted mt-3 text-sm">{t.newsletterBlurb}</p>
           <div className="mt-6">
-            <NewsletterForm />
+            <NewsletterForm id="home-newsletter-email" />
           </div>
         </div>
       </section>
@@ -140,7 +138,7 @@ export default async function HomePage() {
           name: "view_item_list",
           item_list_id: "home-best-sellers",
           item_list_name: t.bestSellers,
-          items: (bestsellers?.products ?? featured)
+          items: (bestsellers.length > 0 ? bestsellers : featured)
             .slice(0, 4)
             .map((product) => itemFromProduct(product)),
         }}

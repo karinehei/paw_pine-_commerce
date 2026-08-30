@@ -52,13 +52,17 @@ export function BackInStockForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="border-border space-y-3 border-t pt-4">
+    <form
+      noValidate
+      onSubmit={onSubmit}
+      className="border-border space-y-3 border-t pt-4"
+    >
       <p className="text-sm font-medium">{t.backInStockTitle}</p>
       <p className="text-muted text-xs">{t.backInStockDemo}</p>
       <label htmlFor="back-in-stock-email" className="sr-only">
         {t.emailAddress}
       </label>
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           id="back-in-stock-email"
           name="email"
@@ -66,6 +70,8 @@ export function BackInStockForm({
           required
           autoComplete="email"
           disabled={status === "loading" || status === "success"}
+          aria-invalid={status === "error"}
+          aria-describedby={message ? "back-in-stock-status" : undefined}
           placeholder={t.emailAddress}
           className="border-border bg-linen min-h-11 flex-1 border px-3 py-2 text-sm"
         />
@@ -79,6 +85,7 @@ export function BackInStockForm({
       </div>
       {message ? (
         <p
+          id="back-in-stock-status"
           className={`text-sm ${status === "error" ? "text-sale" : "text-muted"}`}
           role="status"
         >

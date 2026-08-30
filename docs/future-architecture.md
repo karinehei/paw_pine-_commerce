@@ -1,14 +1,21 @@
 # Future architecture
 
-Documented adapters that are **not live**. Paw & Pine does not call Posti, Matkahuolto, or an email vendor.
+Paw & Pine does not call Posti, Matkahuolto, or an email vendor. Adapters below that are not `Mock*` are **not live**.
 
-## What is real today
+## Real
 
-Shopify owns catalogue, cart, and hosted checkout when credentials are present. Demo mode uses the local catalogue and a cookie cart. Payment is never taken in this repository.
+- Shopify catalogue (when Storefront credentials are present)
+- Shopify cart
+- Shopify-hosted checkout and payment
 
-## Shipping
+Demo mode substitutes a local catalogue and a cookie cart so the repo is reviewable without a shop. Payment is never taken in this repository.
 
-Checkout and payment stay on Shopify. The cart **Delivery estimate** is a UX sketch: it asks for a Finnish postal code (`^[0-9]{5}$`) and shows **demo** rates from `MockShippingProvider`. It does not change Shopify shipping, create labels, or contact a carrier.
+## Simulated
+
+- **Delivery rates** — `MockShippingProvider`. Cart **Delivery estimate** asks for a Finnish postal code (`^[0-9]{5}$`) and shows demo methods: parcel locker €5.90, service point €6.50, home delivery €12.90. Copy: _Demo delivery rates. Final delivery options are confirmed during Shopify Checkout._ The estimator does not change Shopify shipping, create labels, or contact a carrier.
+- **Back-in-stock delivery** — `MockNotificationProvider`. “Notify me when available” validates email and product, then acknowledges. No email is sent.
+- **Newsletter delivery** — `MockNewsletterProvider`. Footer signup validates email. No Mailchimp, Klaviyo, Brevo, or Resend dependency.
+- **Contact form** — `/api/contact` validates name, email, and message, then returns `{ ok: true, demo: true }`. No mailbox or helpdesk is called.
 
 ```ts
 interface ShippingProvider {
@@ -18,22 +25,15 @@ interface ShippingProvider {
 }
 ```
 
-| Adapter                       | Status                                                                              |
-| ----------------------------- | ----------------------------------------------------------------------------------- |
-| `MockShippingProvider`        | Implemented. Parcel locker €5.90, service point €6.50, home €12.90. Marked demo.    |
-| `PostiShippingProvider`       | Not implemented. Would use server-only `POSTI_*` credentials, never in the browser. |
-| `MatkahuoltoShippingProvider` | Not implemented. Same pattern with `MATKAHUOLTO_*`.                                 |
+## Future production adapters
 
-**Where a live adapter would sit:** Shopify carrier service or checkout UI extension for `getRates`; a fulfilment webhook for `createShipment`. Final rates remain Shopify’s responsibility.
+| Adapter                       | Role                                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| `PostiShippingProvider`       | Not implemented. Server-only `POSTI_*` credentials. Never in the browser.                      |
+| `MatkahuoltoShippingProvider` | Not implemented. Same pattern with `MATKAHUOLTO_*`.                                            |
+| Email marketing provider      | Swap `MockNewsletterProvider` / `MockNotificationProvider` for Shopify Customer API or an ESP. |
 
-## Notifications and newsletter
-
-| Adapter                    | Status                                                                                                    |
-| -------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `MockNotificationProvider` | Implemented. “Notify me when available” validates email and product, then acknowledges. No email is sent. |
-| `MockNewsletterProvider`   | Implemented. Footer signup validates email. No Mailchimp, Klaviyo, Brevo, or Resend dependency.           |
-
-A production shop would swap the mock for a provider that talks to Shopify Customer API or an ESP, using server env vars only.
+A live shipping adapter would sit on a Shopify carrier service or checkout UI extension for `getRates`, and a fulfilment webhook for `createShipment`. Final rates remain Shopify’s responsibility.
 
 ## AI-assisted product discovery
 
