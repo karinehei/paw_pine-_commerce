@@ -69,3 +69,7 @@ Do not add `cookies()` to catalogue pages. Do not cache Shopify cart payloads.
 ## Analytics
 
 `track()` is a single function gated on analytics consent. Pages and buttons emit a typed ecommerce event union. Providers can target GTM (`dataLayer`), a console debugger, or sessionStorage. GTM is not loaded before consent. See [analytics.md](./analytics.md).
+
+## Shipping and messaging adapters
+
+`ShippingProvider`, `NotificationProvider`, and `NewsletterProvider` are server-side ports. This repo implements mocks only. Shopify checkout still owns real shipping. See [future-architecture.md](./future-architecture.md).

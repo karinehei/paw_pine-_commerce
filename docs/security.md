@@ -48,8 +48,8 @@ This storefront is a portfolio prototype. It is not a claim that the application
 
 ## Forms
 
-- Contact and newsletter validate email server-side. Contact messages are length-capped.
-- These routes acknowledge receipt only; they do not persist PII. Add a provider and rate limits before production use.
+- Contact, newsletter, and back-in-stock validate email server-side. Finnish postcodes must match `^[0-9]{5}$`. Product handles for restock alerts must match the handle pattern.
+- These routes acknowledge receipt only; they do not persist PII and do not log email addresses. Add a provider and rate limits before production use.
 
 ## Logging
 

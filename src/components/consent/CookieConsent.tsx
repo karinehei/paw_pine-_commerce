@@ -84,63 +84,63 @@ export function CookieConsent() {
           onClose={() => setPreferencesOpen(false)}
           className="bg-paper text-ink border-border w-full max-w-lg border p-0 shadow-2xl"
         >
-        <form
-          className="space-y-6 p-6"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setChoice(analyticsDraft ? "analytics" : "necessary");
-            setPreferencesOpen(false);
-          }}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <h2 id={titleId} className="font-display text-2xl">
-              {t.cookiePreferences}
-            </h2>
-            <button
-              ref={closeRef}
-              type="button"
-              className="text-muted min-h-11 text-sm"
-              onClick={() => setPreferencesOpen(false)}
-            >
-              {t.close}
-            </button>
-          </div>
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">{t.cookieNecessary}</legend>
-            <label className="text-muted flex items-start gap-3 text-sm">
-              <input type="checkbox" checked disabled className="mt-1" />
-              <span>{t.cookieNecessaryHelp}</span>
-            </label>
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">{t.cookieAnalytics}</legend>
-            <label className="flex items-start gap-3 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={analyticsDraft}
-                onChange={(event) => setAnalyticsDraft(event.target.checked)}
-              />
-              <span>{t.cookieAnalyticsHelp}</span>
-            </label>
-          </fieldset>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <button type="submit" className="btn-primary">
-              {t.cookieSavePreferences}
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => {
-                acceptAnalytics();
-                setPreferencesOpen(false);
-              }}
-            >
-              {t.cookieAcceptAnalytics}
-            </button>
-          </div>
-        </form>
-      </dialog>
+          <form
+            className="space-y-6 p-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setChoice(analyticsDraft ? "analytics" : "necessary");
+              setPreferencesOpen(false);
+            }}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <h2 id={titleId} className="font-display text-2xl">
+                {t.cookiePreferences}
+              </h2>
+              <button
+                ref={closeRef}
+                type="button"
+                className="text-muted min-h-11 text-sm"
+                onClick={() => setPreferencesOpen(false)}
+              >
+                {t.close}
+              </button>
+            </div>
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">{t.cookieNecessary}</legend>
+              <label className="text-muted flex items-start gap-3 text-sm">
+                <input type="checkbox" checked disabled className="mt-1" />
+                <span>{t.cookieNecessaryHelp}</span>
+              </label>
+            </fieldset>
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">{t.cookieAnalytics}</legend>
+              <label className="flex items-start gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={analyticsDraft}
+                  onChange={(event) => setAnalyticsDraft(event.target.checked)}
+                />
+                <span>{t.cookieAnalyticsHelp}</span>
+              </label>
+            </fieldset>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button type="submit" className="btn-primary">
+                {t.cookieSavePreferences}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  acceptAnalytics();
+                  setPreferencesOpen(false);
+                }}
+              >
+                {t.cookieAcceptAnalytics}
+              </button>
+            </div>
+          </form>
+        </dialog>
       ) : null}
     </>
   );

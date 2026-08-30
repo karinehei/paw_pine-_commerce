@@ -22,17 +22,23 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
   page,
 }) => {
   await page.goto("/products/oakwood-chew-ring");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
+
+  const addToBag = page.getByRole("button", { name: /add to bag/i });
+  await expect(addToBag).toBeVisible();
 
   const before = await page.evaluate(() => window.dataLayer ?? []);
   expect(before.some((entry) => entry.event === "add_to_cart")).toBe(false);
   expect(before.some((entry) => entry.event === "begin_checkout")).toBe(false);
   expect(before.some((entry) => entry.event === "page_view")).toBe(false);
 
-  const banner = page.getByRole("region", { name: "Cookies" });
-  await banner.getByRole("button", { name: "Accept analytics" }).click();
-  await expect(banner).toBeHidden();
+  await page
+    .getByRole("region", { name: "Cookies" })
+    .getByRole("button", { name: "Accept analytics" })
+    .click();
+  await expect(page.getByRole("region", { name: "Cookies" })).toHaveCount(0);
 
-  await page.getByRole("main").getByRole("button", { name: /add to bag/i }).click();
+  await addToBag.click();
 
   await expect
     .poll(async () =>
@@ -62,8 +68,11 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
 
 test("cookie preferences remain available from the footer", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("region", { name: "Cookies" }).getByRole("button", { name: "Necessary only" }).click();
-  await expect(page.getByRole("region", { name: "Cookies" })).toBeHidden();
+  await page
+    .getByRole("region", { name: "Cookies" })
+    .getByRole("button", { name: "Necessary only" })
+    .click();
+  await expect(page.getByRole("region", { name: "Cookies" })).toHaveCount(0);
   await page.getByRole("button", { name: "Cookie preferences" }).click();
   const dialog = page.getByRole("dialog", { name: "Cookie preferences" });
   await expect(dialog).toBeVisible();

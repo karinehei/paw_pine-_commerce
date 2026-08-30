@@ -40,7 +40,7 @@ Shopify remains the system of record. Next.js owns merchandising, URLs, SEO, ana
 
 **Accessibility is part of the purchase path.** Native dialogs, 44px targets, variant radiogroups, cart announcements, and reduced-motion support.
 
-**Tests cover the path a shopper takes.** Vitest for money, variants, filters, structured data, and security helpers. Playwright for home → collection → product → cart → checkout boundary, including search, mobile nav, and out-of-stock behaviour. CI runs in demo mode and does not need Shopify secrets.
+**Tests cover the path a shopper takes.** Vitest for money, variants, filters, structured data, security helpers, demo shipping rates, and restock eligibility. Playwright for home → collection → product → cart → checkout boundary, including search, mobile nav, and out-of-stock behaviour. CI runs in demo mode and does not need Shopify secrets.
 
 ## Tradeoffs
 

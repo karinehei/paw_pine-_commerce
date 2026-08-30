@@ -138,6 +138,14 @@ Longer write-up: [docs/analytics.md](docs/analytics.md).
 
 SSR metadata, canonicals, JSON-LD (no fake reviews), sitemap, and robots are documented in [docs/seo.md](docs/seo.md). `/api/feeds/google-shopping.xml` is a Merchant-shaped product feed generated from the live or demo catalogue. **The feed endpoint works without requiring a paid Google service or ad campaign.** It is not submitted to Merchant Center from this repository.
 
+## Delivery, restock alerts, and newsletter
+
+**Real:** Shopify catalogue, cart, and hosted checkout (when the shop is connected).
+
+**Simulated:** cart delivery estimate (`MockShippingProvider`, Finnish postcode `^[0-9]{5}$`), back-in-stock form (`MockNotificationProvider`), footer newsletter (`MockNewsletterProvider`). No Posti, Matkahuolto, or email API is called. Rates are labelled demo; checkout still confirms shipping on Shopify.
+
+**Future adapters (not in this repo):** `PostiShippingProvider`, `MatkahuoltoShippingProvider`, and a real ESP. See [docs/future-architecture.md](docs/future-architecture.md).
+
 ## Further reading
 
 - [Case study](docs/case-study.md)

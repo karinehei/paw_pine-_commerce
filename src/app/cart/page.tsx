@@ -1,5 +1,6 @@
 import { CartLineItem } from "@/components/cart/CartLineItem";
 import { CheckoutCta } from "@/components/cart/CheckoutCta";
+import { DeliveryEstimate } from "@/components/commerce/DeliveryEstimate";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { getCart } from "@/lib/cart/actions";
@@ -75,6 +76,7 @@ export default async function CartPage({ searchParams }: QueryPageProps) {
                 ),
               )}
             </p>
+            <DeliveryEstimate />
             <CheckoutCta cart={cart} href={checkout.href} external={checkout.external} />
           </aside>
           <AnalyticsListener

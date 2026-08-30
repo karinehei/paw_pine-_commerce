@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AddToCartButton } from "@/components/product/AddToCartButton";
+import { BackInStockForm } from "@/components/commerce/BackInStockForm";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { formatDispatchWindow } from "@/lib/commerce/delivery";
@@ -105,6 +106,13 @@ export function ProductPurchase({ product }: { product: Product }) {
           : t.emailWhenBack}
       </p>
       <AddToCartButton product={product} variant={variant} quantity={quantityForCart} />
+      {variant && !variant.availableForSale ? (
+        <BackInStockForm
+          key={variant.id}
+          handle={product.handle}
+          variantId={variant.id}
+        />
+      ) : null}
     </div>
   );
 }

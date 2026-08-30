@@ -68,7 +68,11 @@ export function track(event: EcommerceEvent): void {
   if (typeof window === "undefined") {
     return;
   }
-  getRuntime().track(event);
+  try {
+    getRuntime().track(event);
+  } catch {
+    // Measurement must not break adding to the bag.
+  }
 }
 
 export type {

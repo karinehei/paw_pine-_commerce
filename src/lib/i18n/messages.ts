@@ -204,6 +204,24 @@ const en = {
   cookieAnalytics: "Analytics cookies",
   cookieAnalyticsHelp: "Optional measurement of the shop. Never required to buy.",
   demoData: "DEMO DATA",
+  deliveryEstimate: "Delivery estimate",
+  deliveryPostcode: "Finnish postal code",
+  deliveryShowRates: "Show rates",
+  deliveryInvalidPostcode: "Enter a 5-digit Finnish postal code.",
+  deliveryDemoDisclaimer:
+    "Demo delivery rates. Final delivery options are confirmed during Shopify Checkout.",
+  deliveryLocker: "Parcel locker",
+  deliveryServicePoint: "Service point",
+  deliveryHome: "Home delivery",
+  backInStockTitle: "Notify me when available",
+  backInStockNotify: "Notify me",
+  backInStockThanks:
+    "Recorded. This is a simulated subscription — no email will be sent.",
+  backInStockDemo:
+    "Portfolio demo: we do not send restock email. A live shop would use a notification provider.",
+  backInStockInStock: "That option is available to add to the bag.",
+  newsletterDemo:
+    "Simulated in this portfolio. No newsletter is sent unless a provider is connected later.",
 };
 
 const fi: typeof en = {
@@ -411,6 +429,22 @@ const fi: typeof en = {
   cookieAnalytics: "Analytiikkaevästeet",
   cookieAnalyticsHelp: "Valinnainen kaupan mittaus. Ei tarvita ostamiseen.",
   demoData: "DEMO DATA",
+  deliveryEstimate: "Toimitusarvio",
+  deliveryPostcode: "Suomalainen postinumero",
+  deliveryShowRates: "Näytä hinnat",
+  deliveryInvalidPostcode: "Anna viisinumeroinen suomalainen postinumero.",
+  deliveryDemoDisclaimer:
+    "Demotoimitushinnat. Lopulliset toimitustavat vahvistetaan Shopifyn kassalla.",
+  deliveryLocker: "Pakettiautomaatti",
+  deliveryServicePoint: "Noutopiste",
+  deliveryHome: "Kotiinkuljetus",
+  backInStockTitle: "Ilmoita kun saatavilla",
+  backInStockNotify: "Ilmoita minulle",
+  backInStockThanks: "Tallennettu. Tämä on simuloitu ilmoitus — sähköpostia ei lähetetä.",
+  backInStockDemo:
+    "Portfoliodemo: osoite tarkistetaan, sitä ei tallenneta eikä sähköpostia lähetetä.",
+  backInStockInStock: "Tämä vaihtoehto on varastossa.",
+  newsletterDemo: "Simuloitu liittyminen. Uutiskirjepalvelua ei ole kytketty.",
 };
 
 export type Messages = typeof en;

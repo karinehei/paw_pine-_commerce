@@ -1,10 +1,16 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { track } from "@/lib/analytics/events";
 import { useMessages } from "@/components/i18n/LocaleProvider";
+import { isEmail } from "@/lib/validation";
 
-export function NewsletterForm() {
+export function BackInStockForm({
+  handle,
+  variantId,
+}: {
+  handle: string;
+  variantId?: string;
+}) {
   const t = useMessages();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -13,7 +19,9 @@ export function NewsletterForm() {
     event.preventDefault();
     const form = event.currentTarget;
     const email = new FormData(form).get("email");
-    if (typeof email !== "string") {
+    if (typeof email !== "string" || !isEmail(email)) {
+      setStatus("error");
+      setMessage(t.invalidEmail);
       return;
     }
 
@@ -21,21 +29,22 @@ export function NewsletterForm() {
     setMessage(null);
 
     try {
-      const response = await fetch("/api/newsletter", {
+      const response = await fetch("/api/notify-stock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, handle, variantId }),
       });
       const payload = (await response.json()) as { ok?: boolean; message?: string };
       if (!response.ok || !payload.ok) {
         setStatus("error");
-        setMessage(payload.message ?? t.invalidEmail);
+        setMessage(
+          payload.message === "in_stock" ? t.backInStockInStock : t.invalidEmail,
+        );
         return;
       }
       setStatus("success");
-      setMessage(t.newsletterThanks);
+      setMessage(t.backInStockThanks);
       form.reset();
-      track({ name: "newsletter_signup" });
     } catch {
       setStatus("error");
       setMessage(t.genericError);
@@ -43,40 +52,39 @@ export function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full max-w-md">
-      <label
-        htmlFor="newsletter-email"
-        className="text-muted text-xs tracking-[0.16em] uppercase"
-      >
-        {t.notesFromTheHouse}
+    <form onSubmit={onSubmit} className="border-border space-y-3 border-t pt-4">
+      <p className="text-sm font-medium">{t.backInStockTitle}</p>
+      <p className="text-muted text-xs">{t.backInStockDemo}</p>
+      <label htmlFor="back-in-stock-email" className="sr-only">
+        {t.emailAddress}
       </label>
-      <div className="mt-3 flex gap-2">
+      <div className="flex gap-2">
         <input
-          id="newsletter-email"
+          id="back-in-stock-email"
           name="email"
           type="email"
           required
           autoComplete="email"
+          disabled={status === "loading" || status === "success"}
           placeholder={t.emailAddress}
           className="border-border bg-linen min-h-11 flex-1 border px-3 py-2 text-sm"
         />
         <button
           type="submit"
-          disabled={status === "loading"}
-          className="bg-ink text-paper min-h-11 px-4 text-sm tracking-[0.12em] uppercase disabled:opacity-60"
+          disabled={status === "loading" || status === "success"}
+          className="btn-secondary shrink-0 px-3 text-xs disabled:opacity-60"
         >
-          {status === "loading" ? t.sending : t.join}
+          {status === "loading" ? t.sending : t.backInStockNotify}
         </button>
       </div>
       {message ? (
         <p
-          className={`mt-2 text-sm ${status === "error" ? "text-sale" : "text-muted"}`}
+          className={`text-sm ${status === "error" ? "text-sale" : "text-muted"}`}
           role="status"
         >
           {message}
         </p>
       ) : null}
-      <p className="text-muted mt-2 text-xs">{t.newsletterDemo}</p>
     </form>
   );
 }

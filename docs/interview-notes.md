@@ -28,7 +28,7 @@ A short httpOnly cookie stores either a Shopify cart GID or a demo cart id plus 
 
 ## 7. How would you integrate Posti or Matkahuolto?
 
-Keep Shopify checkout for payment. Add a `ShippingProvider` adapter (`getRates`, `createShipment`, `getTracking`) called from a server module after address capture — either Shopify Functions / carrier service, or a post-purchase fulfilment step. Do not call carrier APIs from the browser. See `docs/future-architecture.md`.
+Keep Shopify checkout for payment. The storefront already has a `ShippingProvider` (`getRates`, `createShipment`, `getTracking`) with a **mock** that returns demo FI locker / service-point / home rates. Live Posti or Matkahuolto would be new server-only adapters using merchant credentials — not this mock, and not a browser SDK. See `docs/future-architecture.md`.
 
 ## 8. How would you add GA4/GTM?
 

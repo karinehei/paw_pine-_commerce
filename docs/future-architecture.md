@@ -1,80 +1,40 @@
 # Future architecture
 
-Documented, not implemented. These are the next systems I would add if Paw & Pine became a live shop — not decorations for the portfolio.
+Documented adapters that are **not live**. Paw & Pine does not call Posti, Matkahuolto, or an email vendor.
 
-## Shipping integration
+## What is real today
 
-Checkout and payment stay on Shopify. Carriers belong behind a server-side adapter so Posti, Matkahuolto, or a 3PL can be swapped without touching product pages.
+Shopify owns catalogue, cart, and hosted checkout when credentials are present. Demo mode uses the local catalogue and a cookie cart. Payment is never taken in this repository.
+
+## Shipping
+
+Checkout and payment stay on Shopify. The cart **Delivery estimate** is a UX sketch: it asks for a Finnish postal code (`^[0-9]{5}$`) and shows **demo** rates from `MockShippingProvider`. It does not change Shopify shipping, create labels, or contact a carrier.
 
 ```ts
-interface Address {
-  country: string;
-  postalCode: string;
-  city?: string;
-}
-
-interface Parcel {
-  grams: number;
-  lengthCm?: number;
-  widthCm?: number;
-  heightCm?: number;
-}
-
-interface ShippingRate {
-  id: string;
-  title: string;
-  amount: string;
-  currency: string;
-  minDays?: number;
-  maxDays?: number;
-}
-
-interface Shipment {
-  id: string;
-  trackingCode?: string;
-  labelUrl?: string;
-}
-
 interface ShippingProvider {
-  readonly name: "posti" | "matkahuolto" | string;
-  getRates(input: { destination: Address; parcels: Parcel[] }): Promise<ShippingRate[]>;
-  createShipment(input: {
-    rateId: string;
-    destination: Address;
-    parcels: Parcel[];
-    orderId: string;
-  }): Promise<Shipment>;
-  getTracking(shipmentId: string): Promise<{ status: string; events: string[] }>;
+  getRates(...)
+  createShipment(...)
+  getTracking(...)
 }
 ```
 
-**Where it would sit:** a Shopify carrier service or checkout UI extension for rates; a fulfilment webhook for `createShipment`. Credentials stay in server env vars (`POSTI_*`, `MATKAHUOLTO_*`). The browser never sees them.
+| Adapter                       | Status                                                                              |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| `MockShippingProvider`        | Implemented. Parcel locker €5.90, service point €6.50, home €12.90. Marked demo.    |
+| `PostiShippingProvider`       | Not implemented. Would use server-only `POSTI_*` credentials, never in the browser. |
+| `MatkahuoltoShippingProvider` | Not implemented. Same pattern with `MATKAHUOLTO_*`.                                 |
 
-**What this repo does today:** dispatch window copy and a complimentary-shipping threshold. No carrier APIs are called.
+**Where a live adapter would sit:** Shopify carrier service or checkout UI extension for `getRates`; a fulfilment webhook for `createShipment`. Final rates remain Shopify’s responsibility.
+
+## Notifications and newsletter
+
+| Adapter                    | Status                                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `MockNotificationProvider` | Implemented. “Notify me when available” validates email and product, then acknowledges. No email is sent. |
+| `MockNewsletterProvider`   | Implemented. Footer signup validates email. No Mailchimp, Klaviyo, Brevo, or Resend dependency.           |
+
+A production shop would swap the mock for a provider that talks to Shopify Customer API or an ESP, using server env vars only.
 
 ## AI-assisted product discovery
 
-Optional. Conventional search and collection filters remain the default path.
-
-Example query:
-
-> "I need a durable toy for an active 8 kg terrier that destroys normal toys."
-
-Possible architecture:
-
-```text
-user query
-  → intent extraction (species, category, size, durability)
-  → catalogue filtering / retrieval (existing ProductQuery + embeddings later)
-  → ranked product recommendations
-  → short explanation grounded only in product title, material, features, and care text
-```
-
-Rules:
-
-- Ground answers in catalogue fields. Do not invent stock, reviews, or medical claims.
-- Fall back to `/search?q=` when the model is unavailable.
-- Keep URL-shareable filters. An LLM is an extra entry point, not a replacement for crawlable collections.
-- Do not add an LLM for novelty. Add it when search logs show natural-language queries that filters cannot express.
-
-Nothing in this repository currently calls an LLM.
+Optional. Conventional search and collection filters remain the default path. Nothing in this repository currently calls an LLM.

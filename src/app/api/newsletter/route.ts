@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getNewsletterProvider } from "@/lib/newsletter/mock";
 import { isEmail } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -24,5 +25,9 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true });
+  const result = await getNewsletterProvider().subscribe({ email });
+  return NextResponse.json({
+    ok: result.ok,
+    demo: result.demo,
+  });
 }
