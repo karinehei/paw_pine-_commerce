@@ -16,6 +16,7 @@ test("language switcher keeps the product and search query", async ({ page }) =>
     .getByRole("link", { name: "SV" })
     .click();
   await expect(page).toHaveURL(/\/sv\/products\/oakwood-chew-ring/);
+  await expect(page.getByRole("navigation", { name: "Språk" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
   await expect(page.getByRole("button", { name: /lägg i kassen/i })).toBeVisible();
 
@@ -25,6 +26,7 @@ test("language switcher keeps the product and search query", async ({ page }) =>
     .getByRole("link", { name: "FI" })
     .click();
   await expect(page).toHaveURL(/\/fi\/search\?q=oak/);
+  await expect(page.getByRole("navigation", { name: "Kieli" })).toBeVisible();
 });
 
 test("swedish home localizes chrome without inventing product copy", async ({ page }) => {

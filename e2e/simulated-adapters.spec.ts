@@ -74,10 +74,13 @@ test("newsletter subscribe is simulated", async ({ page }) => {
 test("contact form is simulated", async ({ page }) => {
   await page.goto("/en/contact");
   await dismissCookieBanner(page);
-  await expect(page.getByText(/portfolio demo: the message is validated/i)).toBeVisible();
-  await page.getByLabel("Name").fill("Karin");
-  await page.getByLabel("Email").fill("hello@example.com");
-  await page.getByLabel("Message").fill("Question about the oak bowl size.");
-  await page.getByRole("button", { name: /^send$/i }).click();
-  await expect(page.getByRole("status")).toContainText(/simulated contact form/i);
+  const form = page.locator("#main form");
+  await expect(form.locator("#contact-demo-disclaimer")).toHaveText(
+    /portfolio demo: the message is validated/i,
+  );
+  await form.getByLabel("Name").fill("Karin");
+  await form.getByLabel("Email").fill("hello@example.com");
+  await form.getByLabel("Message").fill("Question about the oak bowl size.");
+  await form.getByRole("button", { name: /^send$/i }).click();
+  await expect(form.getByRole("status")).toContainText(/simulated contact form/i);
 });

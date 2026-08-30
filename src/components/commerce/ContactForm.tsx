@@ -75,7 +75,9 @@ export function ContactForm() {
           className="border-border bg-paper mt-1 min-h-11 w-full border px-3 py-2"
         />
       </div>
-      <p className="text-muted text-xs">{t.contactDemo}</p>
+      <p id="contact-demo-disclaimer" className="text-muted text-xs">
+        {t.contactDemo}
+      </p>
       <button
         type="submit"
         disabled={status === "loading"}

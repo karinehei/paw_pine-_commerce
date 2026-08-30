@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
 import { htmlLang, LOCALES, LOCALE_SHORT_LABEL, type Locale } from "@/lib/i18n/config";
@@ -23,16 +22,18 @@ export function LanguageSwitcher() {
         const href = switchLocaleHref(pathname, query, code);
         const current = code === locale;
         return (
-          <Link
+          // Full document navigation: /en/x and /sv/x both rewrite to /x, so
+          // next/link would reuse the English layout and keep "Add to bag".
+          <a
             key={code}
             href={href}
             hrefLang={code}
             lang={htmlLang(code)}
             aria-current={current ? "true" : undefined}
-            className={`min-h-11 px-1.5 ${current ? "text-ink" : "text-muted hover:text-ink"}`}
+            className={`inline-flex min-h-11 items-center px-1.5 ${current ? "text-ink" : "text-muted hover:text-ink"}`}
           >
             {LOCALE_SHORT_LABEL[code]}
-          </Link>
+          </a>
         );
       })}
     </nav>
