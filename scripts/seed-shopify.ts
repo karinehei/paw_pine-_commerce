@@ -1,6 +1,10 @@
 /**
  * Seed the Shopify Dev Store from the Paw & Pine demo catalogue.
- * Uses the Admin GraphQL API (not Storefront). Requires a custom-app Admin token.
+ * Uses the Admin GraphQL API (not Storefront).
+ *
+ * Auth (Dev Dashboard app, 2026): SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET
+ * are exchanged for a 24h Admin token. Do not paste Client ID/Secret into
+ * SHOPIFY_ADMIN_ACCESS_TOKEN. Optional legacy: SHOPIFY_ADMIN_ACCESS_TOKEN (shpat_…).
  *
  *   npm run seed:shopify
  *   npm run seed:shopify -- --archive-samples
@@ -44,6 +48,57 @@ function loadEnvLocal(): void {
 }
 
 loadEnvLocal();
+console.log("[seed] starting");
+
+async function resolveAdminToken(domain: string): Promise<string> {
+  const clientId = process.env.SHOPIFY_CLIENT_ID?.trim();
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET?.trim();
+  if (clientId && clientSecret) {
+    const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+    });
+    const payload = (await response.json()) as {
+      access_token?: string;
+      expires_in?: number;
+      scope?: string;
+      error?: string;
+      error_description?: string;
+    };
+    if (!response.ok || !payload.access_token) {
+      throw new Error(
+        [
+          payload.error_description ?? payload.error ?? `Token request failed: HTTP ${response.status}.`,
+          "Use Dev Dashboard Client ID + Client secret (App settings), not the Headless Storefront token.",
+          "The app must be installed on this store, and the store must be in the same Shopify organization as the app.",
+        ].join(" "),
+      );
+    }
+    console.log(
+      `[seed] Admin token via client credentials${payload.scope ? ` (${payload.scope})` : ""}`,
+    );
+    return payload.access_token;
+  }
+
+  const staticToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
+  if (staticToken) {
+    if (!/^(shpat_|shpca_|shppa_)/i.test(staticToken)) {
+      console.warn(
+        "[seed] SHOPIFY_ADMIN_ACCESS_TOKEN does not look like a legacy Admin token (shpat_…). Prefer SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET from the Dev Dashboard.",
+      );
+    }
+    return staticToken;
+  }
+
+  throw new Error(
+    "Set SHOPIFY_STORE_DOMAIN plus SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET (Dev Dashboard App settings), or a legacy SHOPIFY_ADMIN_ACCESS_TOKEN (shpat_…).",
+  );
+}
 
 interface GraphQLResponse<T> {
   data?: T;
@@ -158,6 +213,14 @@ const COLLECTION_BY_HANDLE = `
   }
 `;
 
+const ACCESS_SCOPES = `
+  query AccessScopes {
+    currentAppInstallation {
+      accessScopes { handle }
+    }
+  }
+`;
+
 const PUBLICATIONS = `
   query Publications {
     publications(first: 25) {
@@ -202,24 +265,40 @@ const SAMPLE_HANDLES = new Set([
 async function main(): Promise<void> {
   const archiveSamples = process.argv.includes("--archive-samples");
   const domain = normaliseShopifyDomain(process.env.SHOPIFY_STORE_DOMAIN ?? "");
-  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
-
-  if (!domain || !token) {
-    throw new Error(
-      "Set SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_ACCESS_TOKEN (custom app Admin API token, shpat_…).",
-    );
+  if (!domain) {
+    throw new Error("Set SHOPIFY_STORE_DOMAIN to your-store.myshopify.com.");
   }
-  if (!/^(shpat_|shpca_|shppa_)/i.test(token)) {
+  const token = await resolveAdminToken(domain);
+
+  try {
+    const { currentAppInstallation } = await adminFetch<{
+      currentAppInstallation: { accessScopes: Array<{ handle: string }> };
+    }>(domain, token, ACCESS_SCOPES);
+    const scopes = currentAppInstallation.accessScopes.map((scope) => scope.handle).join(", ");
+    console.log(`[seed] token scopes: ${scopes || "(none listed)"}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[seed] could not list token scopes: ${message}`);
+  }
+
+  let publicationInput: Array<{ publicationId: string }> = [];
+  try {
+    const { publications } = await adminFetch<{
+      publications: { nodes: Array<{ id: string }> };
+    }>(domain, token, PUBLICATIONS);
+    publicationInput = publications.nodes.map((node) => ({ publicationId: node.id }));
+    console.log(`[seed] ${publicationInput.length} publication(s)`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     console.warn(
-      "[seed] This should be an Admin API token from Settings → Apps → Develop apps, not the Headless Storefront token.",
+      [
+        `[seed] publications unavailable (${message}).`,
+        "Products will still be created. After the seed, in Shopify admin: Products → select the Paw & Pine items → … → Include in sales channels → Headless (and Online Store).",
+        "To publish from this script next time: Configuration → Admin API integration, search “Publications”, enable View/Manage publications,",
+        "then Install app / Reinstall and paste the new shpat_ token into .env.local.",
+      ].join(" "),
     );
   }
-
-  const { publications } = await adminFetch<{
-    publications: { nodes: Array<{ id: string }> };
-  }>(domain, token, PUBLICATIONS);
-  const publicationInput = publications.nodes.map((node) => ({ publicationId: node.id }));
-  console.log(`[seed] ${publicationInput.length} publication(s)`);
 
   for (const product of demoProducts) {
     const existing = await adminFetch<{

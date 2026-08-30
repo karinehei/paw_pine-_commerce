@@ -81,16 +81,19 @@ npm run build
 
 The Storefront token cannot create products. Seeding uses the **Admin API** and the existing demo catalogue.
 
-1. In Shopify admin: **Settings → Apps and sales channels → Develop apps → Create an app**.
-2. Enable Admin API scopes: `write_products`, `read_products`, `write_publications`, `read_publications`.
-3. Install the app and copy the **Admin API access token** (`shpat_…`).
-4. Put it in `.env.local` as `SHOPIFY_ADMIN_ACCESS_TOKEN` (same `SHOPIFY_STORE_DOMAIN` as the storefront).
-5. Run:
+Shopify no longer shows a copy-paste `shpat_…` token for Dev Dashboard apps. Use **Client ID + Client secret** instead.
+
+1. In the [Dev Dashboard](https://dev.shopify.com/dashboard), create or open the seeder app (scopes: `read_products`, `write_products`, `read_publications`, `write_publications`). Leave **Use legacy install flow** off.
+2. Install that app on the same-organization Dev Store.
+3. **App settings** → copy **Client ID** and **Client secret** into `.env.local` as `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (same `SHOPIFY_STORE_DOMAIN` as the storefront). Do not put these in `SHOPIFY_ADMIN_ACCESS_TOKEN`. Do not use the Headless Storefront token or the App automation token.
+4. Run (from WSL; `make seed` copies onto the Linux filesystem so npm does not hang on `/mnt/d`):
 
 ```bash
-npm run seed:shopify
-npm run seed:shopify -- --archive-samples
+make seed
+make seed-archive
 ```
+
+`npm run seed:shopify` works on a native Linux/macOS checkout. On WSL + `/mnt/d` it often hangs.
 
 The second command archives Shopify’s sample snowboards and gift card. Redeploy, or wait about a minute for Storefront cache.
 
