@@ -14,7 +14,7 @@ This storefront is a portfolio prototype. It is not a claim that the application
 ## Browser bundle
 
 - No `SHOPIFY_*` variables are `NEXT_PUBLIC_`.
-- `NEXT_PUBLIC_GTM_ID` is interpolated into a script only after `/^GTM-[A-Z0-9]+$/i` validation.
+- `NEXT_PUBLIC_GTM_ID` is interpolated into a script only after `/^GTM-[A-Z0-9]+$/i` validation **and** explicit analytics cookie consent.
 
 ## Checkout redirects
 
@@ -40,6 +40,11 @@ This storefront is a portfolio prototype. It is not a claim that the application
 - `httpOnly`, `sameSite=lax`, `secure` in production.
 - Shopify ids must be `gid://shopify/Cart/…`.
 - Demo lines must use `demo-line-` ids and quantities 1–99.
+
+## Consent cookie
+
+- `paw_pine_consent` is first-party, not `httpOnly` (the banner must read it), `SameSite=Lax`, 180 days.
+- Values are only `necessary` or `analytics`. It records the choice; it is not a tracking pixel.
 
 ## Forms
 

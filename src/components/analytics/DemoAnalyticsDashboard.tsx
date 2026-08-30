@@ -102,10 +102,11 @@ export function DemoAnalyticsDashboard() {
   return (
     <div className="space-y-12">
       <section>
-        <h2 className="font-display text-3xl">Illustrative demo dataset</h2>
+        <p className="text-sale text-xs tracking-[0.2em] uppercase">DEMO DATA</p>
+        <h2 className="font-display mt-2 text-3xl">Illustrative demo dataset</h2>
         <p className="text-muted mt-2 text-sm">
           These figures are invented for the portfolio. They are not live Shopify or
-          analytics traffic.
+          analytics traffic. They must not be read as production metrics.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Metric label="Sessions" value={String(illustrative.sessions)} />
@@ -137,8 +138,9 @@ export function DemoAnalyticsDashboard() {
       <section>
         <h2 className="font-display text-3xl">This browser session</h2>
         <p className="text-muted mt-2 text-sm">
-          Events recorded in sessionStorage on this device only. Empty until you browse
-          the shop. Still demo instrumentation — not a production property.
+          Events recorded in sessionStorage on this device only, and only after analytics
+          consent. Empty until you accept analytics and browse the shop. Still demo
+          instrumentation — not a production property.
         </p>
         <p className="mt-4 text-sm">{sessionEvents.length} events stored locally.</p>
         <div className="mt-6">

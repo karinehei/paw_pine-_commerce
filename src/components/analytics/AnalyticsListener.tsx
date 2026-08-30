@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { track, type AnalyticsEvent } from "@/lib/analytics/events";
+import { useHasAnalyticsConsent } from "@/components/consent/ConsentProvider";
+import { track, type EcommerceEvent } from "@/lib/analytics/events";
 
-export function AnalyticsListener({ event }: { event: AnalyticsEvent }) {
+export function AnalyticsListener({ event }: { event: EcommerceEvent }) {
+  const allowed = useHasAnalyticsConsent();
   const key = JSON.stringify(event);
 
   useEffect(() => {
+    if (!allowed) {
+      return;
+    }
     track(event);
-    // event is captured via key; stringify keeps repeat navigations distinct
-  }, [key, event]);
+  }, [key, event, allowed]);
 
   return null;
 }

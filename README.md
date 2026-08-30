@@ -17,7 +17,7 @@ Mobile and tablet: [home-375](docs/screenshots/home-375.png) · [home-768](docs/
 - Headless Shopify architecture with a single commerce provider switch
 - Responsive collections, search, and product pages
 - Shopify cart + hosted checkout (validated HTTPS Shopify URLs)
-- Typed ecommerce analytics with a pluggable adapter layer
+- Typed ecommerce analytics with a pluggable provider layer and GDPR consent
 - Technical SEO and JSON-LD (no fabricated ratings)
 - Accessible UI (keyboard, dialogs, 44px targets, reduced motion)
 - Playwright purchase-flow tests in demo mode
@@ -30,7 +30,7 @@ flowchart TD
   customer[Customer]
   nextjs[Next.js storefront]
   seo[SEO / metadata layer]
-  analytics[Analytics adapters]
+  analytics[Analytics providers]
   commerce[Commerce service layer]
   shopifyApi[Shopify Storefront GraphQL API]
   demo[Optional demo catalogue]
@@ -104,8 +104,8 @@ Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on t
 | Variable                           | Required                  | Purpose                                                                   |
 | ---------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`             | Production canonical URLs | Site origin                                                               |
-| `NEXT_PUBLIC_GTM_ID`               | No                        | Optional `GTM-…` container                                                |
-| `NEXT_PUBLIC_ANALYTICS_DEBUG`      | No                        | Console-log analytics events                                              |
+| `NEXT_PUBLIC_GTM_ID`               | No                        | Optional `GTM-…` container. Injected only after analytics consent.        |
+| `NEXT_PUBLIC_ANALYTICS_DEBUG`      | No                        | Console-log analytics events (still after consent)                        |
 | `SHOPIFY_STORE_DOMAIN`             | Live catalogue            | `your-store.myshopify.com`                                                |
 | `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Live catalogue            | Headless **private access token** (server only). Not the Admin API token. |
 | `SHOPIFY_STOREFRONT_API_VERSION`   | No                        | Defaults to `2026-07`                                                     |
@@ -119,6 +119,20 @@ On Vercel, set `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` for
 In Headless, **Edit** Storefront API permissions and enable products and collections. The sample ski/snowboard products on a new Dev Store are Shopify’s defaults, not Paw & Pine.
 
 Expected Shopify tags when connecting a live shop: `species:dog|cat`, `category:toys|harnesses|beds|feeding|scratching`, `material:…`, optional `sku:`, `dimensions:`, `care:`, `feature:`.
+
+## Analytics
+
+No paid analytics platform is required for the portfolio demo.
+
+The storefront emits a typed `EcommerceEvent` union (`page_view`, `view_item_list`, `select_item`, `view_item`, `search`, `add_to_cart`, `remove_from_cart`, `view_cart`, `begin_checkout`, `purchase`). UI code calls `track()` only. Providers push a GA4-shaped `dataLayer`, optionally log in development, and keep a session copy for `/demo/analytics`.
+
+**Consent.** Necessary cookies (language, bag, the consent cookie) are always on. Analytics stay off until **Accept analytics**. **Necessary only** and **Cookie preferences** (footer) persist that choice in `paw_pine_consent`. `NEXT_PUBLIC_GTM_ID` is optional; the GTM snippet is injected only after analytics consent.
+
+**Funnel.** Collection list → product select → product view → add to cart → cart → begin checkout. Shopify-hosted checkout is outside this app, so `purchase` is in the type system but is not fired from the Checkout button. A live shop would send it from the order status page or a webhook.
+
+**Demo data.** `/demo/analytics` is labelled **DEMO DATA**. The large session / conversion / AOV numbers are an illustrative sample. They are not live traffic.
+
+Longer write-up: [docs/analytics.md](docs/analytics.md).
 
 ## Further reading
 

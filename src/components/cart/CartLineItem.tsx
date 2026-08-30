@@ -8,7 +8,8 @@ import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import { removeCartItem, updateCartItem } from "@/lib/cart/actions";
 import { track } from "@/lib/analytics/events";
-import { selectedOptionsLabel } from "@/lib/format";
+import { itemFromCartLine } from "@/lib/analytics/items";
+import { parseAmount, selectedOptionsLabel } from "@/lib/format";
 import type { CartLine } from "@/lib/commerce/types";
 
 export function CartLineItem({ line }: { line: CartLine }) {
@@ -28,13 +29,9 @@ export function CartLineItem({ line }: { line: CartLine }) {
       const cart = await removeCartItem(line.id);
       track({
         name: "remove_from_cart",
-        items: [
-          {
-            item_id: line.merchandise.product.handle,
-            item_name: line.merchandise.product.title,
-            quantity: line.quantity,
-          },
-        ],
+        currency: line.merchandise.price.currencyCode,
+        value: parseAmount(line.merchandise.price) * line.quantity,
+        items: [itemFromCartLine(line)],
       });
       announce(t.removedFromBag(line.merchandise.product.title));
       setCart(cart);

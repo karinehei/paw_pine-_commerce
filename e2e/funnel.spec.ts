@@ -38,7 +38,7 @@ test("search suggestions appear for a short query", async ({ page }) => {
 
 test("demo analytics page is labelled as demo data", async ({ page }) => {
   await page.goto("/demo/analytics");
-  await expect(page.getByText(/demo data — not production traffic/i)).toBeVisible();
+  await expect(page.getByText(/^demo data$/i).first()).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Illustrative demo dataset" }),
   ).toBeVisible();

@@ -1,6 +1,7 @@
 "use client";
 
 import { NewsletterForm } from "@/components/commerce/NewsletterForm";
+import { openCookiePreferences } from "@/components/consent/CookieConsent";
 import { LocaleLink } from "@/components/i18n/LocaleLink";
 import { useMessages } from "@/components/i18n/LocaleProvider";
 import { SITE_NAME } from "@/lib/constants";
@@ -45,6 +46,15 @@ export function Footer({ mode }: { mode: CommerceMode }) {
                 </LocaleLink>
               </li>
             ))}
+            <li>
+              <button
+                type="button"
+                className="hover:text-pine min-h-11 text-left"
+                onClick={() => openCookiePreferences()}
+              >
+                {t.cookiePreferences}
+              </button>
+            </li>
           </ul>
         </div>
       </div>

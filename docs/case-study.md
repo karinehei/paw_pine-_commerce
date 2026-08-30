@@ -36,7 +36,7 @@ Shopify remains the system of record. Next.js owns merchandising, URLs, SEO, ana
 
 **SEO is a first-class output.** Unique titles, canonicals, Open Graph, robots, a dynamic sitemap, and JSON-LD for Organization, WebSite, Product, and BreadcrumbList. Review ratings are not fabricated.
 
-**Analytics is vendor-neutral.** A typed ecommerce event union fans out to adapters (dataLayer, sessionStorage, optional console). GA4/GTM can be connected later without rewriting product components.
+**Analytics is vendor-neutral.** A typed ecommerce event union fans out to providers (dataLayer, sessionStorage, optional console). GA4/GTM can be connected later without rewriting product components. Optional analytics stay off until cookie consent.
 
 **Accessibility is part of the purchase path.** Native dialogs, 44px targets, variant radiogroups, cart announcements, and reduced-motion support.
 

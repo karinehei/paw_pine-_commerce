@@ -1,34 +1,47 @@
 import { parseAmount, selectedOptionsLabel } from "@/lib/format";
-import type { Cart, Product, ProductVariant } from "@/lib/commerce/types";
+import type { Cart, CartLine, Product, ProductVariant } from "@/lib/commerce/types";
 import type { AnalyticsItem } from "@/lib/analytics/types";
 
 export function itemFromProduct(
-  product: Pick<Product, "handle" | "title" | "vendor" | "category" | "priceRange">,
+  product: Pick<
+    Product,
+    "handle" | "title" | "vendor" | "category" | "species" | "priceRange"
+  >,
   variant?: ProductVariant,
   quantity = 1,
 ): AnalyticsItem {
+  const money = variant?.price ?? product.priceRange.minVariantPrice;
   return {
-    item_id: product.handle,
-    item_name: product.title,
-    item_brand: product.vendor,
-    item_category: product.category,
-    item_variant: variant
+    id: product.handle,
+    handle: product.handle,
+    name: product.title,
+    brand: product.vendor,
+    category: product.category,
+    species: product.species,
+    variant: variant
       ? selectedOptionsLabel(variant.selectedOptions, variant.title)
       : undefined,
-    price: parseAmount(variant?.price ?? product.priceRange.minVariantPrice),
+    price: parseAmount(money),
+    currency: money.currencyCode,
     quantity,
   };
 }
 
-export function itemsFromCart(cart: Cart): AnalyticsItem[] {
-  return cart.lines.map((line) => ({
-    item_id: line.merchandise.product.handle,
-    item_name: line.merchandise.product.title,
-    item_variant: selectedOptionsLabel(
+export function itemFromCartLine(line: CartLine): AnalyticsItem {
+  return {
+    id: line.merchandise.product.handle,
+    handle: line.merchandise.product.handle,
+    name: line.merchandise.product.title,
+    variant: selectedOptionsLabel(
       line.merchandise.selectedOptions,
       line.merchandise.title,
     ),
     price: parseAmount(line.merchandise.price),
+    currency: line.merchandise.price.currencyCode,
     quantity: line.quantity,
-  }));
+  };
+}
+
+export function itemsFromCart(cart: Cart): AnalyticsItem[] {
+  return cart.lines.map(itemFromCartLine);
 }

@@ -32,11 +32,11 @@ Keep Shopify checkout for payment. Add a `ShippingProvider` adapter (`getRates`,
 
 ## 8. How would you add GA4/GTM?
 
-Set `NEXT_PUBLIC_GTM_ID` (must match `GTM-…`). Events already push a GA4-shaped `dataLayer` payload. Map those event names in GTM. No product-component changes required.
+Set `NEXT_PUBLIC_GTM_ID` (must match `GTM-…`). After the shopper accepts analytics cookies, events push a GA4-shaped `dataLayer` payload and the GTM snippet loads. Map those event names in GTM. No product-component changes required. The shop runs with the ID empty.
 
 ## 9. How do you measure conversion?
 
-Funnel events: `view_item` → `add_to_cart` → `begin_checkout` → `purchase`. Storefront can measure through checkout start reliably. `purchase` should fire from order confirmation (webhook or thank-you), not from clicking Checkout. `/demo/analytics` shows the maths with labelled demo data.
+Funnel events: `view_item` → `add_to_cart` → `begin_checkout` → `purchase`. Storefront can measure through checkout start reliably. `purchase` should fire from order confirmation (webhook or thank-you), not from clicking Checkout. `/demo/analytics` shows the maths with labelled **DEMO DATA**. Analytics cookies stay off until consent.
 
 ## 10. How did you implement SEO?
 

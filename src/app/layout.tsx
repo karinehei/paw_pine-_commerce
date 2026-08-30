@@ -7,6 +7,8 @@ import { AnalyticsScripts } from "@/components/analytics/AnalyticsScripts";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import { ConsentProvider } from "@/components/consent/ConsentProvider";
+import { CookieConsent } from "@/components/consent/CookieConsent";
 import { getCommerceMode, getGtmId } from "@/lib/env";
 import { siteMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { getLocale } from "@/lib/i18n/locale";
@@ -73,24 +75,27 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     >
       <body className="bg-linen text-ink flex min-h-full flex-col font-sans antialiased">
         <LocaleProvider locale={locale}>
-          <JsonLd data={organizationJsonLd()} />
-          <JsonLd data={websiteJsonLd()} />
-          <AnalyticsScripts gtmId={gtmId} />
-          <PageViewTracker />
-          <a
-            href="#main"
-            className="focus:bg-paper sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2"
-          >
-            {t.skipToContent}
-          </a>
-          <CartProvider mode={mode}>
-            <Header />
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <Footer mode={mode} />
-            <CartDrawer />
-          </CartProvider>
+          <ConsentProvider>
+            <JsonLd data={organizationJsonLd()} />
+            <JsonLd data={websiteJsonLd()} />
+            <AnalyticsScripts gtmId={gtmId} />
+            <PageViewTracker />
+            <a
+              href="#main"
+              className="focus:bg-paper sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2"
+            >
+              {t.skipToContent}
+            </a>
+            <CartProvider mode={mode}>
+              <Header />
+              <main id="main" className="flex-1">
+                {children}
+              </main>
+              <Footer mode={mode} />
+              <CartDrawer />
+            </CartProvider>
+            <CookieConsent />
+          </ConsentProvider>
         </LocaleProvider>
       </body>
     </html>

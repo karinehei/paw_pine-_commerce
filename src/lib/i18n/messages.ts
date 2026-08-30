@@ -191,6 +191,19 @@ const en = {
   bagMeta: "Review your Paw & Pine bag before checkout.",
   collectionFallback: "Collection",
   productFallback: "Product",
+  cookiePreferences: "Cookie preferences",
+  cookieBannerTitle: "Cookies",
+  cookieBannerBody:
+    "Necessary cookies keep the bag and language working. Analytics cookies are optional and stay off until you accept.",
+  cookieAcceptAnalytics: "Accept analytics",
+  cookieNecessaryOnly: "Necessary only",
+  cookieManagePreferences: "Manage preferences",
+  cookieSavePreferences: "Save preferences",
+  cookieNecessary: "Necessary cookies",
+  cookieNecessaryHelp: "Always on. Language, bag, and security.",
+  cookieAnalytics: "Analytics cookies",
+  cookieAnalyticsHelp: "Optional measurement of the shop. Never required to buy.",
+  demoData: "DEMO DATA",
 };
 
 const fi: typeof en = {
@@ -385,6 +398,19 @@ const fi: typeof en = {
   bagMeta: "Tarkista Paw & Pinen kassi ennen kassaa.",
   collectionFallback: "Kokoelma",
   productFallback: "Tuote",
+  cookiePreferences: "Evästeasetukset",
+  cookieBannerTitle: "Evästeet",
+  cookieBannerBody:
+    "Välttämättömät evästeet pitävät kassin ja kielen toiminnassa. Analytiikkaevästeet ovat valinnaisia ja pysyvät pois päältä kunnes hyväksyt.",
+  cookieAcceptAnalytics: "Hyväksy analytiikka",
+  cookieNecessaryOnly: "Vain välttämättömät",
+  cookieManagePreferences: "Hallitse asetuksia",
+  cookieSavePreferences: "Tallenna asetukset",
+  cookieNecessary: "Välttämättömät evästeet",
+  cookieNecessaryHelp: "Aina päällä. Kieli, kassi ja tietoturva.",
+  cookieAnalytics: "Analytiikkaevästeet",
+  cookieAnalyticsHelp: "Valinnainen kaupan mittaus. Ei tarvita ostamiseen.",
+  demoData: "DEMO DATA",
 };
 
 export type Messages = typeof en;

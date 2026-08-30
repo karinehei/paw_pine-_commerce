@@ -1,14 +1,17 @@
 export interface AnalyticsItem {
-  item_id: string;
-  item_name: string;
-  item_brand?: string;
-  item_category?: string;
-  item_variant?: string;
+  id: string;
+  handle: string;
+  name: string;
+  variant?: string;
   price?: number;
   quantity?: number;
+  category?: string;
+  species?: string;
+  currency?: string;
+  brand?: string;
 }
 
-export type AnalyticsEvent =
+export type EcommerceEvent =
   | {
       name: "page_view";
       page_path: string;
@@ -73,4 +76,10 @@ export type AnalyticsEvent =
       name: "newsletter_signup";
     };
 
+/** @deprecated Use EcommerceEvent. Kept so existing imports keep compiling. */
+export type AnalyticsEvent = EcommerceEvent;
+
 export const SESSION_EVENTS_KEY = "paw_pine_analytics_events";
+export const CONSENT_COOKIE = "paw_pine_consent";
+export const CONSENT_MAX_AGE = 60 * 60 * 24 * 180;
+export const CONSENT_EVENT = "paw-pine-consent";
