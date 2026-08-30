@@ -1,6 +1,7 @@
 "use client";
 
 import { ErrorState } from "@/components/ui/ErrorState";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 
 export default function GlobalError({
   reset,
@@ -8,6 +9,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useMessages();
   return (
     <div className="px-4">
       <ErrorState />
@@ -15,9 +17,9 @@ export default function GlobalError({
         <button
           type="button"
           onClick={reset}
-          className="text-sm text-muted underline-offset-4 hover:underline"
+          className="text-muted text-sm underline-offset-4 hover:underline"
         >
-          Try again
+          {t.tryAgain}
         </button>
       </div>
     </div>

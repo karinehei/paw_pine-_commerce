@@ -1,3 +1,6 @@
+import { getMessages } from "@/lib/i18n/messages";
+import type { Locale } from "@/lib/i18n/config";
+
 export class CommerceError extends Error {
   readonly code:
     | "unavailable"
@@ -17,23 +20,24 @@ export class CommerceError extends Error {
   }
 }
 
-export function toUserErrorMessage(error: unknown): string {
+export function toUserErrorMessage(error: unknown, locale: Locale = "en"): string {
+  const t = getMessages(locale);
   if (error instanceof CommerceError) {
     switch (error.code) {
       case "unavailable":
-        return "The shop is temporarily unavailable. Please try again shortly.";
+        return t.errorUnavailable;
       case "not_found":
-        return "We could not find that item.";
+        return t.errorNotFound;
       case "invalid_cart":
-        return "Your cart could not be loaded. Please add the item again.";
+        return t.errorInvalidCart;
       case "out_of_stock":
-        return "That option is currently out of stock.";
+        return t.errorOutOfStock;
       case "network":
-        return "A network error interrupted the request. Please try again.";
+        return t.errorNetwork;
       case "rate_limited":
-        return "The shop is busy. Please wait a moment and try again.";
+        return t.errorRateLimited;
     }
   }
 
-  return "Something went wrong. Please try again.";
+  return t.genericError;
 }

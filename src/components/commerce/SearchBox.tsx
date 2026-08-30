@@ -1,7 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
+import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
+import { withLocale } from "@/lib/i18n/path";
 import type { SearchSuggestions } from "@/lib/commerce/suggest";
 
 interface SearchBoxProps {
@@ -22,6 +31,8 @@ export function SearchBox({
   updateUrlOnIdle = false,
 }: SearchBoxProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useMessages();
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState(defaultValue);
@@ -59,10 +70,12 @@ export function SearchBox({
     }
     const next = value.trim();
     const handle = window.setTimeout(() => {
-      router.replace(next ? `/search?q=${encodeURIComponent(next)}` : "/search");
+      router.replace(
+        withLocale(next ? `/search?q=${encodeURIComponent(next)}` : "/search", locale),
+      );
     }, 400);
     return () => window.clearTimeout(handle);
-  }, [value, updateUrlOnIdle, router]);
+  }, [value, updateUrlOnIdle, router, locale]);
 
   useEffect(() => {
     function onPointerDown(event: PointerEvent) {
@@ -77,12 +90,12 @@ export function SearchBox({
   const suggestions = canSuggest ? fetched : EMPTY_SUGGESTIONS;
   const options = [
     ...suggestions.collections.map((item) => ({
-      href: `/collections/${item.handle}`,
+      href: withLocale(`/collections/${item.handle}`, locale),
       label: item.title,
-      kind: "Category" as const,
+      kind: t.category,
     })),
     ...suggestions.products.map((item) => ({
-      href: `/products/${item.handle}`,
+      href: withLocale(`/products/${item.handle}`, locale),
       label: item.title,
       kind: item.vendor,
     })),
@@ -97,7 +110,11 @@ export function SearchBox({
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const term = value.trim();
-    go(term ? `/search?q=${encodeURIComponent(term)}` : "/search");
+    go(
+      term
+        ? withLocale(`/search?q=${encodeURIComponent(term)}`, locale)
+        : withLocale("/search", locale),
+    );
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -128,7 +145,7 @@ export function SearchBox({
     <div ref={rootRef} className={`relative ${className}`}>
       <form onSubmit={onSubmit} role="search">
         <label htmlFor={id} className="sr-only">
-          Search products
+          {t.searchProducts}
         </label>
         <input
           id={id}
@@ -147,15 +164,15 @@ export function SearchBox({
             }
           }}
           onKeyDown={onKeyDown}
-          placeholder="Search"
-          className="w-full border-0 border-b border-border bg-transparent py-2 text-sm outline-none placeholder:text-muted focus-visible:border-ink"
+          placeholder={t.searchPlaceholder}
+          className="border-border placeholder:text-muted focus-visible:border-ink w-full border-0 border-b bg-transparent py-2 text-sm outline-none"
         />
       </form>
       {open ? (
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-40 mt-1 w-full min-w-56 border border-border bg-paper py-2 shadow-sm"
+          className="border-border bg-paper absolute z-40 mt-1 w-full min-w-56 border py-2 shadow-sm"
         >
           {options.map((option, index) => (
             <li key={option.href} role="option" aria-selected={index === activeIndex}>
@@ -168,7 +185,7 @@ export function SearchBox({
                 onClick={() => go(option.href)}
               >
                 <span>{option.label}</span>
-                <span className="text-xs text-muted">{option.kind}</span>
+                <span className="text-muted text-xs">{option.kind}</span>
               </button>
             </li>
           ))}

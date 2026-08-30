@@ -1,21 +1,23 @@
-import Link from "next/link";
+"use client";
+
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 
 interface ErrorStateProps {
   title?: string;
   description?: string;
 }
 
-export function ErrorState({
-  title = "This page could not be loaded",
-  description = "Please try again in a moment. If you were adding to your bag, your items should still be there.",
-}: ErrorStateProps) {
+export function ErrorState({ title, description }: ErrorStateProps) {
+  const t = useMessages();
+
   return (
     <div className="mx-auto max-w-lg py-24 text-center">
-      <h1 className="font-display text-4xl">{title}</h1>
-      <p className="mt-4 text-muted">{description}</p>
-      <Link href="/" className="btn-primary mt-8">
-        Back to home
-      </Link>
+      <h1 className="font-display text-4xl">{title ?? t.errorTitle}</h1>
+      <p className="text-muted mt-4">{description ?? t.errorDescription}</p>
+      <LocaleLink href="/" className="btn-primary mt-8">
+        {t.backToHome}
+      </LocaleLink>
     </div>
   );
 }

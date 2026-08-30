@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 
 export function ContactForm() {
+  const t = useMessages();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -22,15 +24,15 @@ export function ContactForm() {
       const payload = (await response.json()) as { ok?: boolean; message?: string };
       if (!response.ok || !payload.ok) {
         setStatus("error");
-        setMessage(payload.message ?? "Please check the form and try again.");
+        setMessage(payload.message ?? t.contactInvalid);
         return;
       }
       setStatus("success");
-      setMessage("Received. We reply within two working days.");
+      setMessage(t.contactSuccess);
       form.reset();
     } catch {
       setStatus("error");
-      setMessage("Something went wrong. Please try again.");
+      setMessage(t.genericError);
     }
   }
 
@@ -38,19 +40,19 @@ export function ContactForm() {
     <form onSubmit={onSubmit} className="mt-10 space-y-5">
       <div>
         <label htmlFor="name" className="text-sm">
-          Name
+          {t.name}
         </label>
         <input
           id="name"
           name="name"
           required
           autoComplete="name"
-          className="mt-1 min-h-11 w-full border border-border bg-paper px-3 py-2"
+          className="border-border bg-paper mt-1 min-h-11 w-full border px-3 py-2"
         />
       </div>
       <div>
         <label htmlFor="email" className="text-sm">
-          Email
+          {t.email}
         </label>
         <input
           id="email"
@@ -58,30 +60,33 @@ export function ContactForm() {
           type="email"
           required
           autoComplete="email"
-          className="mt-1 min-h-11 w-full border border-border bg-paper px-3 py-2"
+          className="border-border bg-paper mt-1 min-h-11 w-full border px-3 py-2"
         />
       </div>
       <div>
         <label htmlFor="message" className="text-sm">
-          Message
+          {t.message}
         </label>
         <textarea
           id="message"
           name="message"
           required
           rows={6}
-          className="mt-1 min-h-11 w-full border border-border bg-paper px-3 py-2"
+          className="border-border bg-paper mt-1 min-h-11 w-full border px-3 py-2"
         />
       </div>
       <button
         type="submit"
         disabled={status === "loading"}
-        className="bg-pine min-h-12 px-5 text-sm tracking-[0.14em] text-paper uppercase disabled:opacity-60"
+        className="bg-pine text-paper min-h-12 px-5 text-sm tracking-[0.14em] uppercase disabled:opacity-60"
       >
-        {status === "loading" ? "Sending" : "Send"}
+        {status === "loading" ? t.sending : t.send}
       </button>
       {message ? (
-        <p className={status === "error" ? "text-sm text-sale" : "text-sm text-muted"} role="status">
+        <p
+          className={status === "error" ? "text-sale text-sm" : "text-muted text-sm"}
+          role="status"
+        >
           {message}
         </p>
       ) : null}

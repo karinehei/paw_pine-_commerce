@@ -68,4 +68,3 @@ Do not add `cookies()` to catalogue pages. Do not cache Shopify cart payloads.
 ## Analytics
 
 `track()` is a single function. Pages and buttons emit a typed ecommerce event union. Adapters can target GTM, a console debugger, or sessionStorage. See [analytics.md](./analytics.md).
-

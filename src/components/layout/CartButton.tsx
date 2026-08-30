@@ -1,9 +1,11 @@
 "use client";
 
 import { useCart } from "@/components/cart/CartProvider";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 
 export function CartButton() {
   const { cart, openCart } = useCart();
+  const t = useMessages();
   const count = cart?.totalQuantity ?? 0;
 
   return (
@@ -11,9 +13,10 @@ export function CartButton() {
       type="button"
       onClick={openCart}
       className="min-h-11 text-sm tracking-[0.12em] uppercase"
-      aria-label={`Open bag, ${count} items`}
+      aria-label={t.openBag(count)}
     >
-      Bag{count > 0 ? ` (${count})` : ""}
+      {t.bag}
+      {count > 0 ? ` (${count})` : ""}
     </button>
   );
 }

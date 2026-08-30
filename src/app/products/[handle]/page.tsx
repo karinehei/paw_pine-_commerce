@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { getLocale } from "@/lib/i18n/locale";
+import { getMessages } from "@/lib/i18n/messages";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchase } from "@/components/product/ProductPurchase";
 import { ProductGrid } from "@/components/product/ProductGrid";
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: HandlePageProps) {
   const { handle } = await params;
   const product = await getCatalogProvider().getProduct(handle);
   if (!product) {
-    return { title: "Product" };
+    return { title: getMessages(await getLocale()).productFallback };
   }
   return productMetadata(product);
 }
@@ -38,24 +40,25 @@ export default async function ProductPage({ params }: HandlePageProps) {
     notFound();
   }
 
+  const t = getMessages(await getLocale());
   const recommended = await commerce.getRecommendations(handle);
   const url = `${getSiteUrl()}/products/${product.handle}`;
   const speciesHref = `/collections/${product.species === "dog" ? "dogs" : "cats"}`;
-  const speciesLabel = product.species === "dog" ? "Dogs" : "Cats";
+  const speciesLabel = product.species === "dog" ? t.dogs : t.cats;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
       <JsonLd data={productJsonLd(product, url)} />
       <JsonLd
         data={breadcrumbJsonLd([
-          { name: "Home", url: getSiteUrl() },
+          { name: t.home, url: getSiteUrl() },
           { name: speciesLabel, url: `${getSiteUrl()}${speciesHref}` },
           { name: product.title, url },
         ])}
       />
       <Breadcrumbs
         items={[
-          { href: "/", label: "Home" },
+          { href: "/", label: t.home },
           { href: speciesHref, label: speciesLabel },
           { label: product.title },
         ]}
@@ -63,50 +66,62 @@ export default async function ProductPage({ params }: HandlePageProps) {
       <div className="mt-8 grid gap-12 lg:grid-cols-2">
         <ProductGallery product={product} />
         <div>
-          <p className="text-xs tracking-[0.16em] text-muted uppercase">{product.vendor}</p>
-          <h1 className="mt-2 font-display text-[2.25rem] leading-[1.1] md:text-5xl">{product.title}</h1>
-          <div className="mt-6 max-w-lg space-y-3 text-muted">
-            {product.description
-              .split(/\n\n+/)
-              .map((paragraph) => (
-                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-              ))}
+          <p className="text-muted text-xs tracking-[0.16em] uppercase">
+            {product.vendor}
+          </p>
+          <h1 className="font-display mt-2 text-[2.25rem] leading-[1.1] md:text-5xl">
+            {product.title}
+          </h1>
+          <div className="text-muted mt-6 max-w-lg space-y-3">
+            {product.description.split(/\n\n+/).map((paragraph) => (
+              <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+            ))}
           </div>
           <div className="mt-8">
             <ProductPurchase product={product} />
           </div>
           <ul className="mt-8 grid gap-3 sm:grid-cols-3">
             {product.features.slice(0, 3).map((feature) => (
-              <li key={feature} className="border border-border bg-paper px-4 py-3 text-sm">
+              <li
+                key={feature}
+                className="border-border bg-paper border px-4 py-3 text-sm"
+              >
                 {feature}
               </li>
             ))}
           </ul>
-          <dl className="mt-10 space-y-4 border-t border-border pt-8 text-sm">
+          <dl className="border-border mt-10 space-y-4 border-t pt-8 text-sm">
             <div>
-              <dt className="tracking-[0.14em] text-muted uppercase">Materials</dt>
+              <dt className="text-muted tracking-[0.14em] uppercase">{t.materials}</dt>
               <dd className="mt-1">{product.material}</dd>
             </div>
             <div>
-              <dt className="tracking-[0.14em] text-muted uppercase">Dimensions</dt>
+              <dt className="text-muted tracking-[0.14em] uppercase">{t.dimensions}</dt>
               <dd className="mt-1">{product.dimensions}</dd>
             </div>
             <div>
-              <dt className="tracking-[0.14em] text-muted uppercase">Care</dt>
+              <dt className="text-muted tracking-[0.14em] uppercase">{t.care}</dt>
               <dd className="mt-1">{product.care}</dd>
             </div>
             <div>
-              <dt className="tracking-[0.14em] text-muted uppercase">Shipping and returns</dt>
-              <dd className="mt-1 text-muted">
-                Complimentary shipping over €{FREE_SHIPPING_THRESHOLD}. Unused items may be returned
-                within 30 days. See{" "}
-                <Link href="/shipping" className="underline-offset-4 hover:underline">
-                  shipping
-                </Link>{" "}
-                and{" "}
-                <Link href="/returns" className="underline-offset-4 hover:underline">
-                  returns
-                </Link>
+              <dt className="text-muted tracking-[0.14em] uppercase">
+                {t.shippingAndReturns}
+              </dt>
+              <dd className="text-muted mt-1">
+                {t.shippingReturnsBlurb(FREE_SHIPPING_THRESHOLD)}{" "}
+                <LocaleLink
+                  href="/shipping"
+                  className="underline-offset-4 hover:underline"
+                >
+                  {t.shipping}
+                </LocaleLink>{" "}
+                {t.andWord}{" "}
+                <LocaleLink
+                  href="/returns"
+                  className="underline-offset-4 hover:underline"
+                >
+                  {t.returns}
+                </LocaleLink>
                 .
               </dd>
             </div>
@@ -115,7 +130,7 @@ export default async function ProductPage({ params }: HandlePageProps) {
       </div>
       {recommended.length > 0 ? (
         <section className="mt-20">
-          <h2 className="mb-8 font-display text-3xl">You may also like</h2>
+          <h2 className="font-display mb-8 text-3xl">{t.youMayAlsoLike}</h2>
           <ProductGrid
             products={recommended}
             listId="related"

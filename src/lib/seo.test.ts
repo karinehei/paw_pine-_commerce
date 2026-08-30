@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { productJsonLd, breadcrumbJsonLd, websiteJsonLd, organizationJsonLd } from "@/lib/seo";
+import {
+  productJsonLd,
+  breadcrumbJsonLd,
+  websiteJsonLd,
+  organizationJsonLd,
+} from "@/lib/seo";
 import { demoProducts } from "@/lib/commerce/demo/catalog";
 
 describe("structured data", () => {
   it("builds Product JSON-LD without review ratings", () => {
     const product = demoProducts[0];
     expect(product).toBeDefined();
-    const json = productJsonLd(product!, "https://example.com/products/oakwood-chew-ring");
+    const json = productJsonLd(
+      product!,
+      "https://example.com/products/oakwood-chew-ring",
+    );
 
     expect(json["@type"]).toBe("Product");
     expect(json.name).toBe(product!.title);

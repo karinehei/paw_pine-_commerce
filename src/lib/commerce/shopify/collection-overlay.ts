@@ -16,7 +16,8 @@ const TITLES: Record<string, string> = {
 /** Collection overlay when Shopify has no matching handle. Uses live products only. */
 export function collectionOverlayFromHandle(handle: string): Collection {
   const title =
-    TITLES[handle] ?? handle.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    TITLES[handle] ??
+    handle.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
   return {
     id: `gid://shopify/Collection/overlay-${handle}`,

@@ -2,8 +2,15 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { parseProductQuery, queryToHref } from "@/lib/commerce/url-state";
-import { CATEGORY_OPTIONS, SORT_OPTIONS, SPECIES_OPTIONS } from "@/lib/commerce/url-state";
+import {
+  CATEGORY_OPTIONS,
+  SORT_OPTIONS,
+  SPECIES_OPTIONS,
+} from "@/lib/commerce/url-state";
 import type { Facets, ProductQuery } from "@/lib/commerce/types";
+import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
+import { stripLocalePrefix, withLocale } from "@/lib/i18n/path";
+import type { Messages } from "@/lib/i18n/messages";
 
 interface FilterPanelProps {
   facets: Facets;
@@ -21,21 +28,23 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useLocale();
+  const t = useMessages();
   const current = parseProductQuery(Object.fromEntries(searchParams.entries()));
 
   function push(next: ProductQuery) {
-    router.push(queryToHref(pathname, next));
+    router.push(withLocale(queryToHref(stripLocalePrefix(pathname), next), locale));
   }
 
   const hasFilters = Boolean(
     current.species?.length ||
-      current.category?.length ||
-      current.brand?.length ||
-      current.material?.length ||
-      current.availability === "in-stock" ||
-      current.priceMin !== undefined ||
-      current.priceMax !== undefined ||
-      (current.sort && current.sort !== "featured"),
+    current.category?.length ||
+    current.brand?.length ||
+    current.material?.length ||
+    current.availability === "in-stock" ||
+    current.priceMin !== undefined ||
+    current.priceMax !== undefined ||
+    (current.sort && current.sort !== "featured"),
   );
 
   return (
@@ -43,20 +52,22 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
       {hasFilters ? (
         <button
           type="button"
-          className="text-sm text-muted underline-offset-4 hover:underline"
+          className="text-muted text-sm underline-offset-4 hover:underline"
           onClick={() => push({ query: current.query })}
         >
-          Clear filters
+          {t.clearFilters}
         </button>
       ) : null}
       <fieldset>
-        <legend className="text-xs tracking-[0.16em] text-muted uppercase">Sort</legend>
+        <legend className="text-muted text-xs tracking-[0.16em] uppercase">
+          {t.sort}
+        </legend>
         <label htmlFor={`${idPrefix}-sort`} className="sr-only">
-          Sort products
+          {t.sortProducts}
         </label>
         <select
           id={`${idPrefix}-sort`}
-          className="mt-2 min-h-11 w-full border border-border bg-paper px-3 py-2 text-sm"
+          className="border-border bg-paper mt-2 min-h-11 w-full border px-3 py-2 text-sm"
           value={current.sort ?? "featured"}
           onChange={(event) =>
             push({ ...current, sort: event.target.value as ProductQuery["sort"] })
@@ -64,18 +75,20 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option} value={option}>
-              {sortLabel(option)}
+              {sortLabel(option, t)}
             </option>
           ))}
         </select>
       </fieldset>
 
       <FilterGroup
-        legend="Species"
-        options={SPECIES_OPTIONS.filter((value) => facets.species.includes(value)).map((value) => ({
-          value,
-          label: value === "dog" ? "Dogs" : "Cats",
-        }))}
+        legend={t.species}
+        options={SPECIES_OPTIONS.filter((value) => facets.species.includes(value)).map(
+          (value) => ({
+            value,
+            label: value === "dog" ? t.dogs : t.cats,
+          }),
+        )}
         selected={current.species ?? []}
         onToggle={(value) =>
           push({
@@ -86,10 +99,10 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
       />
 
       <FilterGroup
-        legend="Category"
-        options={CATEGORY_OPTIONS.filter((value) => facets.categories.includes(value)).map(
-          (value) => ({ value, label: labelize(value) }),
-        )}
+        legend={t.category}
+        options={CATEGORY_OPTIONS.filter((value) =>
+          facets.categories.includes(value),
+        ).map((value) => ({ value, label: categoryLabel(value, t) }))}
         selected={current.category ?? []}
         onToggle={(value) =>
           push({
@@ -100,30 +113,34 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
       />
 
       <FilterGroup
-        legend="Brand"
+        legend={t.brand}
         options={facets.brands.map((value) => ({ value, label: value }))}
         selected={current.brand ?? []}
         onToggle={(value) => push({ ...current, brand: toggle(current.brand, value) })}
       />
 
       <FilterGroup
-        legend="Material"
+        legend={t.material}
         options={facets.materials.map((value) => ({ value, label: value }))}
         selected={current.material ?? []}
-        onToggle={(value) => push({ ...current, material: toggle(current.material, value) })}
+        onToggle={(value) =>
+          push({ ...current, material: toggle(current.material, value) })
+        }
       />
 
       <fieldset className="space-y-2">
-        <legend className="text-xs tracking-[0.16em] text-muted uppercase">Price</legend>
+        <legend className="text-muted text-xs tracking-[0.16em] uppercase">
+          {t.price}
+        </legend>
         <div className="flex gap-2">
-          <label className="flex-1 text-xs text-muted">
-            Min
+          <label className="text-muted flex-1 text-xs">
+            {t.min}
             <input
               type="number"
               min={facets.priceMin}
               max={facets.priceMax}
               defaultValue={current.priceMin ?? ""}
-              className="mt-1 w-full border border-border bg-paper px-2 py-2 text-sm text-ink"
+              className="border-border bg-paper text-ink mt-1 w-full border px-2 py-2 text-sm"
               onBlur={(event) => {
                 const parsed = Number.parseFloat(event.target.value);
                 push({
@@ -133,14 +150,14 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
               }}
             />
           </label>
-          <label className="flex-1 text-xs text-muted">
-            Max
+          <label className="text-muted flex-1 text-xs">
+            {t.max}
             <input
               type="number"
               min={facets.priceMin}
               max={facets.priceMax}
               defaultValue={current.priceMax ?? ""}
-              className="mt-1 w-full border border-border bg-paper px-2 py-2 text-sm text-ink"
+              className="border-border bg-paper text-ink mt-1 w-full border px-2 py-2 text-sm"
               onBlur={(event) => {
                 const parsed = Number.parseFloat(event.target.value);
                 push({
@@ -154,17 +171,22 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
       </fieldset>
 
       <fieldset className="space-y-2">
-        <legend className="text-xs tracking-[0.16em] text-muted uppercase">Availability</legend>
+        <legend className="text-muted text-xs tracking-[0.16em] uppercase">
+          {t.availability}
+        </legend>
         <label className="flex min-h-11 items-center gap-2 text-sm">
           <input
             id={`${idPrefix}-in-stock`}
             type="checkbox"
             checked={current.availability === "in-stock"}
             onChange={(event) =>
-              push({ ...current, availability: event.target.checked ? "in-stock" : "all" })
+              push({
+                ...current,
+                availability: event.target.checked ? "in-stock" : "all",
+              })
             }
           />
-          In stock
+          {t.inStock}
         </label>
       </fieldset>
     </div>
@@ -188,7 +210,7 @@ function FilterGroup({
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-xs tracking-[0.16em] text-muted uppercase">{legend}</legend>
+      <legend className="text-muted text-xs tracking-[0.16em] uppercase">{legend}</legend>
       {options.map((option) => (
         <label key={option.value} className="flex min-h-11 items-center gap-2 text-sm">
           <input
@@ -203,19 +225,32 @@ function FilterGroup({
   );
 }
 
-function labelize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+function categoryLabel(value: string, t: Messages): string {
+  switch (value) {
+    case "toys":
+      return t.toys;
+    case "harnesses":
+      return t.harnesses;
+    case "beds":
+      return t.beds;
+    case "feeding":
+      return t.feeding;
+    case "scratching":
+      return t.scratching;
+    default:
+      return value;
+  }
 }
 
-function sortLabel(value: string): string {
+function sortLabel(value: string, t: Messages): string {
   switch (value) {
     case "newest":
-      return "Newest";
+      return t.sortNewest;
     case "price-asc":
-      return "Price, low to high";
+      return t.sortPriceAsc;
     case "price-desc":
-      return "Price, high to low";
+      return t.sortPriceDesc;
     default:
-      return "Featured";
+      return t.sortFeatured;
   }
 }

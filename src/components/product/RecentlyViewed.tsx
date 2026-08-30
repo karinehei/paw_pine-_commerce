@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import Link from "next/link";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 import {
   rememberProduct,
   subscribeRecentlyViewed,
@@ -11,11 +12,8 @@ import {
 
 const EMPTY: RecentProduct[] = [];
 
-export function RecentlyViewed({
-  current,
-}: {
-  current: RecentProduct;
-}) {
+export function RecentlyViewed({ current }: { current: RecentProduct }) {
+  const t = useMessages();
   useEffect(() => {
     rememberProduct(current);
   }, [current]);
@@ -32,19 +30,21 @@ export function RecentlyViewed({
 
   return (
     <section className="mt-16" aria-labelledby="recently-viewed-heading">
-      <h2 id="recently-viewed-heading" className="mb-6 font-display text-3xl">
-        Recently viewed
+      <h2 id="recently-viewed-heading" className="font-display mb-6 text-3xl">
+        {t.recentlyViewed}
       </h2>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((item) => (
           <li key={item.handle}>
-            <Link
+            <LocaleLink
               href={`/products/${item.handle}`}
-              className="block min-h-11 border border-border bg-paper px-4 py-3"
+              className="border-border bg-paper block min-h-11 border px-4 py-3"
             >
-              <p className="text-xs tracking-[0.14em] text-muted uppercase">{item.vendor}</p>
+              <p className="text-muted text-xs tracking-[0.14em] uppercase">
+                {item.vendor}
+              </p>
               <p className="mt-1 font-medium">{item.title}</p>
-            </Link>
+            </LocaleLink>
           </li>
         ))}
       </ul>

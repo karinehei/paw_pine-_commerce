@@ -38,9 +38,14 @@ export function createSessionAdapter(): AnalyticsAdapter {
       }
       try {
         const raw = window.sessionStorage.getItem(SESSION_EVENTS_KEY);
-        const existing: AnalyticsEvent[] = raw ? (JSON.parse(raw) as AnalyticsEvent[]) : [];
+        const existing: AnalyticsEvent[] = raw
+          ? (JSON.parse(raw) as AnalyticsEvent[])
+          : [];
         existing.push(event);
-        window.sessionStorage.setItem(SESSION_EVENTS_KEY, JSON.stringify(existing.slice(-200)));
+        window.sessionStorage.setItem(
+          SESSION_EVENTS_KEY,
+          JSON.stringify(existing.slice(-200)),
+        );
       } catch {
         // Private browsing or blocked storage should not break checkout.
       }

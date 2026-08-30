@@ -7,6 +7,7 @@ import { track } from "@/lib/analytics/events";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
 import { toUserErrorMessage } from "@/lib/commerce/errors";
+import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
 import type { Product, ProductVariant } from "@/lib/commerce/types";
 
 interface AddToCartButtonProps {
@@ -17,6 +18,8 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({ product, variant, quantity }: AddToCartButtonProps) {
   const { setCart, openCart, announce } = useCart();
+  const t = useMessages();
+  const locale = useLocale();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const unavailable = !variant || !variant.availableForSale;
@@ -38,10 +41,10 @@ export function AddToCartButton({ product, variant, quantity }: AddToCartButtonP
           value: parseAmount(variant.price) * quantity,
           items: [item],
         });
-        announce(`${product.title} added to bag`);
+        announce(t.addedToBag(product.title));
         openCart();
       } catch (caught) {
-        setError(toUserErrorMessage(caught));
+        setError(toUserErrorMessage(caught, locale));
       }
     });
   }
@@ -52,11 +55,11 @@ export function AddToCartButton({ product, variant, quantity }: AddToCartButtonP
         type="button"
         onClick={handleClick}
         disabled={unavailable || pending}
-        className="btn-primary w-full disabled:cursor-not-allowed disabled:bg-stone disabled:text-muted"
+        className="btn-primary disabled:bg-stone disabled:text-muted w-full disabled:cursor-not-allowed"
       >
-        {unavailable ? "Out of stock" : pending ? "Adding…" : "Add to bag"}
+        {unavailable ? t.outOfStock : pending ? t.adding : t.addToBag}
       </button>
-      {error ? <p className="text-sm text-sale">{error}</p> : null}
+      {error ? <p className="text-sale text-sm">{error}</p> : null}
     </div>
   );
 }

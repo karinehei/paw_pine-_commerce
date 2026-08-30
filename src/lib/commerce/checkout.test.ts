@@ -17,7 +17,9 @@ describe("checkout href", () => {
   });
 
   it("keeps demo mode on the in-app boundary", () => {
-    expect(resolveCheckoutHref("demo", "https://paw-pine.myshopify.com/cart/c/abc")).toEqual({
+    expect(
+      resolveCheckoutHref("demo", "https://paw-pine.myshopify.com/cart/c/abc"),
+    ).toEqual({
       href: "/cart?checkout=demo",
       external: false,
     });

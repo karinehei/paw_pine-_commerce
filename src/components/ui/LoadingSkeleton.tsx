@@ -1,12 +1,7 @@
 import { cn } from "@/lib/format";
 
 export function LoadingSkeleton({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn("animate-pulse bg-stone", className)}
-      aria-hidden="true"
-    />
-  );
+  return <div className={cn("bg-stone animate-pulse", className)} aria-hidden="true" />;
 }
 
 export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
@@ -30,7 +25,11 @@ export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
 
 export function ProductDetailSkeleton() {
   return (
-    <div className="grid gap-10 lg:grid-cols-2" aria-busy="true" aria-label="Loading product">
+    <div
+      className="grid gap-10 lg:grid-cols-2"
+      aria-busy="true"
+      aria-label="Loading product"
+    >
       <LoadingSkeleton className="aspect-[4/5]" />
       <div className="space-y-4 pt-4">
         <LoadingSkeleton className="h-3 w-24" />

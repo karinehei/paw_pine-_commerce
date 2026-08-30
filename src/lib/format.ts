@@ -17,10 +17,7 @@ export function formatMoney(money: Money, locale = "en-GB"): string {
   }).format(amount);
 }
 
-export function moneyFromNumber(
-  amount: number,
-  currencyCode = DEFAULT_CURRENCY,
-): Money {
+export function moneyFromNumber(amount: number, currencyCode = DEFAULT_CURRENCY): Money {
   return {
     amount: amount.toFixed(2),
     currencyCode,
@@ -36,7 +33,11 @@ export function selectedOptionsLabel(
   fallback = "",
 ): string {
   const values = options
-    .filter((option) => option.value.toLowerCase() !== "default title" && option.value.toLowerCase() !== "default")
+    .filter(
+      (option) =>
+        option.value.toLowerCase() !== "default title" &&
+        option.value.toLowerCase() !== "default",
+    )
     .map((option) => option.value);
 
   return values.length > 0 ? values.join(" / ") : fallback;

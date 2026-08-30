@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import { track } from "@/lib/analytics/events";
@@ -14,9 +15,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, listId, listName }: ProductCardProps) {
+  const t = useMessages();
   return (
     <article>
-      <Link
+      <LocaleLink
         href={`/products/${product.handle}`}
         className="group block min-h-11 focus-visible:outline-none"
         onClick={() =>
@@ -28,21 +30,23 @@ export function ProductCard({ product, listId, listName }: ProductCardProps) {
           })
         }
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-stone">
+        <div className="bg-stone relative aspect-[4/5] overflow-hidden">
           <ProductMedia product={product} image={product.featuredImage} />
           {!product.availableForSale ? (
-            <span className="absolute top-3 left-3 bg-paper px-2 py-1 text-xs tracking-wide text-muted uppercase">
-              Sold out
+            <span className="bg-paper text-muted absolute top-3 left-3 px-2 py-1 text-xs tracking-wide uppercase">
+              {t.soldOut}
             </span>
           ) : product.tags.includes("new") ? (
-            <span className="absolute top-3 left-3 bg-paper px-2 py-1 text-xs tracking-wide text-ink uppercase">
-              New
+            <span className="bg-paper text-ink absolute top-3 left-3 px-2 py-1 text-xs tracking-wide uppercase">
+              {t.newShort}
             </span>
           ) : null}
         </div>
         <div className="mt-3 space-y-1.5">
-          <p className="text-[0.7rem] tracking-[0.16em] text-muted uppercase">{product.vendor}</p>
-          <h3 className="text-sm font-medium text-pretty text-ink group-hover:text-pine md:text-base">
+          <p className="text-muted text-[0.7rem] tracking-[0.16em] uppercase">
+            {product.vendor}
+          </p>
+          <h3 className="text-ink group-hover:text-pine text-sm font-medium text-pretty md:text-base">
             {product.title}
           </h3>
           <ProductPrice
@@ -51,7 +55,7 @@ export function ProductCard({ product, listId, listName }: ProductCardProps) {
             className="text-sm"
           />
         </div>
-      </Link>
+      </LocaleLink>
     </article>
   );
 }

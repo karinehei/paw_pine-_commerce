@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 import { track } from "@/lib/analytics/events";
 import { itemsFromCart } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
@@ -15,6 +16,7 @@ export function CheckoutCta({
   href: string;
   external: boolean;
 }) {
+  const t = useMessages();
   function onClick() {
     track({
       name: "begin_checkout",
@@ -29,14 +31,14 @@ export function CheckoutCta({
   if (external) {
     return (
       <a href={href} rel="noopener noreferrer" onClick={onClick} className={className}>
-        Checkout
+        {t.checkout}
       </a>
     );
   }
 
   return (
-    <Link href={href} onClick={onClick} className={className}>
-      Checkout
-    </Link>
+    <LocaleLink href={href} onClick={onClick} className={className}>
+      {t.checkout}
+    </LocaleLink>
   );
 }

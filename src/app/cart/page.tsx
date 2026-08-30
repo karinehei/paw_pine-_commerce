@@ -5,22 +5,28 @@ import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { getCart } from "@/lib/cart/actions";
 import { getCommerceMode } from "@/lib/env";
 import { resolveCheckoutHref } from "@/lib/commerce/checkout";
-import {
-  ESTIMATED_SHIPPING_AMOUNT,
-  FREE_SHIPPING_THRESHOLD,
-} from "@/lib/constants";
+import { ESTIMATED_SHIPPING_AMOUNT, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { formatMoney, moneyFromNumber, parseAmount } from "@/lib/format";
 import { itemsFromCart } from "@/lib/analytics/items";
 import { firstSearchParam, type QueryPageProps } from "@/lib/page-props";
+import { getLocale } from "@/lib/i18n/locale";
+import { getMessages } from "@/lib/i18n/messages";
+import { numberLocale } from "@/lib/i18n/config";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Bag",
-  description: "Review your Paw & Pine bag before checkout.",
-  robots: { index: false, follow: false },
-  alternates: { canonical: "/cart" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = getMessages(await getLocale());
+  return {
+    title: t.bag,
+    description: t.bagMeta,
+    robots: { index: false, follow: false },
+    alternates: { canonical: "/cart" },
+  };
+}
 
 export default async function CartPage({ searchParams }: QueryPageProps) {
+  const t = getMessages(await getLocale());
+  const locale = numberLocale(await getLocale());
   const cart = await getCart();
   const mode = getCommerceMode();
   const params = await searchParams;
@@ -32,18 +38,17 @@ export default async function CartPage({ searchParams }: QueryPageProps) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 md:px-6 md:py-14">
-      <h1 className="font-display text-4xl">Bag</h1>
+      <h1 className="font-display text-4xl">{t.bag}</h1>
       {checkoutDemo && mode === "demo" ? (
-        <p className="mt-6 border border-border bg-paper px-4 py-3 text-sm" role="status">
-          This is the checkout boundary. Payments are taken on Shopify-hosted checkout when a store
-          is connected. No payment is collected in demo mode.
+        <p className="border-border bg-paper mt-6 border px-4 py-3 text-sm" role="status">
+          {t.checkoutDemo}
         </p>
       ) : null}
       {lines.length === 0 || !cart ? (
         <EmptyState
-          title="Your bag is empty"
-          description="Start with dogs, cats, or the full edit."
-          action={{ href: "/collections/all", label: "Continue browsing" }}
+          title={t.emptyBagTitle}
+          description={t.emptyBagPage}
+          action={{ href: "/collections/all", label: t.continueBrowsing }}
         />
       ) : (
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -52,26 +57,25 @@ export default async function CartPage({ searchParams }: QueryPageProps) {
               <CartLineItem key={line.id} line={line} />
             ))}
           </ul>
-          <aside className="h-fit space-y-4 border border-border bg-paper p-6">
+          <aside className="border-border bg-paper h-fit space-y-4 border p-6">
             <div className="flex justify-between text-sm">
-              <span>Subtotal</span>
-              <span>{formatMoney(cart.cost.subtotalAmount)}</span>
+              <span>{t.subtotal}</span>
+              <span>{formatMoney(cart.cost.subtotalAmount, locale)}</span>
             </div>
-            <p className="text-sm text-muted">
+            <p className="text-muted text-sm">
               {remaining > 0
-                ? `${formatMoney(moneyFromNumber(remaining))} from complimentary shipping.`
-                : "Complimentary shipping on this order."}
+                ? t.shippingFrom(formatMoney(moneyFromNumber(remaining), locale))
+                : t.shippingComplimentary}
             </p>
-            <p className="text-xs text-muted">
-              Estimated shipping{" "}
-              {formatMoney(moneyFromNumber(remaining > 0 ? ESTIMATED_SHIPPING_AMOUNT : 0))} until the
-              threshold is met. Duties are not included.
+            <p className="text-muted text-xs">
+              {t.shippingEstimatePage(
+                formatMoney(
+                  moneyFromNumber(remaining > 0 ? ESTIMATED_SHIPPING_AMOUNT : 0),
+                  locale,
+                ),
+              )}
             </p>
-            <CheckoutCta
-              cart={cart}
-              href={checkout.href}
-              external={checkout.external}
-            />
+            <CheckoutCta cart={cart} href={checkout.href} external={checkout.external} />
           </aside>
           <AnalyticsListener
             event={{

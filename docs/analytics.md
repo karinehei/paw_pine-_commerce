@@ -8,19 +8,19 @@ Shopify checkout is hosted. The storefront can measure discovery and cart intent
 
 ## Events
 
-| Event | When it fires | Meaningful fields |
-| --- | --- | --- |
-| `page_view` | App Router navigation | `page_path`, `page_title` |
-| `view_item_list` | Collection, search, and home merchandising grids | `item_list_id`, `item_list_name`, `items[]` |
-| `select_item` | Product card click | list context plus the selected item |
-| `view_item` | Product detail | `currency`, `value`, `items[]` |
-| `search` | Search results with a query | `search_term`, `results_count` |
-| `add_to_cart` | Successful add | `currency`, `value`, line `items[]` |
-| `remove_from_cart` | Line removed | `items[]` |
-| `view_cart` | Cart drawer or `/cart` | `currency`, `value`, `items[]` |
-| `begin_checkout` | Checkout CTA | `currency`, `value`, `items[]` |
-| `purchase` | Order confirmation only | `transaction_id`, `currency`, `value`, `items[]`, optional `demo: true` |
-| `newsletter_signup` | Newsletter form success | none |
+| Event               | When it fires                                    | Meaningful fields                                                       |
+| ------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
+| `page_view`         | App Router navigation                            | `page_path`, `page_title`                                               |
+| `view_item_list`    | Collection, search, and home merchandising grids | `item_list_id`, `item_list_name`, `items[]`                             |
+| `select_item`       | Product card click                               | list context plus the selected item                                     |
+| `view_item`         | Product detail                                   | `currency`, `value`, `items[]`                                          |
+| `search`            | Search results with a query                      | `search_term`, `results_count`                                          |
+| `add_to_cart`       | Successful add                                   | `currency`, `value`, line `items[]`                                     |
+| `remove_from_cart`  | Line removed                                     | `items[]`                                                               |
+| `view_cart`         | Cart drawer or `/cart`                           | `currency`, `value`, `items[]`                                          |
+| `begin_checkout`    | Checkout CTA                                     | `currency`, `value`, `items[]`                                          |
+| `purchase`          | Order confirmation only                          | `transaction_id`, `currency`, `value`, `items[]`, optional `demo: true` |
+| `newsletter_signup` | Newsletter form success                          | none                                                                    |
 
 Item payloads use product handle as `item_id` (stable across demo and Shopify GIDs), plus name, brand, category, variant, price, and quantity when they exist.
 
@@ -28,11 +28,11 @@ Events are a TypeScript discriminated union (`src/lib/analytics/types.ts`). Inva
 
 ## Adapters
 
-| Adapter | Role |
-| --- | --- |
-| `dataLayer` | Pushes `{ event, ecommerce }` so GTM / GA4 can be wired later |
-| `session` | Stores the last 200 events in `sessionStorage` for `/demo/analytics` |
-| `console` | Logs in development, or when `NEXT_PUBLIC_ANALYTICS_DEBUG=true` |
+| Adapter     | Role                                                                 |
+| ----------- | -------------------------------------------------------------------- |
+| `dataLayer` | Pushes `{ event, ecommerce }` so GTM / GA4 can be wired later        |
+| `session`   | Stores the last 200 events in `sessionStorage` for `/demo/analytics` |
+| `console`   | Logs in development, or when `NEXT_PUBLIC_ANALYTICS_DEBUG=true`      |
 
 Add a Plausible or first-party adapter by implementing `AnalyticsAdapter` and registering it in `getAdapters()`. No analytics account is required to run the shop.
 

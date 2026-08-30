@@ -2,8 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import { track } from "@/lib/analytics/events";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 
 export function NewsletterForm() {
+  const t = useMessages();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -27,23 +29,26 @@ export function NewsletterForm() {
       const payload = (await response.json()) as { ok?: boolean; message?: string };
       if (!response.ok || !payload.ok) {
         setStatus("error");
-        setMessage(payload.message ?? "Please enter a valid email.");
+        setMessage(payload.message ?? t.invalidEmail);
         return;
       }
       setStatus("success");
-      setMessage("Thank you — we will write when there is something worth sending.");
+      setMessage(t.newsletterThanks);
       form.reset();
       track({ name: "newsletter_signup" });
     } catch {
       setStatus("error");
-      setMessage("Something went wrong. Please try again.");
+      setMessage(t.genericError);
     }
   }
 
   return (
     <form onSubmit={onSubmit} className="w-full max-w-md">
-      <label htmlFor="newsletter-email" className="text-xs tracking-[0.16em] text-muted uppercase">
-        Notes from the house
+      <label
+        htmlFor="newsletter-email"
+        className="text-muted text-xs tracking-[0.16em] uppercase"
+      >
+        {t.notesFromTheHouse}
       </label>
       <div className="mt-3 flex gap-2">
         <input
@@ -52,19 +57,22 @@ export function NewsletterForm() {
           type="email"
           required
           autoComplete="email"
-          placeholder="Email address"
-          className="min-h-11 flex-1 border border-border bg-linen px-3 py-2 text-sm"
+          placeholder={t.emailAddress}
+          className="border-border bg-linen min-h-11 flex-1 border px-3 py-2 text-sm"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="min-h-11 bg-ink px-4 text-sm tracking-[0.12em] text-paper uppercase disabled:opacity-60"
+          className="bg-ink text-paper min-h-11 px-4 text-sm tracking-[0.12em] uppercase disabled:opacity-60"
         >
-          {status === "loading" ? "Sending" : "Join"}
+          {status === "loading" ? t.sending : t.join}
         </button>
       </div>
       {message ? (
-        <p className={`mt-2 text-sm ${status === "error" ? "text-sale" : "text-muted"}`} role="status">
+        <p
+          className={`mt-2 text-sm ${status === "error" ? "text-sale" : "text-muted"}`}
+          role="status"
+        >
           {message}
         </p>
       ) : null}

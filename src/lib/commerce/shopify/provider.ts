@@ -1,5 +1,9 @@
 import { CommerceError } from "@/lib/commerce/errors";
-import { applyProductQuery, buildFacets, filterByCollection } from "@/lib/commerce/filters";
+import {
+  applyProductQuery,
+  buildFacets,
+  filterByCollection,
+} from "@/lib/commerce/filters";
 import { shopifyFetch } from "@/lib/commerce/shopify/client";
 import { collectionOverlayFromHandle } from "@/lib/commerce/shopify/collection-overlay";
 import {
@@ -152,7 +156,9 @@ export const shopifyProvider: CommerceProvider = {
       revalidate: 30,
     });
     const mapped = data.search.nodes
-      .filter((node): node is ShopifyProductNode => "handle" in node && Boolean(node.handle))
+      .filter(
+        (node): node is ShopifyProductNode => "handle" in node && Boolean(node.handle),
+      )
       .map(mapProduct);
     return connect(applyProductQuery(mapped, { ...filters, query }), mapped);
   },

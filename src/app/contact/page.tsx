@@ -1,18 +1,19 @@
 import { ContactForm } from "@/components/commerce/ContactForm";
+import { getLocale } from "@/lib/i18n/locale";
+import { getMessages } from "@/lib/i18n/messages";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Contact",
-  description: "Write to Paw & Pine about orders, materials, and fit.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = getMessages(await getLocale());
+  return { title: t.contactTitle, description: t.contactMeta };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = getMessages(await getLocale());
   return (
     <article className="mx-auto max-w-2xl px-4 py-16 md:px-6">
-      <h1 className="font-display text-5xl">Contact</h1>
-      <p className="mt-4 text-muted">
-        Questions about fit, materials, or an order. We read everything; we do not maintain a chat
-        widget.
-      </p>
+      <h1 className="font-display text-5xl">{t.contactTitle}</h1>
+      <p className="text-muted mt-4">{t.contactIntro}</p>
       <ContactForm />
     </article>
   );

@@ -14,7 +14,9 @@ import {
 
 describe("security helpers", () => {
   it("accepts only Shopify store domains", () => {
-    expect(normaliseShopifyDomain("https://paw-pine.myshopify.com")).toBe("paw-pine.myshopify.com");
+    expect(normaliseShopifyDomain("https://paw-pine.myshopify.com")).toBe(
+      "paw-pine.myshopify.com",
+    );
     expect(normaliseShopifyDomain("evil.com")).toBeNull();
     expect(isShopifyStoreDomain("paw-pine.myshopify.com")).toBe(true);
   });

@@ -38,7 +38,8 @@ export function buildSuggestions(
 
   const matchedCollections = collections
     .filter((collection) => {
-      const haystack = `${collection.title} ${collection.handle} ${collection.description}`.toLowerCase();
+      const haystack =
+        `${collection.title} ${collection.handle} ${collection.description}`.toLowerCase();
       return haystack.includes(needle);
     })
     .slice(0, 4)

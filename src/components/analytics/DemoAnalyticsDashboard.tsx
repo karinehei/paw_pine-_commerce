@@ -25,9 +25,9 @@ function money(value: number): string {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-border bg-paper px-4 py-5">
-      <p className="text-xs tracking-[0.16em] text-muted uppercase">{label}</p>
-      <p className="mt-2 font-display text-3xl">{value}</p>
+    <div className="border-border bg-paper border px-4 py-5">
+      <p className="text-muted text-xs tracking-[0.16em] uppercase">{label}</p>
+      <p className="font-display mt-2 text-3xl">{value}</p>
     </div>
   );
 }
@@ -44,7 +44,7 @@ function Funnel({ metrics, caption }: { metrics: DemoFunnelMetrics; caption: str
 
   return (
     <div>
-      <p className="mb-4 text-sm text-muted">{caption}</p>
+      <p className="text-muted mb-4 text-sm">{caption}</p>
       <ol className="space-y-3">
         {steps.map((step) => (
           <li key={step.label}>
@@ -52,8 +52,11 @@ function Funnel({ metrics, caption }: { metrics: DemoFunnelMetrics; caption: str
               <span>{step.label}</span>
               <span>{step.value}</span>
             </div>
-            <div className="h-2 bg-stone">
-              <div className="h-2 bg-pine" style={{ width: `${(step.value / max) * 100}%` }} />
+            <div className="bg-stone h-2">
+              <div
+                className="bg-pine h-2"
+                style={{ width: `${(step.value / max) * 100}%` }}
+              />
             </div>
           </li>
         ))}
@@ -100,9 +103,9 @@ export function DemoAnalyticsDashboard() {
     <div className="space-y-12">
       <section>
         <h2 className="font-display text-3xl">Illustrative demo dataset</h2>
-        <p className="mt-2 text-sm text-muted">
-          These figures are invented for the portfolio. They are not live Shopify or analytics
-          traffic.
+        <p className="text-muted mt-2 text-sm">
+          These figures are invented for the portfolio. They are not live Shopify or
+          analytics traffic.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Metric label="Sessions" value={String(illustrative.sessions)} />
@@ -119,7 +122,10 @@ export function DemoAnalyticsDashboard() {
             label="Purchase conversion"
             value={percent(rate(illustrative.purchases, illustrative.sessions))}
           />
-          <Metric label="Average order value" value={money(averageOrderValue(illustrative))} />
+          <Metric
+            label="Average order value"
+            value={money(averageOrderValue(illustrative))}
+          />
         </div>
         <div className="mt-8">
           <Funnel
@@ -130,9 +136,9 @@ export function DemoAnalyticsDashboard() {
       </section>
       <section>
         <h2 className="font-display text-3xl">This browser session</h2>
-        <p className="mt-2 text-sm text-muted">
-          Events recorded in sessionStorage on this device only. Empty until you browse the shop.
-          Still demo instrumentation — not a production property.
+        <p className="text-muted mt-2 text-sm">
+          Events recorded in sessionStorage on this device only. Empty until you browse
+          the shop. Still demo instrumentation — not a production property.
         </p>
         <p className="mt-4 text-sm">{sessionEvents.length} events stored locally.</p>
         <div className="mt-6">

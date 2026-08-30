@@ -1,11 +1,6 @@
 export type Species = "dog" | "cat";
 
-export type ProductCategory =
-  | "toys"
-  | "harnesses"
-  | "beds"
-  | "feeding"
-  | "scratching";
+export type ProductCategory = "toys" | "harnesses" | "beds" | "feeding" | "scratching";
 
 export type SortKey = "featured" | "newest" | "price-asc" | "price-desc";
 
@@ -181,10 +176,7 @@ export interface CommerceProvider {
   getProducts(query?: ProductQuery): Promise<ProductConnection>;
   getProduct(handle: string): Promise<Product | null>;
   getCollections(): Promise<Collection[]>;
-  getCollection(
-    handle: string,
-    query?: ProductQuery,
-  ): Promise<CollectionResult | null>;
+  getCollection(handle: string, query?: ProductQuery): Promise<CollectionResult | null>;
   searchProducts(query: string, filters?: ProductQuery): Promise<ProductConnection>;
   getCart(cartId: string): Promise<Cart | null>;
   createCart(lines?: CartLineInput[]): Promise<Cart>;

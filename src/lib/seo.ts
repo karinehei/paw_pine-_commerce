@@ -47,7 +47,14 @@ export function productMetadata(product: Product): Metadata {
       description,
       url: path,
       images: image
-        ? [{ url: image.url, alt: image.altText || title, width: image.width, height: image.height }]
+        ? [
+            {
+              url: image.url,
+              alt: image.altText || title,
+              width: image.width,
+              height: image.height,
+            },
+          ]
         : undefined,
     },
     twitter: {

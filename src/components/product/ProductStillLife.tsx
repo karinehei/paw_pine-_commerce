@@ -10,14 +10,7 @@ function Shape({ shape, accent }: { shape: ProductShape; accent: string }) {
   switch (shape) {
     case "ring":
       return (
-        <circle
-          cx="120"
-          cy="140"
-          r="42"
-          fill="none"
-          stroke={accent}
-          strokeWidth="18"
-        />
+        <circle cx="120" cy="140" r="42" fill="none" stroke={accent} strokeWidth="18" />
       );
     case "rope":
       return (
@@ -37,13 +30,19 @@ function Shape({ shape, accent }: { shape: ProductShape; accent: string }) {
         </g>
       );
     case "bed":
-      return (
-        <ellipse cx="120" cy="150" rx="70" ry="36" fill={accent} opacity="0.85" />
-      );
+      return <ellipse cx="120" cy="150" rx="70" ry="36" fill={accent} opacity="0.85" />;
     case "raised-bed":
       return (
         <g stroke={accent} fill="none" strokeWidth="8" strokeLinecap="round">
-          <rect x="50" y="110" width="140" height="40" rx="4" fill={accent} opacity="0.35" />
+          <rect
+            x="50"
+            y="110"
+            width="140"
+            height="40"
+            rx="4"
+            fill={accent}
+            opacity="0.35"
+          />
           <path d="M58 150 V190 M182 150 V190" />
         </g>
       );
@@ -74,18 +73,34 @@ function Shape({ shape, accent }: { shape: ProductShape; accent: string }) {
     case "column":
       return <rect x="98" y="70" width="44" height="140" rx="4" fill={accent} />;
     case "panel":
-      return <rect x="70" y="70" width="100" height="140" rx="4" fill={accent} opacity="0.85" />;
+      return (
+        <rect
+          x="70"
+          y="70"
+          width="100"
+          height="140"
+          rx="4"
+          fill={accent}
+          opacity="0.85"
+        />
+      );
     case "perch":
       return (
         <g>
           <rect x="48" y="148" width="144" height="14" rx="2" fill={accent} />
-          <rect x="64" y="118" width="112" height="30" rx="8" fill={accent} opacity="0.5" />
+          <rect
+            x="64"
+            y="118"
+            width="112"
+            height="30"
+            rx="8"
+            fill={accent}
+            opacity="0.5"
+          />
         </g>
       );
     case "cave":
-      return (
-        <path d="M60 190 Q120 40 180 190 Z" fill={accent} opacity="0.85" />
-      );
+      return <path d="M60 190 Q120 40 180 190 Z" fill={accent} opacity="0.85" />;
     case "puzzle":
       return (
         <g fill={accent}>

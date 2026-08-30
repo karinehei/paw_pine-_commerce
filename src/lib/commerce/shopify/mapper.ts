@@ -60,7 +60,10 @@ function mapMoney(money: ShopifyMoney | null | undefined): Money | null {
   return { amount: money.amount, currencyCode: money.currencyCode || "EUR" };
 }
 
-function mapImage(image: ShopifyImage | null | undefined, fallbackAlt: string): ProductImage | null {
+function mapImage(
+  image: ShopifyImage | null | undefined,
+  fallbackAlt: string,
+): ProductImage | null {
   if (!image?.url) {
     return null;
   }
@@ -105,11 +108,10 @@ function hashString(value: string): number {
 }
 
 function mapVisual(handle: string): ProductVisual {
-  const palette =
-    PALETTES[hashString(handle) % PALETTES.length] ?? {
-      background: "#E4D3B8",
-      accent: "#8B5E34",
-    };
+  const palette = PALETTES[hashString(handle) % PALETTES.length] ?? {
+    background: "#E4D3B8",
+    accent: "#8B5E34",
+  };
   const shape = SHAPES[hashString(handle) % SHAPES.length] ?? "bowl";
   return {
     background: palette.background,
@@ -165,16 +167,14 @@ export function mapProduct(node: ShopifyProductNode): Product {
     featuredImage: featured,
     images: images.length > 0 ? images : featured ? [featured] : [],
     priceRange: {
-      minVariantPrice:
-        mapMoney(node.priceRange.minVariantPrice) ?? {
-          amount: "0.00",
-          currencyCode: "EUR",
-        },
-      maxVariantPrice:
-        mapMoney(node.priceRange.maxVariantPrice) ?? {
-          amount: "0.00",
-          currencyCode: "EUR",
-        },
+      minVariantPrice: mapMoney(node.priceRange.minVariantPrice) ?? {
+        amount: "0.00",
+        currencyCode: "EUR",
+      },
+      maxVariantPrice: mapMoney(node.priceRange.maxVariantPrice) ?? {
+        amount: "0.00",
+        currencyCode: "EUR",
+      },
     },
     compareAtPriceRange: {
       minVariantPrice: mapMoney(node.compareAtPriceRange.minVariantPrice),
@@ -266,7 +266,9 @@ export function buildShopifySearchQuery(input: {
     parts.push(quoteShopifySearchTerm(input.query));
   }
   if (input.species?.length) {
-    parts.push(`(${input.species.map((value) => `tag:${quoteShopifySearchTerm(value)}`).join(" OR ")})`);
+    parts.push(
+      `(${input.species.map((value) => `tag:${quoteShopifySearchTerm(value)}`).join(" OR ")})`,
+    );
   }
   if (input.category?.length) {
     parts.push(

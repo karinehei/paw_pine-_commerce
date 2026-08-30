@@ -35,6 +35,14 @@ test("about page is reachable", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText("About Paw & Pine");
 });
 
+test("finnish home is available as a second language", async ({ page }) => {
+  await page.goto("/fi");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Hiljaisia esineitä",
+  );
+  await expect(page.getByRole("link", { name: /koirille/i })).toBeVisible();
+});
+
 test("empty search shows an empty state", async ({ page }) => {
   await page.goto("/search?q=zzzz-not-a-product");
   await expect(page.getByRole("heading", { name: "No matching pieces" })).toBeVisible();

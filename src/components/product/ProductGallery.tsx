@@ -16,7 +16,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
 
   return (
     <div className="space-y-3">
-      <div className="aspect-[4/5] overflow-hidden bg-stone">
+      <div className="bg-stone aspect-[4/5] overflow-hidden">
         <ProductMedia
           product={product}
           image={current}
@@ -34,8 +34,8 @@ export function ProductGallery({ product }: ProductGalleryProps) {
                 aria-label={`View image ${index + 1}`}
                 aria-current={index === active}
                 className={cn(
-                  "min-h-11 min-w-11 overflow-hidden bg-stone",
-                  index === active ? "ring-2 ring-pine ring-offset-2" : "opacity-70",
+                  "bg-stone min-h-11 min-w-11 overflow-hidden",
+                  index === active ? "ring-pine ring-2 ring-offset-2" : "opacity-70",
                 )}
               >
                 <ProductMedia product={product} image={image} sizes="64px" />

@@ -297,11 +297,7 @@ const drafts: CatalogDraft[] = [
     material: "Stoneware",
     price: 42,
     tags: ["bestseller", "dog", "ceramic"],
-    features: [
-      "Set of two wide bowls",
-      "Weighted base",
-      "Dishwasher safe",
-    ],
+    features: ["Set of two wide bowls", "Weighted base", "Dishwasher safe"],
     createdAt: "2025-08-11T08:00:00.000Z",
     visual: { background: "#D8DCD4", accent: "#6A7568", shape: "bowl" },
   },
@@ -469,11 +465,7 @@ const drafts: CatalogDraft[] = [
     material: "Beech",
     price: 32,
     tags: ["cat", "new", "wood"],
-    features: [
-      "Solid beech with food-safe oil",
-      "Three sliding wells",
-      "Hand-wash only",
-    ],
+    features: ["Solid beech with food-safe oil", "Three sliding wells", "Hand-wash only"],
     createdAt: "2026-04-18T08:00:00.000Z",
     visual: { background: "#E6D8B8", accent: "#8A6A32", shape: "puzzle" },
   },
@@ -486,21 +478,24 @@ export const demoCollections: Collection[] = [
     id: "gid://demo/Collection/all",
     handle: "all",
     title: "All products",
-    description: "The full Paw & Pine edit — objects for dogs and cats, chosen for material and daily use.",
+    description:
+      "The full Paw & Pine edit — objects for dogs and cats, chosen for material and daily use.",
     image: null,
   },
   {
     id: "gid://demo/Collection/dogs",
     handle: "dogs",
     title: "Dogs",
-    description: "Walk gear, rest, and feeding pieces with the same attention you would give the rest of the house.",
+    description:
+      "Walk gear, rest, and feeding pieces with the same attention you would give the rest of the house.",
     image: null,
   },
   {
     id: "gid://demo/Collection/cats",
     handle: "cats",
     title: "Cats",
-    description: "Scratching, perches, and quiet toys that can live in a considered room.",
+    description:
+      "Scratching, perches, and quiet toys that can live in a considered room.",
     image: null,
   },
   {
@@ -514,7 +509,8 @@ export const demoCollections: Collection[] = [
     id: "gid://demo/Collection/harnesses",
     handle: "harnesses",
     title: "Harnesses",
-    description: "Daily walk harnesses in recycled and standard nylon, cut for a calm silhouette.",
+    description:
+      "Daily walk harnesses in recycled and standard nylon, cut for a calm silhouette.",
     image: null,
   },
   {
@@ -528,14 +524,16 @@ export const demoCollections: Collection[] = [
     id: "gid://demo/Collection/feeding",
     handle: "feeding",
     title: "Feeding",
-    description: "Ceramic and stoneware vessels, plus a beech puzzle tray for slower meals.",
+    description:
+      "Ceramic and stoneware vessels, plus a beech puzzle tray for slower meals.",
     image: null,
   },
   {
     id: "gid://demo/Collection/scratching",
     handle: "scratching",
     title: "Scratching",
-    description: "Sisal column and wall panel — dedicated surfaces that belong in the room.",
+    description:
+      "Sisal column and wall panel — dedicated surfaces that belong in the room.",
     image: null,
   },
   {
@@ -558,10 +556,12 @@ export function findDemoProduct(handle: string): Product | undefined {
   return demoProducts.find((product) => product.handle === handle);
 }
 
-export function findDemoVariant(variantId: string): {
-  product: Product;
-  variant: ProductVariant;
-} | undefined {
+export function findDemoVariant(variantId: string):
+  | {
+      product: Product;
+      variant: ProductVariant;
+    }
+  | undefined {
   for (const product of demoProducts) {
     const variant = product.variants.find((item) => item.id === variantId);
     if (variant) {

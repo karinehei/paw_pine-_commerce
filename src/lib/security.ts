@@ -73,7 +73,11 @@ export function clampSearchQuery(value: string | undefined): string | undefined 
 
 /** Quote a term for Shopify's product search syntax so operators cannot be injected. */
 export function quoteShopifySearchTerm(value: string): string {
-  const cleaned = value.replace(/["\\]/g, " ").replace(/\s+/g, " ").trim().slice(0, MAX_FILTER_VALUE_LENGTH);
+  const cleaned = value
+    .replace(/["\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_FILTER_VALUE_LENGTH);
   if (!cleaned) {
     return '""';
   }
@@ -81,7 +85,10 @@ export function quoteShopifySearchTerm(value: string): string {
 }
 
 export function sanitiseFilterValue(value: string): string | undefined {
-  const cleaned = value.replace(/[^\p{L}\p{N} \-_.]/gu, "").trim().slice(0, MAX_FILTER_VALUE_LENGTH);
+  const cleaned = value
+    .replace(/[^\p{L}\p{N} \-_.]/gu, "")
+    .trim()
+    .slice(0, MAX_FILTER_VALUE_LENGTH);
   return cleaned || undefined;
 }
 

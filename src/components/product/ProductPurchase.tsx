@@ -6,25 +6,31 @@ import { ProductPrice } from "@/components/product/ProductPrice";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { formatDispatchWindow } from "@/lib/commerce/delivery";
 import { defaultSelections, findVariant, optionStatesFor } from "@/lib/commerce/variants";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { clampQuantity } from "@/lib/security";
 import type { Product } from "@/lib/commerce/types";
+import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
+import { numberLocale } from "@/lib/i18n/config";
 
 export function ProductPurchase({ product }: { product: Product }) {
   const [selected, setSelected] = useState(() => defaultSelections(product));
   const [quantity, setQuantity] = useState(1);
+  const t = useMessages();
+  const locale = numberLocale(useLocale());
   const variant = useMemo(() => findVariant(product, selected), [product, selected]);
-  const valueStates = useMemo(() => optionStatesFor(product, selected), [product, selected]);
+  const valueStates = useMemo(
+    () => optionStatesFor(product, selected),
+    [product, selected],
+  );
   const maxQuantity = clampQuantity(99, variant?.quantityAvailable);
   const quantityForCart = clampQuantity(quantity, variant?.quantityAvailable);
 
   const stockLabel = variant
     ? variant.availableForSale
       ? variant.quantityAvailable !== null && variant.quantityAvailable <= 4
-        ? `Only ${variant.quantityAvailable} left`
-        : "In stock · ready to dispatch"
-      : "This option is currently out of stock"
-    : "That combination is not available";
+        ? t.onlyLeft(variant.quantityAvailable)
+        : t.inStockDispatch
+      : t.optionOutOfStock
+    : t.combinationUnavailable;
 
   return (
     <div className="space-y-6">
@@ -45,16 +51,18 @@ export function ProductPurchase({ product }: { product: Product }) {
         options={product.options}
         selected={selected}
         valueStates={valueStates}
-        onChange={(name, value) => setSelected((current) => ({ ...current, [name]: value }))}
+        onChange={(name, value) =>
+          setSelected((current) => ({ ...current, [name]: value }))
+        }
       />
       <div>
-        <label htmlFor="quantity" className="text-sm text-muted">
-          Quantity
+        <label htmlFor="quantity" className="text-muted text-sm">
+          {t.quantity}
         </label>
-        <div className="mt-2 flex w-36 items-center border border-border">
+        <div className="border-border mt-2 flex w-36 items-center border">
           <button
             type="button"
-            aria-label="Decrease quantity"
+            aria-label={t.decreaseQuantity}
             className="min-h-11 min-w-11 px-3"
             onClick={() => setQuantity((value) => Math.max(1, value - 1))}
           >
@@ -67,13 +75,18 @@ export function ProductPurchase({ product }: { product: Product }) {
             max={maxQuantity}
             value={quantityForCart}
             onChange={(event) =>
-              setQuantity(clampQuantity(Number(event.target.value) || 1, variant?.quantityAvailable))
+              setQuantity(
+                clampQuantity(
+                  Number(event.target.value) || 1,
+                  variant?.quantityAvailable,
+                ),
+              )
             }
             className="w-full border-0 bg-transparent text-center text-sm"
           />
           <button
             type="button"
-            aria-label="Increase quantity"
+            aria-label={t.increaseQuantity}
             className="min-h-11 min-w-11 px-3"
             onClick={() =>
               setQuantity((value) => clampQuantity(value + 1, variant?.quantityAvailable))
@@ -83,13 +96,13 @@ export function ProductPurchase({ product }: { product: Product }) {
           </button>
         </div>
       </div>
-      <p className="text-sm text-muted" aria-live="polite">
+      <p className="text-muted text-sm" aria-live="polite">
         {stockLabel}
       </p>
-      <p className="text-sm text-muted">
+      <p className="text-muted text-sm">
         {variant?.availableForSale
-          ? `Dispatch ${formatDispatchWindow()} · complimentary shipping over €${FREE_SHIPPING_THRESHOLD}.`
-          : "We’ll email when this option returns."}
+          ? t.dispatchOver(formatDispatchWindow(new Date(), locale))
+          : t.emailWhenBack}
       </p>
       <AddToCartButton product={product} variant={variant} quantity={quantityForCart} />
     </div>

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  addDemoLine,
-  hydrateDemoCart,
-  updateDemoLine,
-} from "@/lib/commerce/demo/cart";
+import { addDemoLine, hydrateDemoCart, updateDemoLine } from "@/lib/commerce/demo/cart";
 import { demoProducts } from "@/lib/commerce/demo/catalog";
 import { CommerceError } from "@/lib/commerce/errors";
 import { formatMoney, parseAmount } from "@/lib/format";
@@ -30,7 +26,9 @@ describe("demo cart", () => {
   });
 
   it("rejects unknown variants", () => {
-    expect(() => addDemoLine([], { variantId: "missing", quantity: 1 })).toThrow(CommerceError);
+    expect(() => addDemoLine([], { variantId: "missing", quantity: 1 })).toThrow(
+      CommerceError,
+    );
   });
 });
 

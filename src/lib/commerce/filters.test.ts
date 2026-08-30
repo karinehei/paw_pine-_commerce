@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { applyProductQuery, buildFacets, filterByCollection } from "@/lib/commerce/filters";
+import {
+  applyProductQuery,
+  buildFacets,
+  filterByCollection,
+} from "@/lib/commerce/filters";
 import { demoProducts } from "@/lib/commerce/demo/catalog";
-import { parseProductQuery, queryToHref, serializeProductQuery } from "@/lib/commerce/url-state";
+import {
+  parseProductQuery,
+  queryToHref,
+  serializeProductQuery,
+} from "@/lib/commerce/url-state";
 
 describe("applyProductQuery", () => {
   it("filters by species and category", () => {
@@ -17,7 +25,9 @@ describe("applyProductQuery", () => {
 
   it("sorts by price ascending", () => {
     const result = applyProductQuery(demoProducts, { sort: "price-asc" });
-    const prices = result.map((product) => Number(product.priceRange.minVariantPrice.amount));
+    const prices = result.map((product) =>
+      Number(product.priceRange.minVariantPrice.amount),
+    );
     expect([...prices].sort((a, b) => a - b)).toEqual(prices);
   });
 

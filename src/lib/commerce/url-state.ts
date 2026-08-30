@@ -77,7 +77,10 @@ export function parseProductQuery(searchParams: SearchParams): ProductQuery {
         : undefined,
     priceMin: numberValue(first(searchParams.priceMin)),
     priceMax: numberValue(first(searchParams.priceMax)),
-    sort: sortValue && SORTS.includes(sortValue as SortKey) ? (sortValue as SortKey) : undefined,
+    sort:
+      sortValue && SORTS.includes(sortValue as SortKey)
+        ? (sortValue as SortKey)
+        : undefined,
   };
 }
 
@@ -123,4 +126,8 @@ export function queryToHref(pathname: string, query: ProductQuery): string {
   return search ? `${safePath}?${search}` : safePath;
 }
 
-export { SPECIES as SPECIES_OPTIONS, CATEGORIES as CATEGORY_OPTIONS, SORTS as SORT_OPTIONS };
+export {
+  SPECIES as SPECIES_OPTIONS,
+  CATEGORIES as CATEGORY_OPTIONS,
+  SORTS as SORT_OPTIONS,
+};

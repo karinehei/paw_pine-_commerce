@@ -59,20 +59,25 @@ export function applyProductQuery(
 
   if (query.priceMin !== undefined) {
     result = result.filter(
-      (product) => parseAmount(product.priceRange.minVariantPrice) >= (query.priceMin ?? 0),
+      (product) =>
+        parseAmount(product.priceRange.minVariantPrice) >= (query.priceMin ?? 0),
     );
   }
 
   if (query.priceMax !== undefined) {
     result = result.filter(
-      (product) => parseAmount(product.priceRange.minVariantPrice) <= (query.priceMax ?? 0),
+      (product) =>
+        parseAmount(product.priceRange.minVariantPrice) <= (query.priceMax ?? 0),
     );
   }
 
   return sortProducts(result, query.sort ?? "featured");
 }
 
-export function sortProducts(products: Product[], sort: ProductQuery["sort"] = "featured"): Product[] {
+export function sortProducts(
+  products: Product[],
+  sort: ProductQuery["sort"] = "featured",
+): Product[] {
   const copy = [...products];
 
   switch (sort) {
@@ -106,7 +111,9 @@ export function sortProducts(products: Product[], sort: ProductQuery["sort"] = "
 }
 
 export function buildFacets(products: Product[]): Facets {
-  const prices = products.map((product) => parseAmount(product.priceRange.minVariantPrice));
+  const prices = products.map((product) =>
+    parseAmount(product.priceRange.minVariantPrice),
+  );
 
   return {
     species: uniqueSorted(products.map((product) => product.species)) as Species[],
@@ -124,7 +131,10 @@ function uniqueSorted(values: string[]): string[] {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b));
 }
 
-export function filterByCollection(products: Product[], handle: string): Product[] | null {
+export function filterByCollection(
+  products: Product[],
+  handle: string,
+): Product[] | null {
   switch (handle) {
     case "all":
       return products;

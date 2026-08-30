@@ -73,7 +73,9 @@ describe("Shopify Storefront config", () => {
       SHOPIFY_STOREFRONT_ACCESS_TOKEN: "public",
     });
     expect(config?.tokenKind).toBe("private");
-    expect(storefrontRequestHeaders(config!)["Shopify-Storefront-Private-Token"]).toBe("private");
+    expect(storefrontRequestHeaders(config!)["Shopify-Storefront-Private-Token"]).toBe(
+      "private",
+    );
   });
 
   it("strips quotes copied from Vercel or .env files", () => {

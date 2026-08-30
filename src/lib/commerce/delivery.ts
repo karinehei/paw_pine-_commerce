@@ -13,9 +13,9 @@ function addWeekdays(start: Date, days: number): Date {
   return date;
 }
 
-export function formatDispatchWindow(now = new Date()): string {
+export function formatDispatchWindow(now = new Date(), locale = "en-GB"): string {
   const min = addWeekdays(now, DISPATCH_MIN_DAYS);
   const max = addWeekdays(now, DISPATCH_MAX_DAYS);
-  const formatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
+  const formatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
   return `${formatter.format(min)}–${formatter.format(max)}`;
 }

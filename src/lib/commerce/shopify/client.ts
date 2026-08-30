@@ -10,6 +10,9 @@ import {
   type StorefrontTokenKind,
 } from "@/lib/commerce/shopify/config";
 import { logStorefrontFailure, toStorefrontError } from "@/lib/commerce/shopify/log";
+import { withLanguageInContext } from "@/lib/commerce/shopify/in-context";
+import { shopifyLanguage } from "@/lib/i18n/config";
+import { getLocale } from "@/lib/i18n/locale";
 
 interface ShopifyGraphQLResponse<T> {
   data?: T;
@@ -71,7 +74,11 @@ export async function shopifyFetch<T>({
 
   const endpoint = storefrontEndpoint(config);
   const ip = await buyerIp();
-  const body = JSON.stringify({ query, variables });
+  const language = shopifyLanguage(await getLocale());
+  const body = JSON.stringify({
+    query: withLanguageInContext(query),
+    variables: { ...variables, language },
+  });
   let usedKind: StorefrontTokenKind = config.tokenKind;
 
   let response: Response;
@@ -88,10 +95,7 @@ export async function shopifyFetch<T>({
     throw new CommerceError("network");
   }
 
-  if (
-    (response.status === 401 || response.status === 403) &&
-    usedKind === "private"
-  ) {
+  if ((response.status === 401 || response.status === 403) && usedKind === "private") {
     logStorefrontFailure({
       operation,
       code: "unauthorized_retry_public",
@@ -116,7 +120,9 @@ export async function shopifyFetch<T>({
   if (!response.ok) {
     const detail = [
       `header=${usedKind}`,
-      isShopifyAdminApiToken(config.token) ? "hint=use_headless_storefront_private_token" : "",
+      isShopifyAdminApiToken(config.token)
+        ? "hint=use_headless_storefront_private_token"
+        : "",
     ]
       .filter(Boolean)
       .join(" ");

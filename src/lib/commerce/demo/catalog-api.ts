@@ -8,6 +8,12 @@ import {
   demoProducts,
   findDemoProduct,
 } from "@/lib/commerce/demo/catalog";
+import {
+  localizeCollection,
+  localizeProduct,
+  localizeProducts,
+} from "@/lib/commerce/demo/localize";
+import { getLocale } from "@/lib/i18n/locale";
 import type {
   CollectionResult,
   ProductConnection,
@@ -16,54 +22,67 @@ import type {
 
 export const demoCatalogApi = {
   async getProducts(query: ProductQuery = {}): Promise<ProductConnection> {
-    const products = applyProductQuery(demoProducts, query);
+    const locale = await getLocale();
+    const catalogue = localizeProducts(demoProducts, locale);
+    const products = applyProductQuery(catalogue, query);
     return {
       products,
-      facets: buildFacets(demoProducts),
+      facets: buildFacets(catalogue),
     };
   },
 
   async getProduct(handle: string) {
-    return findDemoProduct(handle) ?? null;
+    const locale = await getLocale();
+    const product = findDemoProduct(handle);
+    return product ? localizeProduct(product, locale) : null;
   },
 
   async getCollections() {
-    return demoCollections;
+    const locale = await getLocale();
+    return demoCollections.map((collection) => localizeCollection(collection, locale));
   },
 
   async getCollection(
     handle: string,
     query: ProductQuery = {},
   ): Promise<CollectionResult | null> {
+    const locale = await getLocale();
     const collection = demoCollections.find((item) => item.handle === handle);
     const scoped = filterByCollection(demoProducts, handle);
     if (!collection || !scoped) {
       return null;
     }
+    const products = localizeProducts(scoped, locale);
 
     return {
-      collection,
-      products: applyProductQuery(scoped, query),
-      facets: buildFacets(scoped),
+      collection: localizeCollection(collection, locale),
+      products: applyProductQuery(products, query),
+      facets: buildFacets(products),
     };
   },
 
   async searchProducts(query: string, filters: ProductQuery = {}) {
-    const products = applyProductQuery(demoProducts, { ...filters, query });
+    const locale = await getLocale();
+    const catalogue = localizeProducts(demoProducts, locale);
+    const products = applyProductQuery(catalogue, { ...filters, query });
     return {
       products,
-      facets: buildFacets(demoProducts),
+      facets: buildFacets(catalogue),
     };
   },
 
   async getRecommendations(handle: string) {
+    const locale = await getLocale();
     const product = findDemoProduct(handle);
     if (!product) {
-      return demoProducts.slice(0, 4);
+      return localizeProducts(demoProducts.slice(0, 4), locale);
     }
 
-    return demoProducts
-      .filter((item) => item.handle !== handle && item.species === product.species)
-      .slice(0, 4);
+    return localizeProducts(
+      demoProducts
+        .filter((item) => item.handle !== handle && item.species === product.species)
+        .slice(0, 4),
+      locale,
+    );
   },
 };

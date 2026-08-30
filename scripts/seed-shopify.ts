@@ -73,7 +73,9 @@ async function resolveAdminToken(domain: string): Promise<string> {
     if (!response.ok || !payload.access_token) {
       throw new Error(
         [
-          payload.error_description ?? payload.error ?? `Token request failed: HTTP ${response.status}.`,
+          payload.error_description ??
+            payload.error ??
+            `Token request failed: HTTP ${response.status}.`,
           "Use Dev Dashboard Client ID + Client secret (App settings), not the Headless Storefront token.",
           "The app must be installed on this store, and the store must be in the same Shopify organization as the app.",
         ].join(" "),
@@ -111,14 +113,17 @@ async function adminFetch<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const response = await fetch(`https://${domain}/admin/api/${API_VERSION}/graphql.json`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Access-Token": token,
+  const response = await fetch(
+    `https://${domain}/admin/api/${API_VERSION}/graphql.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": token,
+      },
+      body: JSON.stringify({ query, variables }),
     },
-    body: JSON.stringify({ query, variables }),
-  });
+  );
 
   const payload = (await response.json()) as GraphQLResponse<T>;
   if (!response.ok || payload.errors?.length) {
@@ -149,7 +154,9 @@ function tagsFor(product: Product): string[] {
 
 function productInput(product: Product) {
   const optionName = product.options[0]?.name ?? "Title";
-  const values = product.variants.map((variant) => variant.selectedOptions[0]?.value ?? variant.title);
+  const values = product.variants.map(
+    (variant) => variant.selectedOptions[0]?.value ?? variant.title,
+  );
 
   return {
     title: product.title,
@@ -173,7 +180,9 @@ function productInput(product: Product) {
         },
       ],
       price: parseAmount(variant.price),
-      compareAtPrice: variant.compareAtPrice ? parseAmount(variant.compareAtPrice) : undefined,
+      compareAtPrice: variant.compareAtPrice
+        ? parseAmount(variant.compareAtPrice)
+        : undefined,
       sku: `${product.sku}-${(variant.selectedOptions[0]?.value ?? "default").replace(/\s+/g, "-")}`,
     })),
   };
@@ -274,7 +283,9 @@ async function main(): Promise<void> {
     const { currentAppInstallation } = await adminFetch<{
       currentAppInstallation: { accessScopes: Array<{ handle: string }> };
     }>(domain, token, ACCESS_SCOPES);
-    const scopes = currentAppInstallation.accessScopes.map((scope) => scope.handle).join(", ");
+    const scopes = currentAppInstallation.accessScopes
+      .map((scope) => scope.handle)
+      .join(", ");
     console.log(`[seed] token scopes: ${scopes || "(none listed)"}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -326,7 +337,10 @@ async function main(): Promise<void> {
     if (publicationInput.length > 0) {
       const published = await adminFetch<{
         publishablePublish: { userErrors: Array<{ message: string }> };
-      }>(domain, token, PUBLISH, { id: result.productSet.product.id, input: publicationInput });
+      }>(domain, token, PUBLISH, {
+        id: result.productSet.product.id,
+        input: publicationInput,
+      });
       const publishError = userErrorMessage(published.publishablePublish.userErrors);
       if (publishError) {
         console.warn(`[seed] publish ${product.handle}: ${publishError}`);
@@ -365,7 +379,9 @@ async function main(): Promise<void> {
         input: {
           title: collection.title,
           handle: collection.handle,
-          descriptionHtml: collection.description ? `<p>${collection.description}</p>` : "",
+          descriptionHtml: collection.description
+            ? `<p>${collection.description}</p>`
+            : "",
           ruleSet: {
             appliedDisjunctively: false,
             rules: [{ column: "TAG", relation: "EQUALS", condition: tag }],
@@ -375,7 +391,9 @@ async function main(): Promise<void> {
 
       const error = userErrorMessage(created.collectionCreate.userErrors);
       if (error || !created.collectionCreate.collection) {
-        throw new Error(`collection ${collection.handle}: ${error ?? "no collection returned"}`);
+        throw new Error(
+          `collection ${collection.handle}: ${error ?? "no collection returned"}`,
+        );
       }
       collectionId = created.collectionCreate.collection.id;
     }
@@ -396,11 +414,7 @@ async function main(): Promise<void> {
   if (archiveSamples) {
     const listed = await adminFetch<{
       products: { nodes: Array<{ id: string; handle: string }> };
-    }>(
-      domain,
-      token,
-      `query { products(first: 50) { nodes { id handle } } }`,
-    );
+    }>(domain, token, `query { products(first: 50) { nodes { id handle } } }`);
     for (const product of listed.products.nodes) {
       if (!SAMPLE_HANDLES.has(product.handle)) {
         continue;

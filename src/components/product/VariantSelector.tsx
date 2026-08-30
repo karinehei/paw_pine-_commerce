@@ -25,13 +25,17 @@ export function VariantSelector({
     <div className="space-y-4">
       {options.map((option) => (
         <fieldset key={option.id} className="space-y-2">
-          <legend className="text-sm text-muted">
+          <legend className="text-muted text-sm">
             {option.name}
             {selected[option.name] ? (
-              <span className="ml-2 text-ink">{selected[option.name]}</span>
+              <span className="text-ink ml-2">{selected[option.name]}</span>
             ) : null}
           </legend>
-          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={option.name}>
+          <div
+            className="flex flex-wrap gap-2"
+            role="radiogroup"
+            aria-label={option.name}
+          >
             {option.values.map((value) => {
               const state = valueStates[option.name]?.[value] ?? "available";
               const checked = selected[option.name] === value;
@@ -49,11 +53,17 @@ export function VariantSelector({
                   }}
                   disabled={invalid}
                   aria-label={`${option.name} ${value}${
-                    state === "out_of_stock" ? ", out of stock" : invalid ? ", unavailable" : ""
+                    state === "out_of_stock"
+                      ? ", out of stock"
+                      : invalid
+                        ? ", unavailable"
+                        : ""
                   }`}
                   className={cn(
                     "min-h-11 min-w-11 border px-3 py-2 text-sm",
-                    checked ? "border-ink bg-ink text-paper" : "border-border bg-paper text-ink",
+                    checked
+                      ? "border-ink bg-ink text-paper"
+                      : "border-border bg-paper text-ink",
                     state === "out_of_stock" && "opacity-50",
                     invalid && "cursor-not-allowed line-through opacity-30",
                   )}

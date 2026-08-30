@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import Link from "next/link";
+import { LocaleLink } from "@/components/i18n/LocaleLink";
+import { useMessages } from "@/components/i18n/LocaleProvider";
 import { useCart } from "@/components/cart/CartProvider";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProductPrice } from "@/components/product/ProductPrice";
@@ -12,6 +13,7 @@ import type { CartLine } from "@/lib/commerce/types";
 
 export function CartLineItem({ line }: { line: CartLine }) {
   const { setCart, announce } = useCart();
+  const t = useMessages();
   const [pending, startTransition] = useTransition();
 
   function update(quantity: number) {
@@ -34,40 +36,43 @@ export function CartLineItem({ line }: { line: CartLine }) {
           },
         ],
       });
-      announce(`${line.merchandise.product.title} removed from bag`);
+      announce(t.removedFromBag(line.merchandise.product.title));
       setCart(cart);
     });
   }
 
   return (
     <li className={`flex gap-4 ${pending ? "opacity-60" : ""}`}>
-      <Link
+      <LocaleLink
         href={`/products/${line.merchandise.product.handle}`}
         tabIndex={-1}
         aria-hidden="true"
-        className="block h-24 w-20 shrink-0 bg-stone"
+        className="bg-stone block h-24 w-20 shrink-0"
       >
         <ProductMedia
           product={line.merchandise.product}
           image={line.merchandise.image}
           sizes="80px"
         />
-      </Link>
+      </LocaleLink>
       <div className="min-w-0 flex-1">
         <div className="flex justify-between gap-3">
-          <Link href={`/products/${line.merchandise.product.handle}`} className="font-medium">
+          <LocaleLink
+            href={`/products/${line.merchandise.product.handle}`}
+            className="font-medium"
+          >
             {line.merchandise.product.title}
-          </Link>
+          </LocaleLink>
           <ProductPrice price={line.cost.totalAmount} className="text-sm" />
         </div>
-        <p className="mt-1 text-sm text-muted">
+        <p className="text-muted mt-1 text-sm">
           {selectedOptionsLabel(line.merchandise.selectedOptions, line.merchandise.title)}
         </p>
         <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center border border-border">
+          <div className="border-border flex items-center border">
             <button
               type="button"
-              aria-label="Decrease quantity"
+              aria-label={t.decreaseQuantity}
               className="min-h-11 min-w-11 px-2"
               onClick={() => update(line.quantity - 1)}
             >
@@ -78,7 +83,7 @@ export function CartLineItem({ line }: { line: CartLine }) {
             </span>
             <button
               type="button"
-              aria-label="Increase quantity"
+              aria-label={t.increaseQuantity}
               className="min-h-11 min-w-11 px-2"
               onClick={() => update(line.quantity + 1)}
             >
@@ -88,9 +93,9 @@ export function CartLineItem({ line }: { line: CartLine }) {
           <button
             type="button"
             onClick={remove}
-            className="min-h-11 text-sm text-muted underline-offset-4 hover:underline"
+            className="text-muted min-h-11 text-sm underline-offset-4 hover:underline"
           >
-            Remove
+            {t.remove}
           </button>
         </div>
       </div>

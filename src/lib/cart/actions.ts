@@ -89,7 +89,11 @@ export async function updateCartItem(lineId: string, quantity: number): Promise<
   }
 
   try {
-    return await getCommerceProvider().updateCart(cookie.id, lineId, quantity <= 0 ? 0 : clampQuantity(quantity));
+    return await getCommerceProvider().updateCart(
+      cookie.id,
+      lineId,
+      quantity <= 0 ? 0 : clampQuantity(quantity),
+    );
   } catch (error) {
     if (error instanceof CommerceError && error.code === "invalid_cart") {
       await clearCartCookie();

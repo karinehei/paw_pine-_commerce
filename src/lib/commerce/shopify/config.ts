@@ -25,7 +25,10 @@ export function sanitiseShopifySecret(value?: string): string | undefined {
   }
   token = token.replace(/^Bearer\s+/i, "").trim();
   token = token
-    .replace(/^(Shopify-Storefront-Private-Token|X-Shopify-Storefront-Access-Token)\s*[:=]\s*/i, "")
+    .replace(
+      /^(Shopify-Storefront-Private-Token|X-Shopify-Storefront-Access-Token)\s*[:=]\s*/i,
+      "",
+    )
     .trim();
   return token || undefined;
 }

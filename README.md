@@ -67,7 +67,7 @@ npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No Shopify account is required.
+Open [http://localhost:3000](http://localhost:3000). No Shopify account is required. Finnish is available at [http://localhost:3000/fi](http://localhost:3000/fi) (EN | FI in the header).
 
 ```bash
 npm run lint
@@ -101,14 +101,14 @@ Do not put the Admin token in Vercel. It is only for this local seed script.
 
 Copy `.env.example` to `.env.local` only if you connect a shop. Tokens stay on the server. Never commit `.env.local`. Never use `NEXT_PUBLIC_` for Shopify secrets.
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Production canonical URLs | Site origin |
-| `NEXT_PUBLIC_GTM_ID` | No | Optional `GTM-…` container |
-| `NEXT_PUBLIC_ANALYTICS_DEBUG` | No | Console-log analytics events |
-| `SHOPIFY_STORE_DOMAIN` | Live catalogue | `your-store.myshopify.com` |
-| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Live catalogue | Headless **private access token** (server only). Not the Admin API token. |
-| `SHOPIFY_STOREFRONT_API_VERSION` | No | Defaults to `2026-07` |
+| Variable                           | Required                  | Purpose                                                                   |
+| ---------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`             | Production canonical URLs | Site origin                                                               |
+| `NEXT_PUBLIC_GTM_ID`               | No                        | Optional `GTM-…` container                                                |
+| `NEXT_PUBLIC_ANALYTICS_DEBUG`      | No                        | Console-log analytics events                                              |
+| `SHOPIFY_STORE_DOMAIN`             | Live catalogue            | `your-store.myshopify.com`                                                |
+| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Live catalogue            | Headless **private access token** (server only). Not the Admin API token. |
+| `SHOPIFY_STOREFRONT_API_VERSION`   | No                        | Defaults to `2026-07`                                                     |
 
 Shopify mode uses the Storefront GraphQL API at `/api/2026-07/graphql.json` for products, collections, search, and cart mutations. If those credentials are missing, the local demo catalogue is used. If they are present and Shopify fails, the shop shows an error — it does not swap in mock products.
 

@@ -44,7 +44,10 @@ export function hydrateDemoCart(id: string, records: DemoCartLineRecord[]): Cart
     });
   }
 
-  const subtotal = lines.reduce((sum, line) => sum + parseAmount(line.cost.totalAmount), 0);
+  const subtotal = lines.reduce(
+    (sum, line) => sum + parseAmount(line.cost.totalAmount),
+    0,
+  );
   const currency = lines[0]?.merchandise.price.currencyCode ?? "EUR";
 
   return {
@@ -81,9 +84,7 @@ export function addDemoLine(
 
   if (existing) {
     return records.map((line) =>
-      line.merchandiseId === input.variantId
-        ? { ...line, quantity: nextQuantity }
-        : line,
+      line.merchandiseId === input.variantId ? { ...line, quantity: nextQuantity } : line,
     );
   }
 
@@ -114,9 +115,13 @@ export function updateDemoLine(
   const found = findDemoVariant(match.merchandiseId);
   const available = found?.variant.quantityAvailable;
   const nextQuantity =
-    available !== null && available !== undefined ? Math.min(quantity, available) : quantity;
+    available !== null && available !== undefined
+      ? Math.min(quantity, available)
+      : quantity;
 
-  return records.map((line) => (line.id === lineId ? { ...line, quantity: nextQuantity } : line));
+  return records.map((line) =>
+    line.id === lineId ? { ...line, quantity: nextQuantity } : line,
+  );
 }
 
 export function emptyDemoCart(): Cart {

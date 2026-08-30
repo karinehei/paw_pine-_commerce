@@ -10,22 +10,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     commerce.getCollections(),
   ]);
 
-  const staticRoutes = ["", "/about", "/shipping", "/returns", "/contact", "/search"].map(
-    (path) => ({
-      url: `${site}${path || "/"}`,
-      lastModified: new Date(),
-    }),
-  );
+  const staticRoutes = [
+    "",
+    "/about",
+    "/shipping",
+    "/returns",
+    "/contact",
+    "/search",
+  ].flatMap((path) => {
+    const pathname = path || "/";
+    return [
+      { url: `${site}${pathname === "/" ? "/" : pathname}`, lastModified: new Date() },
+      {
+        url: `${site}${pathname === "/" ? "/fi" : `/fi${pathname}`}`,
+        lastModified: new Date(),
+      },
+    ];
+  });
 
   return [
     ...staticRoutes,
-    ...collections.map((collection) => ({
-      url: `${site}/collections/${collection.handle}`,
-      lastModified: new Date(),
-    })),
-    ...products.map((product) => ({
-      url: `${site}/products/${product.handle}`,
-      lastModified: new Date(product.createdAt),
-    })),
+    ...collections.flatMap((collection) => [
+      {
+        url: `${site}/collections/${collection.handle}`,
+        lastModified: new Date(),
+      },
+      {
+        url: `${site}/fi/collections/${collection.handle}`,
+        lastModified: new Date(),
+      },
+    ]),
+    ...products.flatMap((product) => [
+      {
+        url: `${site}/products/${product.handle}`,
+        lastModified: new Date(product.createdAt),
+      },
+      {
+        url: `${site}/fi/products/${product.handle}`,
+        lastModified: new Date(product.createdAt),
+      },
+    ]),
   ];
 }
