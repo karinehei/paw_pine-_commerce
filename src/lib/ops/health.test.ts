@@ -18,7 +18,7 @@ describe("listing GraphQL fields", () => {
     expect(PRODUCT_CARD_FIELDS).not.toMatch(/\boptions\s*\{/);
     expect(PRODUCTS_QUERY).toContain("first: 50");
     expect(PRODUCT_BY_HANDLE_QUERY).toMatch(/descriptionHtml/);
-    expect(PRODUCT_BY_HANDLE_QUERY).toMatch(/quantityAvailable/);
+    expect(PRODUCT_BY_HANDLE_QUERY).not.toMatch(/quantityAvailable/);
     expect(PRODUCT_BY_HANDLE_QUERY.match(/\bimages\s*\(/g)).toHaveLength(1);
   });
 });

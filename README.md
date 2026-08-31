@@ -191,7 +191,7 @@ The storefront is meant to stay on **free** hosting and logging. There is no pai
 
 **Core Web Vitals.** Catalogue HTML comes from Server Components. LCP work is `next/image` (priority on the home hero and the first collection row, AVIF/WebP, reserved 4:5 frames). CLS risks are the consent banner (after hydrate) and font swap (`next/font` `display: swap`). INP risks are cart, filters, and GTM — GTM loads only after analytics consent. Production posts LCP, INP, CLS, FCP, and TTFB to `POST /api/vitals` (pathname only). **Do not treat those logs as a Lighthouse score.**
 
-**GraphQL.** Listing queries request card fields only (no description, gallery, options, or variants). Detail queries add those fields, including `quantityAvailable`. Queries cap at 50 products. Home uses one catalogue fetch. Product pages fetch the product and related ranking in parallel. Cart stays `no-store` and is not read in the root layout.
+**GraphQL.** Listing queries request card fields only (no description, gallery, options, or variants). Detail queries add those fields. Queries cap at 50 products. Home uses one catalogue fetch. Product pages fetch the product and related ranking in parallel. Cart stays `no-store` and is not read in the root layout.
 
 **Caching.** Catalogue `revalidate: 60` (search `30`). Cart `no-store`. Do not cache shopper-specific bags.
 

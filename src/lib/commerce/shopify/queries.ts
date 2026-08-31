@@ -1,8 +1,8 @@
+/** Inventory quantity requires `unauthenticated_read_product_inventory`; Headless tokens typically lack it. */
 const VARIANT_DETAIL_FIELDS = `
   id
   title
   availableForSale
-  quantityAvailable
   selectedOptions { name value }
   price { amount currencyCode }
   compareAtPrice { amount currencyCode }

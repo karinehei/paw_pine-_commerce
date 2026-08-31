@@ -10,6 +10,7 @@ import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
 import { breadcrumbJsonLd, productJsonLd, productMetadata } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/env";
@@ -26,20 +27,34 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: HandlePageProps) {
   const { handle } = await params;
   const locale = await getLocale();
-  const product = await getCatalogProvider().getProduct(handle);
-  if (!product) {
+  try {
+    const product = await getCatalogProvider().getProduct(handle);
+    if (!product) {
+      return { title: getMessages(locale).productFallback };
+    }
+    return productMetadata(product, locale);
+  } catch {
     return { title: getMessages(locale).productFallback };
   }
-  return productMetadata(product, locale);
 }
 
 export default async function ProductPage({ params }: HandlePageProps) {
   const { handle } = await params;
   const commerce = getCatalogProvider();
-  const [product, recommended] = await Promise.all([
-    commerce.getProduct(handle),
-    commerce.getRecommendations(handle),
-  ]);
+  let product;
+  let recommended;
+  try {
+    [product, recommended] = await Promise.all([
+      commerce.getProduct(handle),
+      commerce.getRecommendations(handle),
+    ]);
+  } catch {
+    return (
+      <div className="px-4">
+        <ErrorState />
+      </div>
+    );
+  }
 
   if (!product) {
     notFound();
