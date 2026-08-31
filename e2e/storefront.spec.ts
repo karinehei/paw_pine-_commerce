@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { dismissCookieBanner } from "./helpers";
 
 test("home page renders the storefront", async ({ page }) => {
   await page.goto("/en");
@@ -74,10 +75,7 @@ test("search finds a Paw & Pine product and never a Shopify sample", async ({ pa
 
 test("case study is reachable from the footer", async ({ page }) => {
   await page.goto("/en");
-  const banner = page.getByRole("region", { name: "Cookies" });
-  if (await banner.isVisible()) {
-    await banner.getByRole("button", { name: "Necessary only" }).click();
-  }
+  await dismissCookieBanner(page);
   await page
     .getByRole("contentinfo")
     .getByRole("link", { name: /portfolio case study/i })

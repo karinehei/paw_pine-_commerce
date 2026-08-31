@@ -1,10 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-async function dismissCookieBanner(page: Page) {
-  const banner = page.getByRole("region", { name: "Cookies" });
-  await banner.getByRole("button", { name: "Necessary only" }).click();
-  await expect(banner).toHaveCount(0);
-}
+import { expect, test } from "@playwright/test";
+import { dismissCookieBanner } from "./helpers";
 
 test("cart delivery estimate shows demo FI rates for a valid postcode", async ({
   page,

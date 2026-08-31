@@ -43,6 +43,10 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+html.cookie-banner-open body {
+  padding-bottom: min(18rem, 48vh);
+}
+
 h1,
 h2,
 h3,

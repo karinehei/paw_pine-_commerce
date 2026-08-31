@@ -27,7 +27,13 @@ test("recently viewed lists the previous product and related items stay on-speci
   page,
 }) => {
   await page.goto("/en/products/oakwood-chew-ring");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
+  await expect
+    .poll(() => page.evaluate(() => window.localStorage.getItem("paw_pine_recently_viewed")))
+    .toContain("oakwood-chew-ring");
+
   await page.goto("/en/products/trail-harness");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Trail Harness");
   await expect(page.getByRole("heading", { name: "Recently viewed" })).toBeVisible();
   await expect(
     page.getByRole("link", { name: /oakwood chew ring/i }).first(),

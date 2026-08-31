@@ -40,6 +40,11 @@ export function CookieConsent() {
 
   const showBanner = hydrated && !state.decided && !preferencesOpen;
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("cookie-banner-open", showBanner);
+    return () => document.documentElement.classList.remove("cookie-banner-open");
+  }, [showBanner]);
+
   return (
     <>
       {showBanner ? (

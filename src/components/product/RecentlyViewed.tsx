@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useLayoutEffect, useSyncExternalStore } from "react";
 import { LocaleLink } from "@/components/i18n/LocaleLink";
 import { useMessages } from "@/components/i18n/LocaleProvider";
 import {
@@ -15,7 +15,7 @@ const EMPTY: RecentProduct[] = [];
 
 export function RecentlyViewed({ current }: { current?: RecentProduct }) {
   const t = useMessages();
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!current) {
       return;
     }
