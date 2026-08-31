@@ -141,13 +141,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 py-20 md:grid-cols-2 md:px-6">
-        <div>
-          <p className="text-label text-muted">{t.homeStudioKicker}</p>
-          <h2 className="font-display mt-3 text-4xl">{t.homeStudioTitle}</h2>
-          <p className="text-muted mt-4 max-w-md">{t.homeStudioCopy}</p>
-        </div>
-        <div className="bg-paper p-8 md:p-12">
+      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6">
+        <div className="bg-paper mx-auto max-w-xl p-8 md:p-12">
           <h2 className="font-display text-3xl">{t.joinTheList}</h2>
           <p className="text-muted mt-3 text-sm">{t.newsletterBlurb}</p>
           <div className="mt-6">
