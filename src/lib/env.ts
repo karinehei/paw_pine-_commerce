@@ -21,3 +21,8 @@ export function getCommerceMode(): CommerceMode {
 export function isShopifyMode(): boolean {
   return getCommerceMode() === "shopify";
 }
+
+export function getStorefrontPassword(): string | undefined {
+  const value = process.env.SHOPIFY_STOREFRONT_PASSWORD?.trim();
+  return value || undefined;
+}

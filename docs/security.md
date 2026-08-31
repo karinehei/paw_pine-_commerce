@@ -18,7 +18,9 @@ This storefront is a portfolio prototype. It is not a claim that the application
 
 ## Checkout redirects
 
-- `cart.checkoutUrl` is used as an `<a href>` only when it is `https:` and on a Shopify host.
+- `cart.checkoutUrl` is followed only when it is `https:` and on a Shopify host (`isShopifyCheckoutUrl`).
+- Live Shopify checkout uses same-origin `/checkout?to=…`. The hop validates `to` before redirecting to Shopify.
+- `SHOPIFY_STOREFRONT_PASSWORD` is server-only. Development stores cannot disable Online Store password protection; the hop copies that Preferences password so shoppers can paste it on Shopify’s `/password` page. Never `NEXT_PUBLIC_*`.
 - Other values fall back to `/cart?checkout=demo`.
 - External checkout links set `rel="noopener noreferrer"`.
 - Filter `router.push` paths must be site-relative (`/` but not `//`).

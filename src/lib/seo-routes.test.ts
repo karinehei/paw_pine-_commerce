@@ -9,6 +9,7 @@ import {
 describe("sitemap exclusions", () => {
   it("excludes cart, demo analytics, and API routes", () => {
     expect(isExcludedFromSitemap("/cart")).toBe(true);
+    expect(isExcludedFromSitemap("/checkout")).toBe(true);
     expect(isExcludedFromSitemap("/wishlist")).toBe(true);
     expect(isExcludedFromSitemap("/demo/analytics")).toBe(true);
     expect(isExcludedFromSitemap("/api/feeds/google-shopping.xml")).toBe(true);
@@ -37,6 +38,7 @@ describe("sitemap exclusions", () => {
     expect(urls).not.toContain("https://example.com/about");
     expect(urls.some((url) => url.includes("/demo"))).toBe(false);
     expect(urls.some((url) => url.includes("/cart"))).toBe(false);
+    expect(urls.some((url) => url.includes("/checkout"))).toBe(false);
     expect(urls.some((url) => url.includes("/wishlist"))).toBe(false);
     expect(urls.some((url) => url.includes("/api/"))).toBe(false);
   });
@@ -44,6 +46,6 @@ describe("sitemap exclusions", () => {
   it("allows the shopping feed to be fetched while still hiding other API routes", () => {
     expect(ROBOTS_ALLOW).toContain("/api/feeds/");
     expect(ROBOTS_DISALLOW).toContain("/api/");
-    expect(ROBOTS_DISALLOW).toContain("/demo/");
+    expect(ROBOTS_DISALLOW).toContain("/checkout");
   });
 });

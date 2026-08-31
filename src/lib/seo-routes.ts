@@ -13,9 +13,21 @@ export const INDEXABLE_CONTENT_PATHS = [
   "/case-study",
 ] as const;
 
-export const SITEMAP_EXCLUDED_PREFIXES = ["/cart", "/wishlist", "/demo", "/api"] as const;
+export const SITEMAP_EXCLUDED_PREFIXES = [
+  "/cart",
+  "/wishlist",
+  "/demo",
+  "/api",
+  "/checkout",
+] as const;
 
-export const ROBOTS_DISALLOW = ["/cart", "/wishlist", "/demo/", "/api/"] as const;
+export const ROBOTS_DISALLOW = [
+  "/cart",
+  "/wishlist",
+  "/demo/",
+  "/api/",
+  "/checkout",
+] as const;
 export const ROBOTS_ALLOW = ["/", "/api/feeds/"] as const;
 
 export function isExcludedFromSitemap(pathname: string): boolean {
