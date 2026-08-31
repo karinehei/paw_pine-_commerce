@@ -7,6 +7,7 @@ import { ProductPrice } from "@/components/product/ProductPrice";
 import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { track } from "@/lib/analytics/events";
 import { itemFromProduct } from "@/lib/analytics/items";
+import { hasSalePrice } from "@/lib/format";
 import type { Product } from "@/lib/commerce/types";
 
 interface ProductCardProps {
@@ -23,9 +24,22 @@ export function ProductCard({
   priority = false,
 }: ProductCardProps) {
   const t = useMessages();
+  const hoverImage = product.images.find(
+    (image) => image.url && image.url !== product.featuredImage?.url,
+  );
+  const badge = !product.availableForSale
+    ? t.soldOut
+    : hasSalePrice(product)
+      ? t.sale
+      : product.tags.includes("new")
+        ? t.newShort
+        : product.tags.includes("bestseller")
+          ? t.popular
+          : null;
+
   return (
     <article className="relative">
-      <div className="absolute top-3 right-3 z-10">
+      <div className="absolute top-2 right-2 z-10">
         <WishlistButton product={product} compact />
       </div>
       <LocaleLink
@@ -41,32 +55,34 @@ export function ProductCard({
         }
       >
         <div className="bg-stone relative aspect-[4/5] overflow-hidden">
-          <ProductMedia
-            product={product}
-            image={product.featuredImage}
-            priority={priority}
-          />
-          {!product.availableForSale ? (
-            <span className="bg-paper text-muted absolute top-3 left-3 px-2 py-1 text-xs tracking-wide uppercase">
-              {t.soldOut}
-            </span>
-          ) : product.tags.includes("new") ? (
-            <span className="bg-paper text-ink absolute top-3 left-3 px-2 py-1 text-xs tracking-wide uppercase">
-              {t.newShort}
+          <div className="h-full w-full">
+            <ProductMedia
+              product={product}
+              image={product.featuredImage}
+              priority={priority}
+            />
+          </div>
+          {hoverImage ? (
+            <div className="pointer-events-none absolute inset-0 hidden opacity-0 transition-opacity duration-200 md:block md:group-hover:opacity-100">
+              <ProductMedia product={product} image={hoverImage} />
+            </div>
+          ) : null}
+          {badge ? (
+            <span className="bg-paper text-ink absolute top-3 left-3 px-2 py-1 text-[0.65rem] tracking-wide uppercase">
+              {badge}
             </span>
           ) : null}
         </div>
-        <div className="mt-3 space-y-1.5">
-          <p className="text-muted text-[0.7rem] tracking-[0.16em] uppercase">
-            {product.vendor}
-          </p>
-          <h3 className="text-ink group-hover:text-pine text-sm font-medium text-pretty md:text-base">
+        <div className="mt-3 space-y-1">
+          <p className="text-label text-muted">{product.vendor}</p>
+          <h3 className="text-ink group-hover:text-pine text-sm text-pretty md:text-base">
             {product.title}
           </h3>
           <ProductPrice
             price={product.priceRange.minVariantPrice}
             compareAtPrice={product.compareAtPriceRange.minVariantPrice}
             className="text-sm"
+            showSavings
           />
         </div>
       </LocaleLink>

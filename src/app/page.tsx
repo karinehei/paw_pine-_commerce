@@ -8,35 +8,37 @@ import { filterByCollection } from "@/lib/commerce/filters";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
+import type { Product } from "@/lib/commerce/types";
 
 export default async function HomePage() {
   const t = getMessages(await getLocale());
   const all = await getCatalogProvider().getProducts();
   const bestsellers = filterByCollection(all.products, "best-sellers") ?? [];
   const newest = filterByCollection(all.products, "new-arrivals") ?? [];
+  const featured = (bestsellers.length > 0 ? bestsellers : all.products).slice(0, 4);
+  const newItems = (newest.length > 0 ? newest : all.products).slice(0, 4);
+  const dog =
+    all.products.find((product) => product.species === "dog") ?? all.products[0];
+  const cat =
+    all.products.find((product) => product.species === "cat") ?? all.products[1];
 
-  const featured = all.products.slice(0, 4);
   const categories = [
-    { href: "/collections/dogs", kicker: "01", title: t.dogs, copy: t.catDogsCopy },
-    { href: "/collections/cats", kicker: "02", title: t.cats, copy: t.catCatsCopy },
-    { href: "/collections/beds", kicker: "03", title: t.beds, copy: t.catBedsCopy },
-    {
-      href: "/collections/feeding",
-      kicker: "04",
-      title: t.feeding,
-      copy: t.catFeedingCopy,
-    },
+    { href: "/collections/toys", title: t.toys },
+    { href: "/collections/beds", title: t.beds },
+    { href: "/collections/feeding", title: t.feeding },
+    { href: "/collections/harnesses", title: t.walking },
+    { href: "/collections/scratching", title: t.scratching },
   ];
 
   return (
     <>
-      <section className="mx-auto grid max-w-6xl items-end gap-10 px-4 py-12 sm:py-16 md:grid-cols-2 md:px-6 md:py-24">
+      <section className="mx-auto grid max-w-6xl items-end gap-10 px-4 py-12 sm:py-16 md:grid-cols-2 md:px-6 md:py-20">
         <div>
-          <p className="text-muted text-xs tracking-[0.2em] uppercase">{t.homeKicker}</p>
-          <h1 className="font-display mt-4 text-4xl leading-[1.08] text-balance sm:text-5xl md:text-6xl">
+          <p className="text-label text-muted">{t.homeKicker}</p>
+          <h1 className="font-display text-display mt-4 text-balance">
             {t.homeHeadline}
           </h1>
-          <p className="text-muted mt-6 max-w-md text-lg">{t.tagline}</p>
+          <p className="text-muted mt-6 max-w-md text-lg">{t.homeSupporting}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <LocaleLink href="/collections/dogs" className="btn-primary">
               {t.shopDogs}
@@ -45,6 +47,7 @@ export default async function HomePage() {
               {t.shopCats}
             </LocaleLink>
           </div>
+          <p className="text-muted mt-8 max-w-sm text-sm">{t.homeEditorial}</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {featured.slice(0, 2).map((product) => (
@@ -60,44 +63,59 @@ export default async function HomePage() {
       </section>
 
       <section className="border-border bg-paper border-y">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:grid-cols-4 md:px-6">
-          {categories.map((item) => (
-            <LocaleLink key={item.href} href={item.href} className="group">
-              <p className="text-muted text-xs tracking-[0.16em] uppercase">
-                {item.kicker}
-              </p>
-              <h2 className="font-display group-hover:text-pine mt-2 text-3xl">
-                {item.title}
-              </h2>
-              <p className="text-muted mt-2 text-sm">{item.copy}</p>
-            </LocaleLink>
-          ))}
+        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
+          <h2 className="font-display text-h2">{t.shopByPet}</h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-6">
+            <ShopPetCard href="/collections/dogs" title={t.dogs} product={dog} />
+            <ShopPetCard href="/collections/cats" title={t.cats} product={cat} />
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
         <SectionHeading
           title={t.bestSellers}
           href="/collections/best-sellers"
           viewAll={t.viewAll}
         />
         <ProductGrid
-          products={(bestsellers.length > 0 ? bestsellers : featured).slice(0, 4)}
+          products={featured}
           listId="home-best-sellers"
           listName={t.bestSellers}
+          priorityCount={2}
+          density="editorial"
         />
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-16 md:px-6">
+      <section className="border-border border-y">
+        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
+          <h2 className="font-display text-h2">{t.shop}</h2>
+          <ul className="bg-border mt-8 grid grid-cols-2 gap-px sm:grid-cols-3 lg:grid-cols-5">
+            {categories.map((item) => (
+              <li key={item.href} className="bg-linen">
+                <LocaleLink
+                  href={item.href}
+                  className="hover:bg-paper flex min-h-24 items-center justify-center px-4 py-6 text-center text-sm tracking-[0.12em] uppercase"
+                >
+                  {item.title}
+                </LocaleLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
         <SectionHeading
-          title={t.homeNew}
+          title={t.newArrivals}
           href="/collections/new-arrivals"
           viewAll={t.viewAll}
         />
         <ProductGrid
-          products={(newest.length > 0 ? newest : all.products).slice(0, 4)}
+          products={newItems}
           listId="home-new"
           listName={t.newArrivals}
+          density="editorial"
         />
       </section>
 
@@ -111,7 +129,7 @@ export default async function HomePage() {
               href="/about"
               className="inline-block pt-2 text-sm tracking-[0.14em] uppercase underline-offset-4 hover:underline"
             >
-              {t.theHouse}
+              {t.about}
             </LocaleLink>
           </div>
         </div>
@@ -119,9 +137,7 @@ export default async function HomePage() {
 
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-20 md:grid-cols-2 md:px-6">
         <div>
-          <p className="text-muted text-xs tracking-[0.16em] uppercase">
-            {t.homeStudioKicker}
-          </p>
+          <p className="text-label text-muted">{t.homeStudioKicker}</p>
           <h2 className="font-display mt-3 text-4xl">{t.homeStudioTitle}</h2>
           <p className="text-muted mt-4 max-w-md">{t.homeStudioCopy}</p>
         </div>
@@ -138,12 +154,39 @@ export default async function HomePage() {
           name: "view_item_list",
           item_list_id: "home-best-sellers",
           item_list_name: t.bestSellers,
-          items: (bestsellers.length > 0 ? bestsellers : featured)
-            .slice(0, 4)
-            .map((product) => itemFromProduct(product)),
+          items: featured.map((product) => itemFromProduct(product)),
         }}
       />
     </>
+  );
+}
+
+function ShopPetCard({
+  href,
+  title,
+  product,
+}: {
+  href: string;
+  title: string;
+  product?: Product;
+}) {
+  if (!product) {
+    return (
+      <LocaleLink href={href} className="bg-stone flex aspect-[5/4] items-end p-6">
+        <span className="font-display text-3xl">{title}</span>
+      </LocaleLink>
+    );
+  }
+  return (
+    <LocaleLink
+      href={href}
+      className="group bg-stone relative block aspect-[5/4] overflow-hidden"
+    >
+      <ProductMedia product={product} image={product.featuredImage} />
+      <span className="bg-linen/90 absolute inset-x-0 bottom-0 px-5 py-4">
+        <span className="font-display text-2xl md:text-3xl">{title}</span>
+      </span>
+    </LocaleLink>
   );
 }
 

@@ -36,32 +36,47 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
     router.push(withLocale(queryToHref(stripLocalePrefix(pathname), next), locale));
   }
 
-  const hasFilters = Boolean(
-    current.species?.length ||
-    current.category?.length ||
-    current.brand?.length ||
-    current.material?.length ||
-    current.availability === "in-stock" ||
+  const chips = selectedChips(current, t);
+  const hasFilters = chips.length > 0;
+  const showPrice =
+    facets.priceMin !== facets.priceMax ||
     current.priceMin !== undefined ||
-    current.priceMax !== undefined ||
-    (current.sort && current.sort !== "featured"),
-  );
+    current.priceMax !== undefined;
 
   return (
     <div className="space-y-8">
       {hasFilters ? (
-        <button
-          type="button"
-          className="text-muted min-h-11 text-sm underline-offset-4 hover:underline"
-          onClick={() => push({ query: current.query })}
-        >
-          {t.clearFilters}
-        </button>
+        <div className="space-y-3">
+          <button
+            type="button"
+            className="text-muted min-h-11 text-sm underline-offset-4 hover:underline"
+            onClick={() =>
+              push({
+                query: current.query,
+                sort: current.sort,
+              })
+            }
+          >
+            {t.clearAll}
+          </button>
+          <ul className="flex flex-wrap gap-2">
+            {chips.map((chip) => (
+              <li key={chip.key}>
+                <button
+                  type="button"
+                  className="border-border inline-flex min-h-9 items-center border px-2 text-xs"
+                  onClick={() => push(chip.next)}
+                >
+                  {chip.label} ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
+
       <fieldset>
-        <legend className="text-muted text-xs tracking-[0.16em] uppercase">
-          {t.sort}
-        </legend>
+        <legend className="text-label text-muted">{t.sort}</legend>
         <label htmlFor={`${idPrefix}-sort`} className="sr-only">
           {t.sortProducts}
         </label>
@@ -128,52 +143,50 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
         }
       />
 
-      <fieldset className="space-y-2">
-        <legend className="text-muted text-xs tracking-[0.16em] uppercase">
-          {t.price}
-        </legend>
-        <div className="flex gap-2">
-          <label className="text-muted flex-1 text-xs">
-            {t.min}
-            <input
-              type="number"
-              min={facets.priceMin}
-              max={facets.priceMax}
-              defaultValue={current.priceMin ?? ""}
-              className="border-border bg-paper text-ink mt-1 min-h-11 w-full border px-2 py-2 text-sm"
-              onBlur={(event) => {
-                const parsed = Number.parseFloat(event.target.value);
-                push({
-                  ...current,
-                  priceMin: Number.isFinite(parsed) ? parsed : undefined,
-                });
-              }}
-            />
-          </label>
-          <label className="text-muted flex-1 text-xs">
-            {t.max}
-            <input
-              type="number"
-              min={facets.priceMin}
-              max={facets.priceMax}
-              defaultValue={current.priceMax ?? ""}
-              className="border-border bg-paper text-ink mt-1 min-h-11 w-full border px-2 py-2 text-sm"
-              onBlur={(event) => {
-                const parsed = Number.parseFloat(event.target.value);
-                push({
-                  ...current,
-                  priceMax: Number.isFinite(parsed) ? parsed : undefined,
-                });
-              }}
-            />
-          </label>
-        </div>
-      </fieldset>
+      {showPrice ? (
+        <fieldset className="space-y-2">
+          <legend className="text-label text-muted">{t.price}</legend>
+          <div className="flex gap-2">
+            <label className="text-muted flex-1 text-xs">
+              {t.min}
+              <input
+                type="number"
+                min={facets.priceMin}
+                max={facets.priceMax}
+                defaultValue={current.priceMin ?? ""}
+                className="border-border bg-paper text-ink mt-1 min-h-11 w-full border px-2 py-2 text-sm"
+                onBlur={(event) => {
+                  const parsed = Number.parseFloat(event.target.value);
+                  push({
+                    ...current,
+                    priceMin: Number.isFinite(parsed) ? parsed : undefined,
+                  });
+                }}
+              />
+            </label>
+            <label className="text-muted flex-1 text-xs">
+              {t.max}
+              <input
+                type="number"
+                min={facets.priceMin}
+                max={facets.priceMax}
+                defaultValue={current.priceMax ?? ""}
+                className="border-border bg-paper text-ink mt-1 min-h-11 w-full border px-2 py-2 text-sm"
+                onBlur={(event) => {
+                  const parsed = Number.parseFloat(event.target.value);
+                  push({
+                    ...current,
+                    priceMax: Number.isFinite(parsed) ? parsed : undefined,
+                  });
+                }}
+              />
+            </label>
+          </div>
+        </fieldset>
+      ) : null}
 
       <fieldset className="space-y-2">
-        <legend className="text-muted text-xs tracking-[0.16em] uppercase">
-          {t.availability}
-        </legend>
+        <legend className="text-label text-muted">{t.availability}</legend>
         <label className="flex min-h-11 items-center gap-2 text-sm">
           <input
             id={`${idPrefix}-in-stock`}
@@ -193,6 +206,58 @@ export function FilterPanel({ facets, idPrefix = "filter" }: FilterPanelProps) {
   );
 }
 
+function selectedChips(current: ProductQuery, t: Messages) {
+  const chips: Array<{ key: string; label: string; next: ProductQuery }> = [];
+  for (const value of current.species ?? []) {
+    chips.push({
+      key: `species-${value}`,
+      label: value === "dog" ? t.dogs : t.cats,
+      next: {
+        ...current,
+        species: (current.species ?? []).filter((item) => item !== value),
+      },
+    });
+  }
+  for (const value of current.category ?? []) {
+    chips.push({
+      key: `category-${value}`,
+      label: categoryLabel(value, t),
+      next: {
+        ...current,
+        category: (current.category ?? []).filter((item) => item !== value),
+      },
+    });
+  }
+  for (const value of current.brand ?? []) {
+    chips.push({
+      key: `brand-${value}`,
+      label: value,
+      next: {
+        ...current,
+        brand: (current.brand ?? []).filter((item) => item !== value),
+      },
+    });
+  }
+  for (const value of current.material ?? []) {
+    chips.push({
+      key: `material-${value}`,
+      label: value,
+      next: {
+        ...current,
+        material: (current.material ?? []).filter((item) => item !== value),
+      },
+    });
+  }
+  if (current.availability === "in-stock") {
+    chips.push({
+      key: "availability",
+      label: t.inStock,
+      next: { ...current, availability: "all" },
+    });
+  }
+  return chips;
+}
+
 function FilterGroup({
   legend,
   options,
@@ -204,13 +269,13 @@ function FilterGroup({
   selected: string[];
   onToggle: (value: string) => void;
 }) {
-  if (options.length === 0) {
+  if (options.length === 0 || (options.length <= 1 && selected.length === 0)) {
     return null;
   }
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-muted text-xs tracking-[0.16em] uppercase">{legend}</legend>
+      <legend className="text-label text-muted">{legend}</legend>
       {options.map((option) => (
         <label key={option.value} className="flex min-h-11 items-center gap-2 text-sm">
           <input

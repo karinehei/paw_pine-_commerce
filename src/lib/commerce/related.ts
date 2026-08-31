@@ -1,4 +1,5 @@
 import { parseAmount } from "@/lib/format";
+import { isPawPineProduct } from "@/lib/commerce/catalog-scope";
 import type { Product } from "@/lib/commerce/types";
 
 const SPECIES_TAGS = new Set(["dog", "cat"]);
@@ -39,6 +40,9 @@ export function getRelatedProducts(
 
 export function isRelevantRelated(current: Product, candidate: Product): boolean {
   if (candidate.handle === current.handle) {
+    return false;
+  }
+  if (!isPawPineProduct(candidate)) {
     return false;
   }
   return candidate.species === current.species;

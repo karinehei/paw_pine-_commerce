@@ -10,6 +10,7 @@ export const INDEXABLE_CONTENT_PATHS = [
   "/contact",
   "/cookies",
   "/search",
+  "/case-study",
 ] as const;
 
 export const SITEMAP_EXCLUDED_PREFIXES = ["/cart", "/wishlist", "/demo", "/api"] as const;

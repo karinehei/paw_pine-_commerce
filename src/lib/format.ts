@@ -12,7 +12,7 @@ export function formatMoney(money: Money, locale = "en-GB"): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: money.currencyCode || DEFAULT_CURRENCY,
-    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
 }
@@ -49,6 +49,20 @@ export function variantLabel(variant: ProductVariant): string {
 
 export function productAlt(product: Pick<Product, "title">, suffix?: string): string {
   return suffix ? `${product.title}, ${suffix}` : `${product.title} from ${SITE_NAME}`;
+}
+
+export function savingsMoney(
+  price: Money,
+  compareAt: Money | null | undefined,
+): Money | null {
+  if (!compareAt) {
+    return null;
+  }
+  const saved = parseAmount(compareAt) - parseAmount(price);
+  if (saved <= 0) {
+    return null;
+  }
+  return moneyFromNumber(saved, price.currencyCode || compareAt.currencyCode);
 }
 
 export function hasSalePrice(product: Product): boolean {

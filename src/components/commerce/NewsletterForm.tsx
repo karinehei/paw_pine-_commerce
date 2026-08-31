@@ -79,7 +79,6 @@ export function NewsletterForm({ id = "newsletter-email" }: { id?: string }) {
           {message}
         </p>
       ) : null}
-      <p className="text-muted mt-2 text-xs">{t.newsletterDemo}</p>
     </form>
   );
 }

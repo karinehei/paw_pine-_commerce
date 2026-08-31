@@ -189,6 +189,8 @@ export function localizeProduct(product: Product, locale: Locale): Product {
     descriptionHtml: product.descriptionHtml,
     features: copy.features,
     material: copy.material ?? product.material,
+    care: "Pyyhi puhtaaksi. Vältä voimakkaita kemikaaleja.",
+    dimensions: "Mittakaava näkyy tuotekuvissa.",
   };
 }
 

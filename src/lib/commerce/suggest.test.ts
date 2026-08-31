@@ -16,4 +16,21 @@ describe("search suggestions", () => {
   it("ignores one-character queries", () => {
     expect(buildSuggestions("h", demoProducts, demoCollections).products).toHaveLength(0);
   });
+
+  it("does not suggest Shopify sample products", () => {
+    const snowboard = {
+      ...demoProducts[0]!,
+      handle: "the-complete-snowboard",
+      title: "The Complete Snowboard",
+      tags: ["snowboard"],
+    };
+    const result = buildSuggestions(
+      "snow",
+      [snowboard, ...demoProducts],
+      demoCollections,
+    );
+    expect(result.products.some((product) => product.handle.includes("snowboard"))).toBe(
+      false,
+    );
+  });
 });

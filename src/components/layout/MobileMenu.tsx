@@ -9,6 +9,7 @@ import { useMessages } from "@/components/i18n/LocaleProvider";
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const t = useMessages();
   const dogLabels: Record<string, string> = {
     Toys: t.toys,
@@ -33,6 +34,7 @@ export function MobileMenu() {
     }
     if (!open && dialog.open) {
       dialog.close();
+      triggerRef.current?.focus();
     }
   }, [open]);
 
@@ -43,10 +45,12 @@ export function MobileMenu() {
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
-        className="min-h-11 text-sm tracking-[0.12em] uppercase md:hidden"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm tracking-[0.12em] uppercase md:hidden"
         aria-expanded={open}
         aria-controls="mobile-menu"
+        aria-haspopup="dialog"
         onClick={() => setOpen(true)}
       >
         {t.menu}
@@ -56,9 +60,11 @@ export function MobileMenu() {
         id="mobile-menu"
         onClose={close}
         aria-label={t.menu}
-        className="bg-paper text-ink border-border backdrop:bg-ink/40 fixed inset-y-0 left-0 m-0 h-full max-h-none w-full max-w-sm border-r p-0"
+        aria-modal="true"
+        inert={!open}
+        className="bg-paper text-ink border-border backdrop:bg-ink/40 fixed inset-y-0 right-0 m-0 h-full max-h-none w-full max-w-sm border-l p-0"
       >
-        <div className="flex h-full flex-col px-6 py-5">
+        <div className="flex h-full flex-col overflow-y-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <p className="font-display text-xl">{SITE_NAME}</p>
             <button type="button" onClick={close} className="text-muted min-h-11 text-sm">
@@ -121,19 +127,10 @@ export function MobileMenu() {
                     onClick={close}
                     className="inline-flex min-h-11 items-center"
                   >
-                    {link.label === "New" ? t.newShort : t.bestSellers}
+                    {link.label === "New" ? t.newArrivals : t.bestSellers}
                   </LocaleLink>
                 </li>
               ))}
-              <li>
-                <LocaleLink
-                  href="/wishlist"
-                  onClick={close}
-                  className="inline-flex min-h-11 items-center"
-                >
-                  {t.wishlist}
-                </LocaleLink>
-              </li>
               <li>
                 <LocaleLink
                   href="/about"

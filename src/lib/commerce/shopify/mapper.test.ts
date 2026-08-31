@@ -68,7 +68,9 @@ describe("Shopify product mapper", () => {
 
   it("quotes user search input for Shopify query syntax", () => {
     const query = buildShopifySearchQuery({ query: 'oak" OR title:*' });
-    expect(query).toBe('"oak OR title:*"');
+    expect(query).toContain('"oak OR title:*"');
+    expect(query).toContain("tag:catalog:paw-pine");
+    expect(query).not.toContain("vendor:");
     expect(query).not.toContain('oak"');
   });
 });

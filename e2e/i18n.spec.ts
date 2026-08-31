@@ -5,36 +5,42 @@ test("root URL redirects to Finnish as the default market", async ({ page }) => 
   expect(response?.status()).toBe(200);
   await expect(page).toHaveURL(/\/fi\/?$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Hiljaisia esineitä",
+    "Kauniit ja kestävät tarvikkeet",
   );
 });
 
 test("language switcher keeps the product and search query", async ({ page }) => {
   await page.goto("/en/products/oakwood-chew-ring");
   await page
+    .getByRole("banner")
     .getByRole("navigation", { name: "Language" })
     .getByRole("link", { name: "SV" })
     .click();
   await expect(page).toHaveURL(/\/sv\/products\/oakwood-chew-ring/);
-  await expect(page.getByRole("navigation", { name: "Språk" })).toBeVisible();
+  await expect(
+    page.getByRole("banner").getByRole("navigation", { name: "Språk" }),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
-  await expect(page.getByRole("button", { name: /lägg i kassen/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /lägg i varukorgen/i })).toBeVisible();
 
   await page.goto("/en/search?q=oak");
   await page
+    .getByRole("banner")
     .getByRole("navigation", { name: "Language" })
     .getByRole("link", { name: "FI" })
     .click();
   await expect(page).toHaveURL(/\/fi\/search\?q=oak/);
-  await expect(page.getByRole("navigation", { name: "Kieli" })).toBeVisible();
+  await expect(
+    page.getByRole("banner").getByRole("navigation", { name: "Kieli" }),
+  ).toBeVisible();
 });
 
 test("swedish home localizes chrome without inventing product copy", async ({ page }) => {
   await page.goto("/sv");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Stillsamma föremål",
+    "Vackra, hållbara saker",
   );
-  await expect(page.getByRole("link", { name: /till hundar/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /till hundar/i }).first()).toBeVisible();
 });
 
 test("canonical and hreflang point at prefixed locale URLs", async ({ page }) => {

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { FilterDrawer } from "@/components/commerce/FilterDrawer";
 import { FilterPanel } from "@/components/commerce/FilterPanel";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -74,16 +75,11 @@ export default async function CollectionPage({ params, searchParams }: HandlePag
       </header>
       <div className="mt-10 grid gap-10 md:grid-cols-[200px_minmax(0,1fr)] lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside>
-          <details className="md:hidden">
-            <summary className="min-h-11 cursor-pointer text-sm tracking-[0.12em] uppercase">
-              {t.filterAndSort}
-            </summary>
-            <div className="pt-6">
-              <Suspense>
-                <FilterPanel facets={facets} idPrefix="mobile" />
-              </Suspense>
-            </div>
-          </details>
+          <FilterDrawer>
+            <Suspense>
+              <FilterPanel facets={facets} idPrefix="mobile" />
+            </Suspense>
+          </FilterDrawer>
           <div className="hidden md:block">
             <Suspense>
               <FilterPanel facets={facets} />

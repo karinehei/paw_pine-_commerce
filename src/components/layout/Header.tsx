@@ -15,35 +15,51 @@ export async function Header() {
 
   return (
     <header className="border-border bg-linen/95 sticky top-0 z-30 border-b backdrop-blur-sm">
-      <div className="border-border flex flex-col gap-2 border-b px-4 py-2 sm:flex-row sm:items-center sm:justify-between md:px-6">
-        <p className="text-muted text-center text-xs tracking-[0.16em] uppercase sm:flex-1">
+      <div className="border-border flex items-center justify-between gap-3 border-b px-4 py-1.5 md:px-6">
+        <p className="text-muted flex-1 text-center text-[0.7rem] tracking-[0.16em] uppercase">
           {t.shippingBanner}
         </p>
-        <div className="flex justify-center sm:justify-end">
+        <div className="hidden shrink-0 opacity-70 md:block">
           <Suspense fallback={null}>
             <LanguageSwitcher />
           </Suspense>
         </div>
       </div>
-      <div className="mx-auto grid max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 md:flex md:gap-6 md:px-6 md:py-4">
-        <MobileMenu />
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 md:gap-8 md:px-6 md:py-3">
         <LocaleLink
           href="/"
-          className="font-display justify-self-center text-center text-2xl tracking-tight md:shrink-0 md:justify-self-start md:text-left md:text-3xl"
+          className="font-display shrink-0 text-xl tracking-tight md:text-2xl"
         >
           {SITE_NAME}
         </LocaleLink>
-        <div className="hidden flex-1 md:block">
+        <div className="hidden min-w-0 flex-1 md:block" aria-hidden={false}>
           <Navigation />
         </div>
-        <div className="flex items-center justify-end gap-2 sm:gap-4">
-          <div className="hidden w-40 sm:block lg:w-48">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <LocaleLink
+            href="/search"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center md:hidden"
+            aria-label={t.searchProducts}
+          >
+            <SearchIcon />
+          </LocaleLink>
+          <div className="hidden w-40 md:block lg:w-52">
             <SearchBox id="header-search" />
           </div>
-          <CartButton />
           <WishlistLink />
+          <CartButton />
+          <MobileMenu />
         </div>
       </div>
     </header>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
   );
 }

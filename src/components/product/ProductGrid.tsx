@@ -7,6 +7,7 @@ interface ProductGridProps {
   listName?: string;
   /** First N cards request LCP-priority images. Below-fold grids should stay 0. */
   priorityCount?: number;
+  density?: "default" | "editorial";
 }
 
 export function ProductGrid({
@@ -14,9 +15,15 @@ export function ProductGrid({
   listId,
   listName,
   priorityCount = 0,
+  density = "default",
 }: ProductGridProps) {
+  const columns =
+    density === "editorial"
+      ? "grid grid-cols-2 gap-x-3 gap-y-10 md:gap-x-6 lg:grid-cols-4"
+      : "grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 md:gap-y-10 lg:grid-cols-4";
+
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-4 md:grid-cols-3 md:gap-x-6 md:gap-y-10 lg:grid-cols-4">
+    <ul className={columns}>
       {products.map((product, index) => (
         <li key={product.id}>
           <ProductCard

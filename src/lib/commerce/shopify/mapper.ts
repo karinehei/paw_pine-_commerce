@@ -19,6 +19,7 @@ import type {
   ShopifyVariantNode,
 } from "@/lib/commerce/shopify/storefront-types";
 import { quoteShopifySearchTerm } from "@/lib/security";
+import { shopifyCatalogQueryClause } from "@/lib/commerce/catalog-scope";
 
 const CATEGORIES: ProductCategory[] = [
   "toys",
@@ -265,7 +266,7 @@ export function buildShopifySearchQuery(input: {
   brand?: string[];
   availability?: string;
 }): string | undefined {
-  const parts: string[] = [];
+  const parts: string[] = [shopifyCatalogQueryClause()];
 
   if (input.query) {
     parts.push(quoteShopifySearchTerm(input.query));
@@ -289,7 +290,7 @@ export function buildShopifySearchQuery(input: {
     parts.push("available_for_sale:true");
   }
 
-  return parts.length > 0 ? parts.join(" ") : undefined;
+  return parts.join(" ");
 }
 
 export function toShopifyProductSort(sort?: string): {

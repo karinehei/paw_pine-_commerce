@@ -9,7 +9,7 @@ describe("translation dictionaries", () => {
   it("interpolates without locale branches in callers", () => {
     expect(getMessages("en").searchResult(1, "oak")).toContain("1 result");
     expect(getMessages("fi").searchResult(2, "tammi")).toContain("2 tulosta");
-    expect(getMessages("sv").addToBag).toBe("Lägg i kassen");
+    expect(getMessages("sv").addToBag).toBe("Lägg i varukorgen");
     expect(getMessages("sv").checkout).toBe("Till kassan");
   });
 });

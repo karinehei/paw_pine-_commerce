@@ -95,7 +95,7 @@ function buildProduct(draft: CatalogDraft): Product {
       draft.sizes && draft.sizes.length > 1
         ? [{ id: `option-${draft.handle}-size`, name: "Size", values: draft.sizes }]
         : [],
-    tags: draft.tags,
+    tags: [...new Set(["catalog:paw-pine", "paw-pine", ...draft.tags])],
     vendor: draft.vendor,
     productType: draft.category,
     species: draft.species,

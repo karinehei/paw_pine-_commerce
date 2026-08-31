@@ -8,6 +8,19 @@ import { getRelatedProducts } from "@/lib/commerce/related";
 import { shopifyFetch } from "@/lib/commerce/shopify/client";
 import { collectionOverlayFromHandle } from "@/lib/commerce/shopify/collection-overlay";
 import {
+  filterPawPineCollections,
+  filterPawPineProducts,
+  isPawPineCollectionHandle,
+  isPawPineProduct,
+  shopifyCatalogQueryClause,
+} from "@/lib/commerce/catalog-scope";
+import {
+  localizeCollection,
+  localizeProduct,
+  localizeProducts,
+} from "@/lib/commerce/demo/localize";
+import { getLocale } from "@/lib/i18n/locale";
+import {
   buildShopifySearchQuery,
   mapCart,
   mapCollection,
@@ -94,8 +107,10 @@ export const shopifyProvider: CommerceProvider = {
         reverse,
       },
     });
-    const mapped = data.products.nodes.map(mapProduct);
-    return connect(applyProductQuery(mapped, query), mapped);
+    const mapped = filterPawPineProducts(data.products.nodes.map(mapProduct));
+    const locale = await getLocale();
+    const localised = localizeProducts(mapped, locale);
+    return connect(applyProductQuery(localised, query), localised);
   },
 
   async getProduct(handle: string) {
@@ -104,14 +119,21 @@ export const shopifyProvider: CommerceProvider = {
       operation: "productByHandle",
       variables: { handle },
     });
-    return data.product ? mapProduct(data.product) : null;
+    const mapped = data.product ? mapProduct(data.product) : null;
+    if (!mapped || !isPawPineProduct(mapped)) {
+      return null;
+    }
+    return localizeProduct(mapped, await getLocale());
   },
 
   async getCollections() {
+    const locale = await getLocale();
     const data = await shopifyFetch<{
       collections: { nodes: ShopifyCollectionNode[] };
     }>({ query: COLLECTIONS_QUERY, operation: "collections" });
-    return data.collections.nodes.map(mapCollection);
+    return filterPawPineCollections(data.collections.nodes.map(mapCollection)).map(
+      (collection) => localizeCollection(collection, locale),
+    );
   },
 
   async getCollection(
@@ -125,12 +147,16 @@ export const shopifyProvider: CommerceProvider = {
       variables: { handle, sortKey, reverse },
     });
 
-    if (data.collection) {
-      const mapped = (data.collection.products?.nodes ?? []).map(mapProduct);
+    if (data.collection && isPawPineCollectionHandle(handle)) {
+      const locale = await getLocale();
+      const mapped = filterPawPineProducts(
+        (data.collection.products?.nodes ?? []).map(mapProduct),
+      );
+      const localised = localizeProducts(mapped, locale);
       return {
-        collection: mapCollection(data.collection),
-        products: applyProductQuery(mapped, query),
-        facets: buildFacets(mapped),
+        collection: localizeCollection(mapCollection(data.collection), locale),
+        products: applyProductQuery(localised, query),
+        facets: buildFacets(localised),
       };
     }
 
@@ -153,15 +179,19 @@ export const shopifyProvider: CommerceProvider = {
     }>({
       query: SEARCH_QUERY,
       operation: "searchProducts",
-      variables: { query },
+      variables: { query: `${shopifyCatalogQueryClause()} ${query}`.trim() },
       revalidate: 30,
     });
-    const mapped = data.search.nodes
-      .filter(
-        (node): node is ShopifyProductNode => "handle" in node && Boolean(node.handle),
-      )
-      .map(mapProduct);
-    return connect(applyProductQuery(mapped, { ...filters, query }), mapped);
+    const mapped = filterPawPineProducts(
+      data.search.nodes
+        .filter(
+          (node): node is ShopifyProductNode => "handle" in node && Boolean(node.handle),
+        )
+        .map(mapProduct),
+    );
+    const locale = await getLocale();
+    const localised = localizeProducts(mapped, locale);
+    return connect(applyProductQuery(localised, { ...filters, query }), localised);
   },
 
   async getCart(cartId: string) {

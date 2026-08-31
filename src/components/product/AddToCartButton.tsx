@@ -14,9 +14,15 @@ interface AddToCartButtonProps {
   product: Product;
   variant: ProductVariant | undefined;
   quantity: number;
+  fullWidth?: boolean;
 }
 
-export function AddToCartButton({ product, variant, quantity }: AddToCartButtonProps) {
+export function AddToCartButton({
+  product,
+  variant,
+  quantity,
+  fullWidth = true,
+}: AddToCartButtonProps) {
   const { setCart, openCart, announce } = useCart();
   const t = useMessages();
   const locale = useLocale();
@@ -55,7 +61,9 @@ export function AddToCartButton({ product, variant, quantity }: AddToCartButtonP
         type="button"
         onClick={handleClick}
         disabled={unavailable || pending}
-        className="btn-primary disabled:bg-stone disabled:text-muted w-full disabled:cursor-not-allowed"
+        className={`btn-primary disabled:bg-stone disabled:text-muted disabled:cursor-not-allowed ${
+          fullWidth ? "w-full" : "min-w-40"
+        }`}
       >
         {unavailable ? t.outOfStock : pending ? t.adding : t.addToBag}
       </button>

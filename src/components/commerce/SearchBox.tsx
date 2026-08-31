@@ -10,8 +10,9 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
-import { LOCALE_HEADER } from "@/lib/i18n/config";
+import { LOCALE_HEADER, numberLocale } from "@/lib/i18n/config";
 import { withLocale } from "@/lib/i18n/path";
+import { formatMoney } from "@/lib/format";
 import type { SearchSuggestions } from "@/lib/commerce/suggest";
 
 interface SearchBoxProps {
@@ -33,6 +34,7 @@ export function SearchBox({
 }: SearchBoxProps) {
   const router = useRouter();
   const locale = useLocale();
+  const moneyLocale = numberLocale(locale);
   const t = useMessages();
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -40,6 +42,7 @@ export function SearchBox({
   const [panelOpen, setPanelOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [fetched, setFetched] = useState<SearchSuggestions>(EMPTY_SUGGESTIONS);
+  const [loading, setLoading] = useState(false);
 
   const query = value.trim();
   const canSuggest = showSuggestions && query.length >= 2;
@@ -50,6 +53,7 @@ export function SearchBox({
     }
 
     const handle = window.setTimeout(() => {
+      setLoading(true);
       void fetch(`/api/search/suggest?q=${encodeURIComponent(query)}&locale=${locale}`, {
         headers: { [LOCALE_HEADER]: locale },
       })
@@ -61,7 +65,8 @@ export function SearchBox({
         })
         .catch(() => {
           setFetched(EMPTY_SUGGESTIONS);
-        });
+        })
+        .finally(() => setLoading(false));
     }, 250);
 
     return () => window.clearTimeout(handle);
@@ -91,7 +96,13 @@ export function SearchBox({
   }, []);
 
   const suggestions = canSuggest ? fetched : EMPTY_SUGGESTIONS;
-  const options = [
+  const options: Array<{
+    href: string;
+    label: string;
+    kind: string;
+    price?: string;
+    image?: { url: string; altText: string } | null;
+  }> = [
     ...suggestions.collections.map((item) => ({
       href: withLocale(`/collections/${item.handle}`, locale),
       label: item.title,
@@ -100,7 +111,9 @@ export function SearchBox({
     ...suggestions.products.map((item) => ({
       href: withLocale(`/products/${item.handle}`, locale),
       label: item.title,
-      kind: item.vendor,
+      kind: [item.vendor, item.category].filter(Boolean).join(" · "),
+      price: item.price ? formatMoney(item.price, moneyLocale) : undefined,
+      image: item.image,
     })),
   ];
   const open = panelOpen && options.length > 0;
@@ -167,6 +180,7 @@ export function SearchBox({
             }
           }}
           onKeyDown={onKeyDown}
+          aria-busy={loading}
           placeholder={t.searchPlaceholder}
           className="border-border placeholder:text-muted focus-visible:border-ink w-full border-0 border-b bg-transparent py-2 text-sm outline-none"
         />
@@ -175,20 +189,35 @@ export function SearchBox({
         <ul
           id={listId}
           role="listbox"
-          className="border-border bg-paper absolute z-40 mt-1 w-full min-w-56 border py-2"
+          className="border-border bg-paper absolute z-40 mt-1 w-full min-w-64 border py-2"
         >
           {options.map((option, index) => (
             <li key={option.href} role="option" aria-selected={index === activeIndex}>
               <button
                 type="button"
-                className={`flex min-h-11 w-full flex-col justify-center px-3 py-2 text-left text-sm ${
+                className={`flex min-h-11 w-full items-center gap-3 px-3 py-2 text-left text-sm ${
                   index === activeIndex ? "bg-linen" : ""
                 }`}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => go(option.href)}
               >
-                <span>{option.label}</span>
-                <span className="text-muted text-xs">{option.kind}</span>
+                {option.image?.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={option.image.url}
+                    alt=""
+                    width={40}
+                    height={50}
+                    className="bg-stone h-12 w-10 shrink-0 object-cover"
+                  />
+                ) : null}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{option.label}</span>
+                  <span className="text-muted block truncate text-xs">
+                    {option.kind}
+                    {option.price ? ` · ${option.price}` : ""}
+                  </span>
+                </span>
               </button>
             </li>
           ))}

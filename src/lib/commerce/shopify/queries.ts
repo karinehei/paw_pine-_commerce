@@ -32,6 +32,14 @@ export const PRODUCT_CARD_FIELDS = `
     minVariantPrice { amount currencyCode }
     maxVariantPrice { amount currencyCode }
   }
+  images(first: 2) {
+    nodes {
+      url
+      altText
+      width
+      height
+    }
+  }
 `;
 
 const PRODUCT_FIELDS = `
@@ -153,7 +161,7 @@ export const CART_QUERY = `
 
 export const CART_CREATE_MUTATION = `
   mutation CartCreate($lines: [CartLineInput!]) {
-    cartCreate(input: { lines: $lines }) {
+    cartCreate(input: { lines: $lines, buyerIdentity: { countryCode: FI } }) {
       cart { ${CART_FRAGMENT} }
       userErrors { code message }
     }

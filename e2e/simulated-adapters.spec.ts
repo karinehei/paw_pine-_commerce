@@ -11,10 +11,10 @@ test("cart delivery estimate shows demo FI rates for a valid postcode", async ({
 }) => {
   await page.goto("/en/products/oakwood-chew-ring");
   await dismissCookieBanner(page);
-  await page.getByRole("button", { name: /add to bag/i }).click();
-  const bag = page.getByRole("dialog", { name: "Bag" });
+  await page.getByRole("button", { name: /add to cart/i }).click();
+  const bag = page.getByRole("dialog", { name: "Cart" });
   await expect(bag).toBeVisible();
-  await bag.getByRole("link", { name: /view bag/i }).click();
+  await bag.getByRole("link", { name: /view cart/i }).click();
   await expect(page).toHaveURL(/\/cart/);
 
   await expect(page.getByRole("heading", { name: "Delivery estimate" })).toBeVisible();
@@ -56,7 +56,9 @@ test("unavailable variants offer a simulated restock notification", async ({ pag
   await expect(page.getByRole("status")).toContainText(/simulated subscription/i);
 });
 
-test("newsletter subscribe is simulated", async ({ page }) => {
+test("newsletter subscribe confirms without exposing the simulation on the form", async ({
+  page,
+}) => {
   await page.goto("/en/about");
   await dismissCookieBanner(page);
   const email = page.locator("#footer-newsletter-email").first();
@@ -67,8 +69,8 @@ test("newsletter subscribe is simulated", async ({ page }) => {
 
   await email.fill("reader@example.com");
   await form.getByRole("button", { name: /^join$/i }).click();
-  await expect(form.getByRole("status")).toContainText(/simulated signup/i);
-  await expect(form.getByText(/simulated in this portfolio/i)).toBeVisible();
+  await expect(form.getByRole("status")).toContainText(/on the list/i);
+  await expect(form.getByText(/simulated/i)).toHaveCount(0);
 });
 
 test("contact form is simulated", async ({ page }) => {

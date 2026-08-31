@@ -11,6 +11,7 @@ rsync -a --delete \
   --exclude .env.local \
   "$ROOT/" "$APP/"
 cd "$APP"
+rm -f .env.local
 export npm_config_update_notifier=false
 export CI=true
 export NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3100

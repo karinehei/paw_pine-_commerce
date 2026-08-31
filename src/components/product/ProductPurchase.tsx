@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddToCartButton } from "@/components/product/AddToCartButton";
 import { BackInStockForm } from "@/components/commerce/BackInStockForm";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { formatDispatchWindow } from "@/lib/commerce/delivery";
 import { defaultSelections, findVariant, optionStatesFor } from "@/lib/commerce/variants";
+import { formatMoney } from "@/lib/format";
 import { clampQuantity } from "@/lib/security";
 import type { Product } from "@/lib/commerce/types";
 import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
@@ -17,6 +18,8 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const t = useMessages();
   const locale = numberLocale(useLocale());
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const [sticky, setSticky] = useState(false);
   const variant = useMemo(() => findVariant(product, selected), [product, selected]);
   const valueStates = useMemo(
     () => optionStatesFor(product, selected),
@@ -27,11 +30,22 @@ export function ProductPurchase({ product }: { product: Product }) {
 
   const stockLabel = variant
     ? variant.availableForSale
-      ? variant.quantityAvailable !== null && variant.quantityAvailable <= 4
-        ? t.onlyLeft(variant.quantityAvailable)
-        : t.inStockDispatch
+      ? t.inStockDispatch
       : t.optionOutOfStock
     : t.combinationUnavailable;
+
+  useEffect(() => {
+    const node = ctaRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setSticky(Boolean(entry && !entry.isIntersecting)),
+      { threshold: 0 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -40,12 +54,14 @@ export function ProductPurchase({ product }: { product: Product }) {
           price={variant.price}
           compareAtPrice={variant.compareAtPrice}
           className="text-lg"
+          showSavings
         />
       ) : (
         <ProductPrice
           price={product.priceRange.minVariantPrice}
           compareAtPrice={product.compareAtPriceRange.minVariantPrice}
           className="text-lg"
+          showSavings
         />
       )}
       <VariantSelector
@@ -100,18 +116,39 @@ export function ProductPurchase({ product }: { product: Product }) {
       <p className="text-muted text-sm" aria-live="polite">
         {stockLabel}
       </p>
-      <p className="text-muted text-sm">
-        {variant?.availableForSale
-          ? t.dispatchOver(formatDispatchWindow(new Date(), locale))
-          : t.emailWhenBack}
-      </p>
-      <AddToCartButton product={product} variant={variant} quantity={quantityForCart} />
+      {variant?.availableForSale ? (
+        <p className="text-muted text-sm">
+          {t.dispatchOver(formatDispatchWindow(new Date(), locale))}
+        </p>
+      ) : (
+        <p className="text-muted text-sm">{t.emailWhenBack}</p>
+      )}
+      <div ref={ctaRef} id="product-purchase-cta">
+        <AddToCartButton product={product} variant={variant} quantity={quantityForCart} />
+      </div>
       {variant && !variant.availableForSale ? (
         <BackInStockForm
           key={variant.id}
           handle={product.handle}
           variantId={variant.id}
         />
+      ) : null}
+      {sticky && variant?.availableForSale ? (
+        <div className="border-border bg-linen/95 supports-[backdrop-filter]:bg-linen/90 fixed inset-x-0 bottom-0 z-20 border-t px-4 py-3 backdrop-blur-sm lg:hidden">
+          <div className="mx-auto flex max-w-6xl items-center gap-3">
+            <p className="min-w-0 flex-1 truncate text-sm">
+              {formatMoney(variant.price, locale)}
+            </p>
+            <div className="shrink-0">
+              <AddToCartButton
+                product={product}
+                variant={variant}
+                quantity={quantityForCart}
+                fullWidth={false}
+              />
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );

@@ -30,6 +30,7 @@ describe("sitemap exclusions", () => {
     expect(urls).toContain("https://example.com/sv");
     expect(urls).toContain("https://example.com/en/about");
     expect(urls).toContain("https://example.com/en/cookies");
+    expect(urls).toContain("https://example.com/fi/case-study");
     expect(urls).toContain("https://example.com/sv/collections/dogs");
     expect(urls).toContain("https://example.com/fi/products/oakwood-chew-ring");
     expect(urls).not.toContain("https://example.com/");

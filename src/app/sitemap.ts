@@ -1,4 +1,8 @@
 import type { MetadataRoute } from "next";
+import {
+  filterPawPineCollections,
+  filterPawPineProducts,
+} from "@/lib/commerce/catalog-scope";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
 import { getSiteUrl } from "@/lib/env";
 import { buildSitemapEntries } from "@/lib/seo-routes";
@@ -12,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return buildSitemapEntries({
     site: getSiteUrl(),
-    products,
-    collections,
+    products: filterPawPineProducts(products),
+    collections: filterPawPineCollections(collections),
   });
 }

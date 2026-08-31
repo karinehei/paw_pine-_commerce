@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { filterPawPineProducts } from "@/lib/commerce/catalog-scope";
 import { getCatalogProvider } from "@/lib/commerce/catalog";
 import { getSiteUrl } from "@/lib/env";
 import {
@@ -13,7 +14,7 @@ export async function GET() {
     const { products } = await getCatalogProvider().getProducts();
     const xml = buildGoogleShoppingFeed({
       siteUrl: getSiteUrl(),
-      products,
+      products: filterPawPineProducts(products),
     });
     return new NextResponse(xml, {
       status: 200,

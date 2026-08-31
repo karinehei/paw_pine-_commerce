@@ -141,6 +141,7 @@ function userErrorMessage(errors?: Array<{ message: string }>): string | undefin
 
 function tagsFor(product: Product): string[] {
   const tags = new Set<string>([
+    "catalog:paw-pine",
     "paw-pine",
     `species:${product.species}`,
     `category:${product.category}`,

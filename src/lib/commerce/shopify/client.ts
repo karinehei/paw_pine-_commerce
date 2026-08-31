@@ -10,8 +10,10 @@ import {
   type StorefrontTokenKind,
 } from "@/lib/commerce/shopify/config";
 import { logStorefrontFailure, toStorefrontError } from "@/lib/commerce/shopify/log";
-import { withLanguageInContext } from "@/lib/commerce/shopify/in-context";
-import { shopifyLanguage } from "@/lib/i18n/config";
+import {
+  storefrontContextVariables,
+  withStorefrontInContext,
+} from "@/lib/commerce/shopify/in-context";
 import { getLocale } from "@/lib/i18n/locale";
 
 interface ShopifyGraphQLResponse<T> {
@@ -78,10 +80,11 @@ export async function shopifyFetch<T>({
 
   const endpoint = storefrontEndpoint(config);
   const ip = await buyerIp();
-  const language = shopifyLanguage(await getLocale());
+  const locale = await getLocale();
+  const context = storefrontContextVariables(locale);
   const body = JSON.stringify({
-    query: withLanguageInContext(query),
-    variables: { ...variables, language },
+    query: withStorefrontInContext(query),
+    variables: { ...variables, ...context },
   });
   let usedKind: StorefrontTokenKind = config.tokenKind;
 

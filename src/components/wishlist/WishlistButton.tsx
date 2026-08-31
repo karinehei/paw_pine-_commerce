@@ -57,13 +57,21 @@ export function WishlistButton({
       onClick={onClick}
       aria-pressed={hydrated ? saved : false}
       aria-label={label}
-      className={`min-h-11 text-xs tracking-[0.12em] uppercase ${
+      className={
         compact
-          ? "border-border bg-paper/95 text-ink border px-2 py-1"
-          : "text-muted hover:text-ink underline-offset-4 hover:underline"
-      }`}
+          ? "bg-paper/90 text-ink inline-flex min-h-11 min-w-11 items-center justify-center"
+          : "text-muted hover:text-ink inline-flex min-h-11 items-center gap-2 text-sm underline-offset-4 hover:underline"
+      }
     >
-      {saved ? t.wishlistSaved : t.wishlistSave}
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.6-7 10-7 10Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          fill={saved ? "currentColor" : "none"}
+        />
+      </svg>
+      {compact ? null : <span>{saved ? t.wishlistSaved : t.wishlistSave}</span>}
     </button>
   );
 }

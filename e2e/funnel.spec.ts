@@ -2,16 +2,16 @@ import { expect, test } from "@playwright/test";
 
 test("purchase funnel reaches the Shopify checkout boundary", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("link", { name: /shop dogs/i }).click();
+  await page.getByRole("link", { name: "Shop dogs" }).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Dogs");
 
   await page.getByRole("link", { name: /trail harness/i }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Trail Harness");
 
   await page.getByRole("radio", { name: /size m/i }).click();
-  await page.getByRole("button", { name: /add to bag/i }).click();
+  await page.getByRole("button", { name: /add to cart/i }).click();
 
-  const bag = page.getByRole("dialog", { name: "Bag" });
+  const bag = page.getByRole("dialog", { name: "Cart" });
   await expect(bag).toBeVisible();
   await expect(bag.getByRole("link", { name: "Trail Harness" })).toBeVisible();
 
@@ -64,5 +64,21 @@ test.describe("mobile navigation", () => {
     await menu.getByRole("link", { name: "Dogs", exact: true }).click();
     await expect(page).toHaveURL(/collections\/dogs/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Dogs");
+  });
+
+  test("opens filters and the cart drawer", async ({ page }) => {
+    await page.goto("/en/collections/dogs");
+    await page.getByRole("button", { name: "Filter" }).click();
+    const filters = page.getByRole("dialog", { name: "Filter" });
+    await expect(filters).toBeVisible();
+    await filters.getByLabel("Sort products").selectOption("price-asc");
+    await expect(page).toHaveURL(/sort=price-asc/);
+
+    await page.goto("/en/products/oakwood-chew-ring");
+    await page
+      .getByRole("button", { name: /add to cart/i })
+      .first()
+      .click();
+    await expect(page.getByRole("dialog", { name: "Cart" })).toBeVisible();
   });
 });

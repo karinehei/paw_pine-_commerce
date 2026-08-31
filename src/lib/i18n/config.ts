@@ -31,6 +31,13 @@ export const SHOPIFY_LANGUAGE: Record<Locale, "FI" | "EN" | "SV"> = {
   sv: "SV",
 };
 
+/** Finnish market for every storefront language. Contextual cart/catalogue pricing. */
+export const SHOPIFY_COUNTRY: Record<Locale, "FI"> = {
+  fi: "FI",
+  en: "FI",
+  sv: "FI",
+};
+
 export const LOCALE_SHORT_LABEL: Record<Locale, string> = {
   fi: "FI",
   en: "EN",

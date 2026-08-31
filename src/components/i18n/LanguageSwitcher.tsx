@@ -23,7 +23,7 @@ export function LanguageSwitcher() {
         const current = code === locale;
         return (
           // Full document navigation: /en/x and /sv/x both rewrite to /x, so
-          // next/link would reuse the English layout and keep "Add to bag".
+          // next/link would reuse the English layout and keep "Add to cart".
           <a
             key={code}
             href={href}

@@ -1,5 +1,6 @@
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
-import { LOCALES, type Locale } from "@/lib/i18n/config";
+import { formatMoney, moneyFromNumber } from "@/lib/format";
+import { LOCALES, NUMBER_LOCALES, type Locale } from "@/lib/i18n/config";
 import enJson from "../../../locales/en.json";
 import fiJson from "../../../locales/fi.json";
 import svJson from "../../../locales/sv.json";
@@ -16,8 +17,11 @@ function interpolate(template: string, vars: Record<string, string | number>): s
   return template.replace(/\{(\w+)\}/g, (_, key: string) => String(vars[key] ?? ""));
 }
 
-function bind(dict: Dictionary) {
-  const threshold = String(FREE_SHIPPING_THRESHOLD);
+function bind(dict: Dictionary, locale: Locale) {
+  const threshold = formatMoney(
+    moneyFromNumber(FREE_SHIPPING_THRESHOLD),
+    NUMBER_LOCALES[locale],
+  );
   return {
     ...dict,
     shippingBanner: interpolate(dict.shippingBanner, { threshold }),
@@ -41,20 +45,25 @@ function bind(dict: Dictionary) {
     dispatchOver: (window: string) =>
       interpolate(dict.dispatchOver, { window, threshold }),
     shippingReturnsBlurb: (value: number) =>
-      interpolate(dict.shippingReturnsBlurb, { threshold: value }),
+      interpolate(dict.shippingReturnsBlurb, {
+        threshold: formatMoney(moneyFromNumber(value), NUMBER_LOCALES[locale]),
+      }),
     saveToWishlist: (title: string) => interpolate(dict.saveToWishlist, { title }),
     removeFromWishlist: (title: string) =>
       interpolate(dict.removeFromWishlist, { title }),
     openWishlist: (count: number) => interpolate(dict.openWishlist, { count }),
+    saveAmount: (amount: string) => interpolate(dict.saveAmount, { amount }),
+    searchNoResults: (term: string) => interpolate(dict.searchNoResults, { term }),
+    trustFreeShipping: interpolate(dict.trustFreeShipping, { threshold }),
   };
 }
 
 export type Messages = ReturnType<typeof bind>;
 
 const catalogs: Record<Locale, Messages> = {
-  en: bind(enJson),
-  fi: bind(fiJson),
-  sv: bind(svJson),
+  en: bind(enJson, "en"),
+  fi: bind(fiJson, "fi"),
+  sv: bind(svJson, "sv"),
 };
 
 export function getMessages(locale: Locale): Messages {

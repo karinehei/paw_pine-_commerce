@@ -24,7 +24,7 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
   await page.goto("/en/products/oakwood-chew-ring");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
 
-  const addToBag = page.getByRole("button", { name: /add to bag/i });
+  const addToBag = page.getByRole("button", { name: /add to cart/i });
   await expect(addToBag).toBeVisible();
 
   const before = await page.evaluate(() => window.dataLayer ?? []);
@@ -50,7 +50,7 @@ test("analytics events stay off until consent, then add_to_cart and begin_checko
     )
     .toBe(1);
 
-  const bag = page.getByRole("dialog", { name: "Bag" });
+  const bag = page.getByRole("dialog", { name: "Cart" });
   await expect(bag).toBeVisible();
   await bag.getByRole("link", { name: "Checkout" }).click();
   await expect(page).toHaveURL(/checkout=demo/);
