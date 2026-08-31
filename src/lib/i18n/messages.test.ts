@@ -12,4 +12,19 @@ describe("translation dictionaries", () => {
     expect(getMessages("sv").addToBag).toBe("Lägg i varukorgen");
     expect(getMessages("sv").checkout).toBe("Till kassan");
   });
+
+  it("limits AI imagery disclosure to selected editorial visuals", () => {
+    expect(getMessages("en").caseStudyImageryNote).toContain(
+      "Selected editorial lifestyle imagery",
+    );
+    expect(getMessages("en").caseStudyImageryNote).toContain(
+      "Shopify-based commerce architecture",
+    );
+    expect(getMessages("fi").caseStudyImageryNote).toContain(
+      "editoriaalisesta lifestyle-kuvituksesta",
+    );
+    expect(getMessages("sv").caseStudyImageryNote).toContain(
+      "redaktionella livsstilsbilderna",
+    );
+  });
 });

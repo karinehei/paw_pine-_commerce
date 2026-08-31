@@ -25,6 +25,12 @@ Customer
 
 Shopify remains the system of record. Next.js owns merchandising, URLs, SEO, consent, and presentation. There is no custom order backend.
 
+## Editorial imagery
+
+Selected editorial lifestyle imagery in this portfolio project is AI-generated or AI-assisted. These visuals are used for brand presentation only. Product catalogue data and ecommerce functionality are implemented through the project’s Shopify-based commerce architecture.
+
+This disclosure lives in portfolio documentation and on `/case-study`. It is not shown on homepage category cards, product cards, collections, cart, checkout, or the cookie banner.
+
 ## Why Shopify
 
 Catalogue, inventory, carts, tax, and PCI checkout are solved problems. Rebuilding them for a small merchant would be slower, riskier, and more expensive than using Shopify as the commerce system of record. The Storefront API is a real GraphQL integration a hiring manager can inspect.

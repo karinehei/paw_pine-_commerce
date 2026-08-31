@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { NewsletterForm } from "@/components/commerce/NewsletterForm";
@@ -8,7 +9,6 @@ import { filterByCollection } from "@/lib/commerce/filters";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
-import type { Product } from "@/lib/commerce/types";
 
 export default async function HomePage() {
   const t = getMessages(await getLocale());
@@ -17,10 +17,6 @@ export default async function HomePage() {
   const newest = filterByCollection(all.products, "new-arrivals") ?? [];
   const featured = (bestsellers.length > 0 ? bestsellers : all.products).slice(0, 4);
   const newItems = (newest.length > 0 ? newest : all.products).slice(0, 4);
-  const dog =
-    all.products.find((product) => product.species === "dog") ?? all.products[0];
-  const cat =
-    all.products.find((product) => product.species === "cat") ?? all.products[1];
 
   const categories = [
     { href: "/collections/toys", title: t.toys },
@@ -66,8 +62,18 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-16 md:px-6">
           <h2 className="font-display text-h2">{t.shopByPet}</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-2 md:gap-6">
-            <ShopPetCard href="/collections/dogs" title={t.dogs} product={dog} />
-            <ShopPetCard href="/collections/cats" title={t.cats} product={cat} />
+            <ShopPetCard
+              href="/collections/dogs"
+              title={t.dogs}
+              src="/images/editorial-dogs.jpg"
+              alt={t.shopByPetDogsAlt}
+            />
+            <ShopPetCard
+              href="/collections/cats"
+              title={t.cats}
+              src="/images/editorial-cats.jpg"
+              alt={t.shopByPetCatsAlt}
+            />
           </div>
         </div>
       </section>
@@ -164,25 +170,26 @@ export default async function HomePage() {
 function ShopPetCard({
   href,
   title,
-  product,
+  src,
+  alt,
 }: {
   href: string;
   title: string;
-  product?: Product;
+  src: string;
+  alt: string;
 }) {
-  if (!product) {
-    return (
-      <LocaleLink href={href} className="bg-stone flex aspect-[5/4] items-end p-6">
-        <span className="font-display text-3xl">{title}</span>
-      </LocaleLink>
-    );
-  }
   return (
     <LocaleLink
       href={href}
-      className="group bg-stone relative block aspect-[5/4] overflow-hidden"
+      className="bg-stone relative block aspect-[5/4] overflow-hidden"
     >
-      <ProductMedia product={product} image={product.featuredImage} />
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover"
+        sizes="(min-width: 768px) 50vw, 100vw"
+      />
       <span className="bg-linen/90 absolute inset-x-0 bottom-0 px-5 py-4">
         <span className="font-display text-2xl md:text-3xl">{title}</span>
       </span>

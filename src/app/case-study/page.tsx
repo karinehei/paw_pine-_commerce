@@ -29,6 +29,10 @@ export default async function CaseStudyPage() {
           <p className="text-muted mt-3">{t.caseStudyStack}</p>
         </section>
         <section>
+          <h2 className="font-display text-2xl">{t.caseStudyImagery}</h2>
+          <p className="text-muted mt-3">{t.caseStudyImageryNote}</p>
+        </section>
+        <section>
           <h2 className="font-display text-2xl">{t.demoAnalyticsTitle}</h2>
           <p className="text-muted mt-3">{t.caseStudyHonesty}</p>
           <p className="mt-4">

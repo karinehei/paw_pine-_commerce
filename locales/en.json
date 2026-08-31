@@ -216,6 +216,8 @@
   "homeSupporting": "A considered edit of toys, beds, feeding, and walk gear that can also live in your home.",
   "homeEditorial": "Quieter objects for pets and rooms.",
   "shopByPet": "Shop by pet",
+  "shopByPetDogsAlt": "A dog resting in a Paw & Pine bed",
+  "shopByPetCatsAlt": "A cat resting in a Paw & Pine bed",
   "walking": "Walk / harnesses",
   "popular": "Popular",
   "sale": "Sale",
@@ -234,6 +236,8 @@
   "caseStudyLead": "A headless Shopify storefront built as a portfolio. The customer UI is a shop. This page covers architecture, simulated integrations, and testing.",
   "caseStudyStack": "Next.js App Router, TypeScript, Tailwind, Shopify Storefront GraphQL, Shopify-hosted checkout, Vercel.",
   "caseStudyHonesty": "Newsletter, contact, and restock alerts are simulated: input is validated, nothing is delivered. Analytics stay in this browser until GTM is connected. Delivery rates are demo estimates; final methods are confirmed on Shopify Checkout.",
+  "caseStudyImagery": "Editorial imagery",
+  "caseStudyImageryNote": "Selected editorial lifestyle imagery in this portfolio project is AI-generated or AI-assisted. These visuals are used for brand presentation only. Product catalogue data and ecommerce functionality are implemented through the project’s Shopify-based commerce architecture.",
   "customerService": "Customer service",
   "information": "About",
   "portfolioDemo": "Portfolio demo"

@@ -216,6 +216,8 @@
   "homeSupporting": "Ett genomtänkt urval av leksaker, bäddar, matning och promenadutrustning som också passar i hemmet.",
   "homeEditorial": "Tystare föremål för djur och rum.",
   "shopByPet": "Handla efter djur",
+  "shopByPetDogsAlt": "En hund vilande i en Paw & Pine-bädd",
+  "shopByPetCatsAlt": "En katt vilande i en Paw & Pine-bädd",
   "walking": "Promenad / selar",
   "popular": "Populär",
   "sale": "Rea",
@@ -234,6 +236,8 @@
   "caseStudyLead": "En headless Shopify-butik byggd som portfölj. Kundgränssnittet är en butik. Den här sidan täcker arkitektur, simulerade integrationer och tester.",
   "caseStudyStack": "Next.js App Router, TypeScript, Tailwind, Shopify Storefront GraphQL, Shopifys kassa, Vercel.",
   "caseStudyHonesty": "Nyhetsbrev, kontakt och restock-aviseringar är simulerade: indata valideras, inget skickas. Analys stannar i den här webbläsaren tills GTM kopplas. Fraktpriser är demoestimat; slutliga sätt bekräftas i Shopifys kassa.",
+  "caseStudyImagery": "Redaktionella bilder",
+  "caseStudyImageryNote": "En del av de redaktionella livsstilsbilderna i detta portfolioprojekt är AI-genererade eller AI-assisterade. Bilderna används endast för varumärkesmässig presentation. Produktkatalogen och e-handelsfunktionaliteten bygger på projektets Shopify-baserade implementation.",
   "customerService": "Kundservice",
   "information": "Om oss",
   "portfolioDemo": "Portföljdemo"

@@ -216,6 +216,8 @@
   "homeSupporting": "Harkittu valikoima leluja, petejä, ruokintatuotteita ja kävelyvarusteita, jotka sopivat myös kotiisi.",
   "homeEditorial": "Hiljaisempia esineitä lemmikeille ja koteihin.",
   "shopByPet": "Kauppa lemmikin mukaan",
+  "shopByPetDogsAlt": "Koira Paw & Pinen pedissä",
+  "shopByPetCatsAlt": "Kissa Paw & Pinen pedissä",
   "walking": "Kävely / Valjaat",
   "popular": "Suosittu",
   "sale": "Alennus",
@@ -234,6 +236,8 @@
   "caseStudyLead": "Headless Shopify -storefront portfoliota varten. Asiakasnäkymä on kauppa. Tällä sivulla on arkkitehtuuri, demo-integraatiot ja testaus.",
   "caseStudyStack": "Next.js App Router, TypeScript, Tailwind, Shopify Storefront GraphQL, Shopifyn kassa, Vercel.",
   "caseStudyHonesty": "Uutiskirje, yhteydenotto ja varastoilmoitus ovat simuloituja: osoite tarkistetaan, viestiä ei toimiteta. Analytiikka pysyy tässä selaimessa kunnes GTM kytketään. Toimitushinnat ovat demoarvioita; lopulliset tavat vahvistetaan Shopifyn kassalla.",
+  "caseStudyImagery": "Editoriaalinen kuvitus",
+  "caseStudyImageryNote": "Osa tässä portfoliohankkeessa käytetystä editoriaalisesta lifestyle-kuvituksesta on tekoälyllä tuotettua tai tekoälyavusteista. Kuvia käytetään vain brändilliseen esitystarkoitukseen. Tuotekatalogi ja verkkokaupan toiminnallisuus perustuvat projektin Shopify-pohjaiseen toteutukseen.",
   "customerService": "Asiakaspalvelu",
   "information": "Tietoa",
   "portfolioDemo": "Portfolio-demo"

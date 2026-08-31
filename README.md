@@ -16,6 +16,12 @@ A live commercial shop would require a **paid Shopify plan** and potentially pai
 
 Mobile and tablet: [home-375](docs/screenshots/home-375.png) · [home-768](docs/screenshots/home-768.png) · more in [docs/screenshots](docs/screenshots/)
 
+## Editorial imagery
+
+Selected editorial lifestyle imagery in this portfolio project is AI-generated or AI-assisted. These visuals are used for brand presentation only. Product catalogue data and ecommerce functionality are implemented through the project’s Shopify-based commerce architecture.
+
+The same note is on the in-app [case study](docs/case-study.md) and `/case-study` (FI / EN / SV). It is not shown on homepage category cards, product cards, collections, cart, checkout, or the cookie banner.
+
 ## Tech stack
 
 Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Shopify Storefront GraphQL · Vitest · Playwright · GitHub Actions · Vercel Hobby

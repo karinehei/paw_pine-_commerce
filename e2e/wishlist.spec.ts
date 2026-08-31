@@ -29,7 +29,9 @@ test("recently viewed lists the previous product and related items stay on-speci
   await page.goto("/en/products/oakwood-chew-ring");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oakwood Chew Ring");
   await expect
-    .poll(() => page.evaluate(() => window.localStorage.getItem("paw_pine_recently_viewed")))
+    .poll(() =>
+      page.evaluate(() => window.localStorage.getItem("paw_pine_recently_viewed")),
+    )
     .toContain("oakwood-chew-ring");
 
   await page.goto("/en/products/trail-harness");
