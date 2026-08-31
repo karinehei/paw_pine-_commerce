@@ -1,3 +1,5 @@
+import { quoteShopifySearchTerm } from "@/lib/security";
+
 export const PAW_PINE_CATALOG_TAG = "catalog:paw-pine";
 export const PAW_PINE_CATALOG_TAG_LEGACY = "paw-pine";
 
@@ -51,7 +53,7 @@ export function filterPawPineCollections<T extends { handle: string }>(
   return collections.filter((collection) => isPawPineCollectionHandle(collection.handle));
 }
 
-/** Storefront `products(query:)` clause. Never identify the catalogue by vendor. */
+/** Storefront `products(query:)`. Tags with `:` must be quoted or the whole clause matches nothing. */
 export function shopifyCatalogQueryClause(): string {
-  return `(tag:${PAW_PINE_CATALOG_TAG} OR tag:${PAW_PINE_CATALOG_TAG_LEGACY})`;
+  return `(tag:${quoteShopifySearchTerm(PAW_PINE_CATALOG_TAG)} OR tag:${quoteShopifySearchTerm(PAW_PINE_CATALOG_TAG_LEGACY)})`;
 }

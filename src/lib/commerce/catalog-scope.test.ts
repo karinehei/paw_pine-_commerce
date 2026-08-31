@@ -88,7 +88,9 @@ describe("Paw & Pine catalogue scope", () => {
   });
 
   it("scopes Storefront product queries by catalogue tag, not vendor", () => {
-    expect(shopifyCatalogQueryClause()).toContain("tag:catalog:paw-pine");
+    expect(shopifyCatalogQueryClause()).toContain('tag:"catalog:paw-pine"');
+    expect(shopifyCatalogQueryClause()).toContain('tag:"paw-pine"');
+    expect(shopifyCatalogQueryClause()).not.toContain("tag:catalog:paw-pine OR");
     expect(shopifyCatalogQueryClause()).not.toContain("vendor:");
   });
 });
