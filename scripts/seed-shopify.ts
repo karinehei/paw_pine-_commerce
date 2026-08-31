@@ -190,18 +190,14 @@ function productInput(product: Product) {
 }
 
 const PRODUCT_SET = `
-  mutation ProductSet($synchronous: Boolean!, $input: ProductSetInput!) {
-    productSet(synchronous: $synchronous, input: $input) {
+  mutation ProductSet(
+    $identifier: ProductSetIdentifiers
+    $synchronous: Boolean!
+    $input: ProductSetInput!
+  ) {
+    productSet(identifier: $identifier, synchronous: $synchronous, input: $input) {
       product { id handle }
       userErrors { field message }
-    }
-  }
-`;
-
-const PRODUCT_BY_HANDLE = `
-  query ProductByHandle($query: String!) {
-    products(first: 1, query: $query) {
-      nodes { id handle }
     }
   }
 `;
@@ -248,8 +244,12 @@ const PUBLISH = `
 `;
 
 const ARCHIVE = `
-  mutation Archive($input: ProductSetInput!, $synchronous: Boolean!) {
-    productSet(synchronous: $synchronous, input: $input) {
+  mutation Archive(
+    $identifier: ProductSetIdentifiers!
+    $input: ProductSetInput!
+    $synchronous: Boolean!
+  ) {
+    productSet(identifier: $identifier, synchronous: $synchronous, input: $input) {
       product { id handle status }
       userErrors { field message }
     }
@@ -313,22 +313,16 @@ async function main(): Promise<void> {
   }
 
   for (const product of demoProducts) {
-    const existing = await adminFetch<{
-      products: { nodes: Array<{ id: string }> };
-    }>(domain, token, PRODUCT_BY_HANDLE, { query: `handle:${product.handle}` });
-
-    const existingId = existing.products.nodes[0]?.id;
-    const input = {
-      ...(existingId ? { identifier: { id: existingId } } : {}),
-      ...productInput(product),
-    };
-
     const result = await adminFetch<{
       productSet: {
         product: { id: string; handle: string } | null;
         userErrors: Array<{ message: string }>;
       };
-    }>(domain, token, PRODUCT_SET, { synchronous: true, input });
+    }>(domain, token, PRODUCT_SET, {
+      identifier: { handle: product.handle },
+      synchronous: true,
+      input: productInput(product),
+    });
 
     const error = userErrorMessage(result.productSet.userErrors);
     if (error || !result.productSet.product) {
@@ -423,8 +417,9 @@ async function main(): Promise<void> {
       const archived = await adminFetch<{
         productSet: { userErrors: Array<{ message: string }> };
       }>(domain, token, ARCHIVE, {
+        identifier: { id: product.id },
         synchronous: true,
-        input: { identifier: { id: product.id }, status: "ARCHIVED" },
+        input: { status: "ARCHIVED" },
       });
       const error = userErrorMessage(archived.productSet.userErrors);
       if (error) {
