@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { getLocale } from "@/lib/i18n/locale";
 import { getMessages } from "@/lib/i18n/messages";
 import { ProductDetails } from "@/components/product/ProductDetails";
@@ -19,10 +19,12 @@ import { parseAmount } from "@/lib/format";
 import { withLocale } from "@/lib/i18n/path";
 import type { HandlePageProps } from "@/lib/page-props";
 
-export async function generateStaticParams() {
-  const { products } = await getCatalogProvider().getProducts();
-  return products.map((product) => ({ handle: product.handle }));
-}
+/**
+ * Locale and Shopify context read `headers()` / `cookies()`.
+ * `generateStaticParams` would prerender these routes as static, then Next.js
+ * throws at runtime: "Page changed from static to dynamic ... reason: headers".
+ */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: HandlePageProps) {
   const { handle } = await params;
@@ -33,7 +35,8 @@ export async function generateMetadata({ params }: HandlePageProps) {
       return { title: getMessages(locale).productFallback };
     }
     return productMetadata(product, locale);
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return { title: getMessages(locale).productFallback };
   }
 }
@@ -48,7 +51,8 @@ export default async function ProductPage({ params }: HandlePageProps) {
       commerce.getProduct(handle),
       commerce.getRecommendations(handle),
     ]);
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return (
       <div className="px-4">
         <ErrorState />

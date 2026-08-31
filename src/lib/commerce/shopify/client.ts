@@ -15,6 +15,7 @@ import {
   withStorefrontInContext,
 } from "@/lib/commerce/shopify/in-context";
 import { getLocale } from "@/lib/i18n/locale";
+import { unstable_rethrow } from "next/navigation";
 
 interface ShopifyGraphQLResponse<T> {
   data?: T;
@@ -42,7 +43,8 @@ async function buyerIp(): Promise<string | undefined> {
     const { headers } = await import("next/headers");
     const store = await headers();
     return sanitiseBuyerIp(store.get("x-forwarded-for") ?? store.get("x-real-ip"));
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return undefined;
   }
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies, headers } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
@@ -19,7 +20,8 @@ export async function getLocale(): Promise<Locale> {
     if (isLocale(cookieValue)) {
       return cookieValue;
     }
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return DEFAULT_LOCALE;
   }
   return DEFAULT_LOCALE;
