@@ -187,9 +187,9 @@ export interface BreadcrumbListJsonLd {
 
 export function productJsonLd(product: Product, url: string): ProductJsonLd {
   const images = product.images.map((image) => image.url).filter(Boolean);
-  const sku = product.sku.trim();
-  const brand = product.vendor.trim();
-  const description = product.description.trim();
+  const sku = product.sku?.trim() ?? "";
+  const brand = product.vendor?.trim() ?? "";
+  const description = product.description?.trim() ?? "";
   const json: ProductJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -218,7 +218,7 @@ export function productJsonLd(product: Product, url: string): ProductJsonLd {
   if (brand) {
     json.brand = { "@type": "Brand", name: brand };
   }
-  if (product.material.trim()) {
+  if (product.material?.trim()) {
     json.material = product.material;
   }
   return json;

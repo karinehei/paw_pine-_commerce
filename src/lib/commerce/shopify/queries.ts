@@ -8,8 +8,15 @@ const VARIANT_DETAIL_FIELDS = `
   compareAtPrice { amount currencyCode }
 `;
 
-/** Listing fields only: no body copy, gallery, options, or variants. */
-export const PRODUCT_CARD_FIELDS = `
+const PRODUCT_IMAGE_FIELDS = `
+    url
+    altText
+    width
+    height
+`;
+
+/** Shared identity and pricing. Image connections are added per query so `images` is never requested twice. */
+const PRODUCT_CORE_FIELDS = `
   id
   handle
   title
@@ -19,10 +26,7 @@ export const PRODUCT_CARD_FIELDS = `
   createdAt
   availableForSale
   featuredImage {
-    url
-    altText
-    width
-    height
+    ${PRODUCT_IMAGE_FIELDS}
   }
   priceRange {
     minVariantPrice { amount currencyCode }
@@ -32,26 +36,25 @@ export const PRODUCT_CARD_FIELDS = `
     minVariantPrice { amount currencyCode }
     maxVariantPrice { amount currencyCode }
   }
+`;
+
+/** Listing fields: no body copy, options, or variants. Two images for card hover. */
+export const PRODUCT_CARD_FIELDS = `
+  ${PRODUCT_CORE_FIELDS}
   images(first: 2) {
     nodes {
-      url
-      altText
-      width
-      height
+      ${PRODUCT_IMAGE_FIELDS}
     }
   }
 `;
 
 const PRODUCT_FIELDS = `
-  ${PRODUCT_CARD_FIELDS}
+  ${PRODUCT_CORE_FIELDS}
   description
   descriptionHtml
   images(first: 8) {
     nodes {
-      url
-      altText
-      width
-      height
+      ${PRODUCT_IMAGE_FIELDS}
     }
   }
   options {

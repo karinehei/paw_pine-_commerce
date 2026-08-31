@@ -79,7 +79,7 @@ export default async function ProductPage({ params }: HandlePageProps) {
             {product.title}
           </h1>
           <p className="text-muted mt-4 max-w-lg">
-            {product.description.split(/\n\n+/)[0] ?? product.description}
+            {(product.description ?? "").split(/\n\n+/)[0] || product.title}
           </p>
           <div className="mt-8">
             <ProductPurchase product={product} />
