@@ -80,7 +80,11 @@ export default async function CartPage({ searchParams }: QueryPageProps) {
               )}
             </p>
             <DeliveryEstimate />
-            <CheckoutCta cart={cart} href={checkout.href} external={checkout.external} />
+            <CheckoutCta
+              cart={cart}
+              href={checkout.href}
+              hardNavigation={checkout.hardNavigation}
+            />
           </aside>
           <AnalyticsListener
             event={{

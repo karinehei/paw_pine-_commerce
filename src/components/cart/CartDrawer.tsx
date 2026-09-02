@@ -11,13 +11,15 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { track } from "@/lib/analytics/events";
 import { itemsFromCart } from "@/lib/analytics/items";
 import { resolveCheckoutHref } from "@/lib/commerce/checkout";
+import { withLocale } from "@/lib/i18n/path";
 import { ESTIMATED_SHIPPING_AMOUNT, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { formatMoney, moneyFromNumber, parseAmount } from "@/lib/format";
 
 export function CartDrawer() {
   const { cart, isOpen, closeCart, mode, dialogRef } = useCart();
   const t = useMessages();
-  const moneyLocale = numberLocale(useLocale());
+  const locale = useLocale();
+  const moneyLocale = numberLocale(locale);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const trackedOpen = useRef(false);
@@ -141,11 +143,13 @@ export function CartDrawer() {
                 ),
               )}
             </p>
-            {checkout.external ? (
+            {checkout.hardNavigation ? (
               <a
-                href={checkout.href}
-                rel="noopener noreferrer"
-                onClick={beginCheckout}
+                href={withLocale(checkout.href, locale)}
+                onClick={() => {
+                  beginCheckout();
+                  closeCart();
+                }}
                 className="btn-primary w-full"
               >
                 {t.checkout}

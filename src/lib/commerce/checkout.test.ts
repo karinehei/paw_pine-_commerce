@@ -7,14 +7,14 @@ describe("checkout href", () => {
       "shopify",
       "https://paw-pine.myshopify.com/cart/c/abc",
     );
-    expect(live.external).toBe(false);
+    expect(live.hardNavigation).toBe(true);
     expect(live.href).toBe(
       "/checkout?to=https%3A%2F%2Fpaw-pine.myshopify.com%2Fcart%2Fc%2Fabc",
     );
 
     expect(resolveCheckoutHref("shopify", "https://evil.example/phish")).toEqual({
       href: "/cart?checkout=demo",
-      external: false,
+      hardNavigation: false,
     });
   });
 
@@ -30,7 +30,7 @@ describe("checkout href", () => {
       resolveCheckoutHref("demo", "https://paw-pine.myshopify.com/cart/c/abc"),
     ).toEqual({
       href: "/cart?checkout=demo",
-      external: false,
+      hardNavigation: false,
     });
   });
 });

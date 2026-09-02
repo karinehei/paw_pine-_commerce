@@ -15,10 +15,11 @@ export function parseCheckoutTarget(value: string | undefined): string | null {
 export function resolveCheckoutHref(
   mode: CommerceMode,
   checkoutUrl: string | undefined,
-): { href: string; external: boolean } {
+): { href: string; hardNavigation: boolean } {
   if (mode === "shopify" && checkoutUrl && isShopifyCheckoutUrl(checkoutUrl)) {
-    return { href: shopifyCheckoutHopPath(checkoutUrl), external: false };
+    // Document navigation: Next.js Link inside <dialog> stays on the PDP in Chrome.
+    return { href: shopifyCheckoutHopPath(checkoutUrl), hardNavigation: true };
   }
 
-  return { href: "/cart?checkout=demo", external: false };
+  return { href: "/cart?checkout=demo", hardNavigation: false };
 }

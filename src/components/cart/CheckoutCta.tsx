@@ -1,22 +1,24 @@
 "use client";
 
 import { LocaleLink } from "@/components/i18n/LocaleLink";
-import { useMessages } from "@/components/i18n/LocaleProvider";
+import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
 import { track } from "@/lib/analytics/events";
 import { itemsFromCart } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
+import { withLocale } from "@/lib/i18n/path";
 import type { Cart } from "@/lib/commerce/types";
 
 export function CheckoutCta({
   cart,
   href,
-  external,
+  hardNavigation,
 }: {
   cart: Cart;
   href: string;
-  external: boolean;
+  hardNavigation: boolean;
 }) {
   const t = useMessages();
+  const locale = useLocale();
   function onClick() {
     track({
       name: "begin_checkout",
@@ -28,9 +30,9 @@ export function CheckoutCta({
 
   const className = "btn-primary w-full";
 
-  if (external) {
+  if (hardNavigation) {
     return (
-      <a href={href} rel="noopener noreferrer" onClick={onClick} className={className}>
+      <a href={withLocale(href, locale)} onClick={onClick} className={className}>
         {t.checkout}
       </a>
     );
