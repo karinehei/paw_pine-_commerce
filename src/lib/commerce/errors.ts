@@ -22,6 +22,22 @@ export class CommerceError extends Error {
 
 export type CommerceErrorCode = CommerceError["code"];
 
+const COMMERCE_ERROR_CODES: readonly CommerceErrorCode[] = [
+  "unavailable",
+  "not_found",
+  "invalid_cart",
+  "out_of_stock",
+  "network",
+  "rate_limited",
+];
+
+export function isCommerceErrorCode(value: unknown): value is CommerceErrorCode {
+  return (
+    typeof value === "string" &&
+    (COMMERCE_ERROR_CODES as readonly string[]).includes(value)
+  );
+}
+
 export function toUserErrorMessage(
   error: unknown,
   locale: Locale = DEFAULT_LOCALE,

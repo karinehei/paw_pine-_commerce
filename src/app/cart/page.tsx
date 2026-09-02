@@ -4,7 +4,7 @@ import { DeliveryEstimate } from "@/components/commerce/DeliveryEstimate";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { AnalyticsListener } from "@/components/analytics/AnalyticsListener";
-import { getCart } from "@/lib/cart/actions";
+import { getCart } from "@/lib/cart/service";
 import { getCommerceMode } from "@/lib/env";
 import { resolveCheckoutHref } from "@/lib/commerce/checkout";
 import { ESTIMATED_SHIPPING_AMOUNT, FREE_SHIPPING_THRESHOLD } from "@/lib/constants";

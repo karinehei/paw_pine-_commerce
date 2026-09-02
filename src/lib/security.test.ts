@@ -3,7 +3,10 @@ import {
   clampQuantity,
   clampSearchQuery,
   isGtmId,
+  isMerchandiseId,
+  isCartLineId,
   isProductHandle,
+  isSameOriginRequest,
   isShopifyCartGid,
   isShopifyCheckoutUrl,
   isShopifyStoreDomain,
@@ -39,6 +42,44 @@ describe("security helpers", () => {
     expect(isGtmId("GTM-abc');alert(1)//")).toBe(false);
     expect(isShopifyCartGid("gid://shopify/Cart/1")).toBe(true);
     expect(isShopifyCartGid("gid://shopify/Product/1")).toBe(false);
+  });
+
+  it("accepts shop and demo merchandise and line ids", () => {
+    expect(isMerchandiseId("gid://shopify/ProductVariant/123")).toBe(true);
+    expect(isMerchandiseId("gid://demo/ProductVariant/ceramic-dish-one-size")).toBe(
+      true,
+    );
+    expect(isMerchandiseId("gid://shopify/Product/123")).toBe(false);
+    expect(isMerchandiseId('gid://shopify/ProductVariant/1"><script>')).toBe(false);
+    expect(isCartLineId("gid://shopify/CartLine/abc")).toBe(true);
+    expect(isCartLineId("demo-line-1")).toBe(true);
+    expect(isCartLineId("gid://shopify/Cart/1")).toBe(false);
+  });
+
+  it("rejects cross-origin cart requests", () => {
+    const url = "https://paw-pine-commerce.vercel.app/api/cart";
+    expect(
+      isSameOriginRequest(
+        new Request(url, {
+          method: "POST",
+          headers: { origin: "https://paw-pine-commerce.vercel.app" },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isSameOriginRequest(
+        new Request(url, {
+          method: "POST",
+          headers: { origin: "https://evil.example" },
+        }),
+      ),
+    ).toBe(false);
+    expect(isSameOriginRequest(new Request(url, { method: "POST" }))).toBe(false);
+    expect(
+      isSameOriginRequest(new Request(url, { method: "GET" }), {
+        requireOrigin: false,
+      }),
+    ).toBe(true);
   });
 
   it("clamps queries, filter values, and quantities", () => {

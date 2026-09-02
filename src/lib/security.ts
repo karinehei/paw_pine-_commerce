@@ -3,6 +3,10 @@ export const GTM_ID_PATTERN = /^GTM-[A-Z0-9]+$/i;
 export const SHOPIFY_DOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i;
 export const SHOPIFY_API_VERSION_PATTERN = /^\d{4}-\d{2}$/;
 export const SHOPIFY_CART_GID_PREFIX = "gid://shopify/Cart/";
+export const SHOPIFY_VARIANT_GID_PREFIX = "gid://shopify/ProductVariant/";
+export const SHOPIFY_CART_LINE_GID_PREFIX = "gid://shopify/CartLine/";
+export const DEMO_VARIANT_GID_PREFIX = "gid://demo/ProductVariant/";
+export const DEMO_LINE_ID_PREFIX = "demo-line-";
 export const MAX_SEARCH_QUERY_LENGTH = 80;
 export const MAX_FILTER_VALUE_LENGTH = 40;
 export const MAX_LINE_QUANTITY = 99;
@@ -23,12 +27,60 @@ export function isShopifyApiVersion(value: string): boolean {
   return SHOPIFY_API_VERSION_PATTERN.test(value);
 }
 
+function isSafePrefixedId(value: string, prefix: string): boolean {
+  return value.startsWith(prefix) && value.length <= 512 && !/[\s<>"']/.test(value);
+}
+
 export function isShopifyCartGid(value: string): boolean {
+  return isSafePrefixedId(value, SHOPIFY_CART_GID_PREFIX);
+}
+
+export function isMerchandiseId(value: string): boolean {
   return (
-    value.startsWith(SHOPIFY_CART_GID_PREFIX) &&
-    value.length <= 512 &&
-    !/[\s<>"']/.test(value)
+    isSafePrefixedId(value, SHOPIFY_VARIANT_GID_PREFIX) ||
+    isSafePrefixedId(value, DEMO_VARIANT_GID_PREFIX)
   );
+}
+
+export function isCartLineId(value: string): boolean {
+  return (
+    isSafePrefixedId(value, SHOPIFY_CART_LINE_GID_PREFIX) ||
+    isSafePrefixedId(value, DEMO_LINE_ID_PREFIX)
+  );
+}
+
+/** Browser POSTs send Origin; GET may omit it. Reject cross-site callers. */
+export function isSameOriginRequest(
+  request: Request,
+  options: { requireOrigin?: boolean } = {},
+): boolean {
+  const requireOrigin = options.requireOrigin ?? true;
+  let expectedOrigin: string;
+  try {
+    expectedOrigin = new URL(request.url).origin;
+  } catch {
+    return false;
+  }
+
+  const origin = request.headers.get("origin");
+  if (origin) {
+    try {
+      if (new URL(origin).origin !== expectedOrigin) {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+  } else if (requireOrigin) {
+    return false;
+  }
+
+  const site = request.headers.get("sec-fetch-site");
+  if (site && site !== "same-origin" && site !== "none") {
+    return false;
+  }
+
+  return true;
 }
 
 export function normaliseShopifyDomain(raw: string): string | null {

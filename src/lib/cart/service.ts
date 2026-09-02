@@ -1,7 +1,13 @@
-"use server";
+import "server-only";
 
-import { CommerceError, type CommerceErrorCode } from "@/lib/commerce/errors";
-import { clampQuantity, isShopifyCartGid, MAX_LINE_QUANTITY } from "@/lib/security";
+import { CommerceError } from "@/lib/commerce/errors";
+import {
+  clampQuantity,
+  isCartLineId,
+  isMerchandiseId,
+  isShopifyCartGid,
+  MAX_LINE_QUANTITY,
+} from "@/lib/security";
 import { getCommerceProvider } from "@/lib/commerce/provider";
 import {
   clearCartCookie,
@@ -11,16 +17,13 @@ import {
 } from "@/lib/commerce/demo/cart-cookie";
 import { getCommerceMode } from "@/lib/env";
 import type { Cart } from "@/lib/commerce/types";
+import type { CartMutationResult } from "@/lib/cart/types";
 
-export type CartMutationResult =
-  | { ok: true; cart: Cart }
-  | { ok: false; code: CommerceErrorCode };
-
-function asCartResult(error: unknown): CartMutationResult {
+export function asCartResult(error: unknown): CartMutationResult {
   if (error instanceof CommerceError) {
     return { ok: false, code: error.code };
   }
-  throw error;
+  return { ok: false, code: "unavailable" };
 }
 
 export async function getCart(): Promise<Cart | null> {
@@ -72,6 +75,10 @@ export async function addItemToCart(
   variantId: string,
   quantity: number,
 ): Promise<CartMutationResult> {
+  if (!isMerchandiseId(variantId)) {
+    return { ok: false, code: "invalid_cart" };
+  }
+
   const safeQuantity = clampQuantity(quantity);
   if (safeQuantity < 1 || safeQuantity > MAX_LINE_QUANTITY) {
     return { ok: false, code: "invalid_cart" };
@@ -103,6 +110,10 @@ export async function updateCartItem(
   lineId: string,
   quantity: number,
 ): Promise<CartMutationResult> {
+  if (!isCartLineId(lineId) || !Number.isFinite(quantity)) {
+    return { ok: false, code: "invalid_cart" };
+  }
+
   const cookie = await readCartCookie();
   const mode = getCommerceMode();
   if (!cookieMatchesMode(cookie, mode)) {
@@ -125,6 +136,10 @@ export async function updateCartItem(
 }
 
 export async function removeCartItem(lineId: string): Promise<CartMutationResult> {
+  if (!isCartLineId(lineId)) {
+    return { ok: false, code: "invalid_cart" };
+  }
+
   const cookie = await readCartCookie();
   const mode = getCommerceMode();
   if (!cookieMatchesMode(cookie, mode)) {

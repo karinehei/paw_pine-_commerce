@@ -28,7 +28,7 @@ PCI, payment methods, Shop Pay, and address/shipping configuration already exist
 
 ## 7. How does cart state work?
 
-A short httpOnly cookie stores either a Shopify cart GID or a demo cart id plus line ids. The root layout does not read it, so catalogue pages stay cacheable. A client `CartProvider` hydrates via a server action after load. Mutations return a normalised `Cart` so the drawer updates without a full navigation. Shopify cart GraphQL is `no-store`.
+A short httpOnly cookie stores either a Shopify cart GID or a demo cart id plus line ids. The root layout does not read it, so catalogue pages stay cacheable. A client `CartProvider` hydrates via `GET /api/cart` after load. Mutations use `POST /api/cart` (not App Router server actions) so locale middleware cannot rewrite the request. The response is a normalised `Cart` so the drawer updates without a full navigation. Shopify cart GraphQL is `no-store`.
 
 ## 8. How is SEO implemented?
 

@@ -11,7 +11,8 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { getCart } from "@/lib/cart/actions";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import { fetchCart } from "@/lib/cart/client";
 import type { Cart, CommerceMode } from "@/lib/commerce/types";
 
 interface CartContextValue {
@@ -34,6 +35,7 @@ export function CartProvider({
   mode: CommerceMode;
   children: ReactNode;
 }) {
+  const locale = useLocale();
   const [cart, setCartState] = useState<Cart | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [liveMessage, setLiveMessage] = useState("");
@@ -47,12 +49,12 @@ export function CartProvider({
 
   useEffect(() => {
     const generation = ++loadGeneration.current;
-    void getCart().then((next) => {
+    void fetchCart(locale).then((next) => {
       if (generation === loadGeneration.current) {
         setCartState(next);
       }
     });
-  }, []);
+  }, [locale]);
 
   const openCart = useCallback(() => {
     setIsOpen(true);
@@ -78,7 +80,7 @@ export function CartProvider({
 
   const value = useMemo(
     () => ({ cart, setCart, isOpen, openCart, closeCart, mode, announce, dialogRef }),
-    [cart, isOpen, openCart, closeCart, mode, announce],
+    [cart, isOpen, openCart, closeCart, mode, announce, setCart],
   );
 
   return (

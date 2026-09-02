@@ -2,11 +2,11 @@
 
 import { useTransition } from "react";
 import { LocaleLink } from "@/components/i18n/LocaleLink";
-import { useMessages } from "@/components/i18n/LocaleProvider";
+import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
 import { useCart } from "@/components/cart/CartProvider";
 import { ProductMedia } from "@/components/product/ProductMedia";
 import { ProductPrice } from "@/components/product/ProductPrice";
-import { removeCartItem, updateCartItem } from "@/lib/cart/actions";
+import { removeCartItem, updateCartItem } from "@/lib/cart/client";
 import { track } from "@/lib/analytics/events";
 import { itemFromCartLine } from "@/lib/analytics/items";
 import { parseAmount, selectedOptionsLabel } from "@/lib/format";
@@ -15,11 +15,12 @@ import type { CartLine } from "@/lib/commerce/types";
 export function CartLineItem({ line }: { line: CartLine }) {
   const { setCart, announce } = useCart();
   const t = useMessages();
+  const locale = useLocale();
   const [pending, startTransition] = useTransition();
 
   function update(quantity: number) {
     startTransition(async () => {
-      const result = await updateCartItem(line.id, quantity);
+      const result = await updateCartItem(locale, line.id, quantity);
       if (result.ok) {
         setCart(result.cart);
       }
@@ -28,7 +29,7 @@ export function CartLineItem({ line }: { line: CartLine }) {
 
   function remove() {
     startTransition(async () => {
-      const result = await removeCartItem(line.id);
+      const result = await removeCartItem(locale, line.id);
       if (!result.ok) {
         return;
       }

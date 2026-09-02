@@ -13,10 +13,11 @@ src/lib/commerce/filters.ts        query, sort, facets (used by both modes)
 src/lib/commerce/url-state.ts      URL <-> ProductQuery
 src/lib/commerce/shopify/          GraphQL client, queries, mapper, provider
 src/lib/commerce/demo/             catalogue, cookie cart, provider
-src/lib/cart/actions.ts            server actions consumed by the UI
+src/lib/cart/service.ts            cart cookie + provider writes
+src/app/api/cart/route.ts          GET/POST used by the browser cart UI
 ```
 
-UI components import `Product`, `Cart`, and server actions. They do not import `shopifyFetch` or the demo catalogue.
+UI components import `Product`, `Cart`, and `/api/cart`. They do not import `shopifyFetch` or the demo catalogue.
 
 The switch is environment, not a runtime feature flag in the client:
 
@@ -33,7 +34,7 @@ If Shopify is configured and the Storefront API fails, the request errors. The d
 
 **Reads** happen in Server Components. A collection page parses `searchParams`, asks the provider for `{ collection, products, facets }`, and renders the grid.
 
-**Writes** happen in server actions. `addItemToCart` ensures a cart id (Shopify cart GID or demo id), mutates the cart, and returns the normalised `Cart`. The client provider stores that result so the drawer and header count update without a full reload.
+**Writes** happen through `POST /api/cart` (matcher-excluded from locale middleware so Chrome does not drop the body on a rewrite). The handler ensures a cart id (Shopify cart GID or demo id), mutates the cart, and returns the normalised `Cart`. The client provider stores that result so the drawer and header count update without a full reload. The cart page reads via `getCart()` on the server.
 
 ## Demo cart
 

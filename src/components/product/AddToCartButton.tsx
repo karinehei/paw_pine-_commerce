@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useCart } from "@/components/cart/CartProvider";
-import { addItemToCart } from "@/lib/cart/actions";
+import { addItemToCart } from "@/lib/cart/client";
 import { track } from "@/lib/analytics/events";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
@@ -39,7 +39,7 @@ export function AddToCartButton({
     openCart();
     startTransition(async () => {
       try {
-        const result = await addItemToCart(variant.id, quantity);
+        const result = await addItemToCart(locale, variant.id, quantity);
         if (!result.ok) {
           closeCart();
           setError(messageForCommerceCode(result.code, locale));
