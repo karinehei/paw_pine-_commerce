@@ -23,7 +23,7 @@ export function AddToCartButton({
   quantity,
   fullWidth = true,
 }: AddToCartButtonProps) {
-  const { setCart, openCart, announce } = useCart();
+  const { setCart, openCart, closeCart, announce } = useCart();
   const t = useMessages();
   const locale = useLocale();
   const [pending, startTransition] = useTransition();
@@ -36,10 +36,12 @@ export function AddToCartButton({
     }
 
     setError(null);
+    openCart();
     startTransition(async () => {
       try {
         const result = await addItemToCart(variant.id, quantity);
         if (!result.ok) {
+          closeCart();
           setError(messageForCommerceCode(result.code, locale));
           return;
         }
@@ -52,8 +54,8 @@ export function AddToCartButton({
           items: [item],
         });
         announce(t.addedToBag(product.title));
-        openCart();
       } catch {
+        closeCart();
         setError(messageForCommerceCode("unavailable", locale));
       }
     });

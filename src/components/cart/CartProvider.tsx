@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { getCart } from "@/lib/cart/actions";
 import type { Cart, CommerceMode } from "@/lib/commerce/types";
@@ -21,6 +22,7 @@ interface CartContextValue {
   closeCart: () => void;
   mode: CommerceMode;
   announce: (message: string) => void;
+  dialogRef: RefObject<HTMLDialogElement | null>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -36,6 +38,7 @@ export function CartProvider({
   const [isOpen, setIsOpen] = useState(false);
   const [liveMessage, setLiveMessage] = useState("");
   const loadGeneration = useRef(0);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const setCart = useCallback((next: Cart | null) => {
     loadGeneration.current += 1;
@@ -51,15 +54,30 @@ export function CartProvider({
     });
   }, []);
 
-  const openCart = useCallback(() => setIsOpen(true), []);
-  const closeCart = useCallback(() => setIsOpen(false), []);
+  const openCart = useCallback(() => {
+    setIsOpen(true);
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.open) {
+      return;
+    }
+    try {
+      dialog.showModal();
+    } catch {
+      dialog.show();
+    }
+  }, []);
+
+  const closeCart = useCallback(() => {
+    setIsOpen(false);
+    dialogRef.current?.close();
+  }, []);
   const announce = useCallback((message: string) => {
     setLiveMessage("");
     requestAnimationFrame(() => setLiveMessage(message));
   }, []);
 
   const value = useMemo(
-    () => ({ cart, setCart, isOpen, openCart, closeCart, mode, announce }),
+    () => ({ cart, setCart, isOpen, openCart, closeCart, mode, announce, dialogRef }),
     [cart, isOpen, openCart, closeCart, mode, announce],
   );
 

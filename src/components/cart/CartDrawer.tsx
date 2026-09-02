@@ -15,10 +15,9 @@ import { ESTIMATED_SHIPPING_AMOUNT, FREE_SHIPPING_THRESHOLD } from "@/lib/consta
 import { formatMoney, moneyFromNumber, parseAmount } from "@/lib/format";
 
 export function CartDrawer() {
-  const { cart, isOpen, closeCart, mode } = useCart();
+  const { cart, isOpen, closeCart, mode, dialogRef } = useCart();
   const t = useMessages();
   const moneyLocale = numberLocale(useLocale());
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const trackedOpen = useRef(false);
@@ -28,14 +27,21 @@ export function CartDrawer() {
     if (!dialog) {
       return;
     }
-    if (isOpen && !dialog.open) {
-      dialog.showModal();
+    if (isOpen) {
+      if (!dialog.open) {
+        try {
+          dialog.showModal();
+        } catch {
+          dialog.show();
+        }
+      }
       closeRef.current?.focus();
+      return;
     }
-    if (!isOpen && dialog.open) {
+    if (dialog.open) {
       dialog.close();
     }
-  }, [isOpen]);
+  }, [isOpen, dialogRef]);
 
   useEffect(() => {
     if (isOpen && cart && !trackedOpen.current) {
