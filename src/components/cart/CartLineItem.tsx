@@ -19,14 +19,19 @@ export function CartLineItem({ line }: { line: CartLine }) {
 
   function update(quantity: number) {
     startTransition(async () => {
-      const cart = await updateCartItem(line.id, quantity);
-      setCart(cart);
+      const result = await updateCartItem(line.id, quantity);
+      if (result.ok) {
+        setCart(result.cart);
+      }
     });
   }
 
   function remove() {
     startTransition(async () => {
-      const cart = await removeCartItem(line.id);
+      const result = await removeCartItem(line.id);
+      if (!result.ok) {
+        return;
+      }
       track({
         name: "remove_from_cart",
         currency: line.merchandise.price.currencyCode,
@@ -34,7 +39,7 @@ export function CartLineItem({ line }: { line: CartLine }) {
         items: [itemFromCartLine(line)],
       });
       announce(t.removedFromBag(line.merchandise.product.title));
-      setCart(cart);
+      setCart(result.cart);
     });
   }
 

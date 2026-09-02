@@ -6,7 +6,7 @@ import { addItemToCart } from "@/lib/cart/actions";
 import { track } from "@/lib/analytics/events";
 import { itemFromProduct } from "@/lib/analytics/items";
 import { parseAmount } from "@/lib/format";
-import { toUserErrorMessage } from "@/lib/commerce/errors";
+import { messageForCommerceCode } from "@/lib/commerce/errors";
 import { useLocale, useMessages } from "@/components/i18n/LocaleProvider";
 import type { Product, ProductVariant } from "@/lib/commerce/types";
 
@@ -38,8 +38,12 @@ export function AddToCartButton({
     setError(null);
     startTransition(async () => {
       try {
-        const cart = await addItemToCart(variant.id, quantity);
-        setCart(cart);
+        const result = await addItemToCart(variant.id, quantity);
+        if (!result.ok) {
+          setError(messageForCommerceCode(result.code, locale));
+          return;
+        }
+        setCart(result.cart);
         const item = itemFromProduct(product, variant, quantity);
         track({
           name: "add_to_cart",
@@ -49,8 +53,8 @@ export function AddToCartButton({
         });
         announce(t.addedToBag(product.title));
         openCart();
-      } catch (caught) {
-        setError(toUserErrorMessage(caught, locale));
+      } catch {
+        setError(messageForCommerceCode("unavailable", locale));
       }
     });
   }

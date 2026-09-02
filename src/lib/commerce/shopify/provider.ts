@@ -59,7 +59,7 @@ import type {
 function hasStockWarning(payload: ShopifyUserErrorPayload): boolean {
   return (payload.warnings ?? []).some((warning) => {
     const code = warning.code?.toLowerCase() ?? "";
-    const message = warning.message.toLowerCase();
+    const message = warning.message?.toLowerCase() ?? "";
     return code.includes("stock") || message.includes("stock") || message.includes("sold out");
   });
 }
@@ -101,9 +101,9 @@ function assertLineQuantities(
   payload: ShopifyUserErrorPayload | null | undefined,
   variantIds: string[],
 ) {
-  const nodes = payload?.cart?.lines.nodes ?? [];
+  const nodes = payload?.cart?.lines?.nodes ?? [];
   for (const variantId of variantIds) {
-    const line = nodes.find((node) => node.merchandise.id === variantId);
+    const line = nodes.find((node) => node.merchandise?.id === variantId);
     if (!line || line.quantity < 1) {
       throw new CommerceError("out_of_stock");
     }

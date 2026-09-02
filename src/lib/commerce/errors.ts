@@ -20,27 +20,39 @@ export class CommerceError extends Error {
   }
 }
 
+export type CommerceErrorCode = CommerceError["code"];
+
 export function toUserErrorMessage(
   error: unknown,
   locale: Locale = DEFAULT_LOCALE,
 ): string {
   const t = getMessages(locale);
   if (error instanceof CommerceError) {
-    switch (error.code) {
-      case "unavailable":
-        return t.errorUnavailable;
-      case "not_found":
-        return t.errorNotFound;
-      case "invalid_cart":
-        return t.errorInvalidCart;
-      case "out_of_stock":
-        return t.errorOutOfStock;
-      case "network":
-        return t.errorNetwork;
-      case "rate_limited":
-        return t.errorRateLimited;
-    }
+    return messageForCommerceCode(error.code, locale);
   }
 
   return t.genericError;
+}
+
+export function messageForCommerceCode(
+  code: CommerceErrorCode,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
+  const t = getMessages(locale);
+  switch (code) {
+    case "unavailable":
+      return t.errorUnavailable;
+    case "not_found":
+      return t.errorNotFound;
+    case "invalid_cart":
+      return t.errorInvalidCart;
+    case "out_of_stock":
+      return t.errorOutOfStock;
+    case "network":
+      return t.errorNetwork;
+    case "rate_limited":
+      return t.errorRateLimited;
+    default:
+      return t.genericError;
+  }
 }

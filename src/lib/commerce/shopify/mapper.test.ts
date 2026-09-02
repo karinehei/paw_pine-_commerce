@@ -123,4 +123,28 @@ describe("Shopify cart mapper", () => {
     expect(cart.cost.subtotalAmount.amount).toBe("18.00");
     expect(cart.totalQuantity).toBe(1);
   });
+
+  it("skips lines whose merchandise was not a ProductVariant", () => {
+    const cart = mapCart({
+      id: "gid://shopify/Cart/1",
+      checkoutUrl: "https://paw-pine.myshopify.com/cart/c/abc",
+      totalQuantity: 1,
+      cost: {
+        subtotalAmount: { amount: "24.00", currencyCode: "EUR" },
+        totalAmount: { amount: "24.00", currencyCode: "EUR" },
+      },
+      lines: {
+        nodes: [
+          {
+            id: "gid://shopify/CartLine/broken",
+            quantity: 1,
+            cost: { totalAmount: { amount: "24.00", currencyCode: "EUR" } },
+            merchandise: undefined,
+          },
+        ],
+      },
+    });
+    expect(cart.lines).toHaveLength(0);
+    expect(cart.cost.subtotalAmount.amount).toBe("0.00");
+  });
 });

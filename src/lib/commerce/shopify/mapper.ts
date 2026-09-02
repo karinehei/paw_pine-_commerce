@@ -216,19 +216,20 @@ export function mapCollection(node: ShopifyCollectionNode): Collection {
 
 export function mapCart(node: ShopifyCartNode): Cart {
   const currency =
-    mapMoney(node.cost.subtotalAmount)?.currencyCode ??
-    mapMoney(node.cost.totalAmount)?.currencyCode ??
+    mapMoney(node.cost?.subtotalAmount)?.currencyCode ??
+    mapMoney(node.cost?.totalAmount)?.currencyCode ??
     "EUR";
-  const lines = node.lines.nodes.flatMap((line) => {
-    if (!line.quantity || line.quantity < 1) {
+  const lines = (node.lines?.nodes ?? []).flatMap((line) => {
+    const merchandise = line.merchandise;
+    if (!line.quantity || line.quantity < 1 || !merchandise?.id) {
       return [];
     }
 
     const unit =
-      mapMoney(line.merchandise.price) ??
-      mapMoney(line.cost.amountPerQuantity) ??
+      mapMoney(merchandise.price) ??
+      mapMoney(line.cost?.amountPerQuantity) ??
       ({ amount: "0.00", currencyCode: currency } satisfies Money);
-    const reportedTotal = mapMoney(line.cost.totalAmount);
+    const reportedTotal = mapMoney(line.cost?.totalAmount);
     const totalAmount =
       reportedTotal && parseAmount(reportedTotal) > 0
         ? reportedTotal
@@ -239,18 +240,18 @@ export function mapCart(node: ShopifyCartNode): Cart {
         id: line.id,
         quantity: line.quantity,
         merchandise: {
-          id: line.merchandise.id,
-          title: line.merchandise.title,
-          selectedOptions: line.merchandise.selectedOptions ?? [],
+          id: merchandise.id,
+          title: merchandise.title,
+          selectedOptions: merchandise.selectedOptions ?? [],
           price: unit,
           image: mapImage(
-            line.merchandise.image,
-            line.merchandise.product?.title ?? line.merchandise.title,
+            merchandise.image,
+            merchandise.product?.title ?? merchandise.title,
           ),
           product: {
-            handle: line.merchandise.product?.handle ?? "",
-            title: line.merchandise.product?.title ?? line.merchandise.title,
-            visual: mapVisual(line.merchandise.product?.handle ?? line.merchandise.id),
+            handle: merchandise.product?.handle ?? "",
+            title: merchandise.product?.title ?? merchandise.title,
+            visual: mapVisual(merchandise.product?.handle ?? merchandise.id),
           },
         },
         cost: { totalAmount },
@@ -259,10 +260,10 @@ export function mapCart(node: ShopifyCartNode): Cart {
   });
 
   const subtotal = lines.reduce((sum, line) => sum + parseAmount(line.cost.totalAmount), 0);
-  const reportedSubtotal = mapMoney(node.cost.subtotalAmount);
-  const reportedTotal = mapMoney(node.cost.totalAmount);
+  const reportedSubtotal = mapMoney(node.cost?.subtotalAmount);
+  const reportedTotal = mapMoney(node.cost?.totalAmount);
   const subtotalAmount =
-    reportedSubtotal && parseAmount(reportedSubtotal) > 0
+    lines.length > 0 && reportedSubtotal && parseAmount(reportedSubtotal) > 0
       ? reportedSubtotal
       : { amount: subtotal.toFixed(2), currencyCode: currency };
 

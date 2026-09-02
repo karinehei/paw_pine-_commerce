@@ -60,19 +60,19 @@ export interface ShopifyCartNode {
   id: string;
   checkoutUrl: string;
   totalQuantity: number;
-  cost: {
-    subtotalAmount: ShopifyMoney;
-    totalAmount: ShopifyMoney;
-  };
-  lines: {
+  cost?: {
+    subtotalAmount?: ShopifyMoney | null;
+    totalAmount?: ShopifyMoney | null;
+  } | null;
+  lines?: {
     nodes: Array<{
       id: string;
       quantity: number;
-      cost: {
-        totalAmount: ShopifyMoney;
+      cost?: {
+        totalAmount?: ShopifyMoney | null;
         amountPerQuantity?: ShopifyMoney | null;
-      };
-      merchandise: ShopifyVariantNode;
+      } | null;
+      merchandise?: ShopifyVariantNode | null;
     }>;
   };
 }
