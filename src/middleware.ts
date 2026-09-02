@@ -16,13 +16,29 @@ export function middleware(request: NextRequest) {
   }
 
   const requestHeaders = new Headers(request.headers);
+  const isServerAction =
+    request.method === "POST" && request.headers.has("next-action");
 
   if (routing.kind === "redirect") {
+    const redirected = resolveLocaleRouting(routing.location);
+    if (isServerAction && redirected.kind === "rewrite") {
+      requestHeaders.set(LOCALE_HEADER, redirected.locale);
+      const response = NextResponse.rewrite(
+        new URL(`${redirected.rewritePath}${search}`, request.url),
+        { request: { headers: requestHeaders } },
+      );
+      response.cookies.set(LOCALE_COOKIE, redirected.locale, {
+        path: "/",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 365,
+      });
+      return response;
+    }
+
     const response = NextResponse.redirect(
       new URL(`${routing.location}${search}`, request.url),
       308,
     );
-    const redirected = resolveLocaleRouting(routing.location);
     if (redirected.kind === "rewrite") {
       response.cookies.set(LOCALE_COOKIE, redirected.locale, {
         path: "/",

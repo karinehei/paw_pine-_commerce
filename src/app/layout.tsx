@@ -64,7 +64,8 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html
       lang={htmlLang(locale)}
-      className={`${outfit.variable} ${fraunces.variable} h-full`}
+      translate="no"
+      className={`notranslate ${outfit.variable} ${fraunces.variable} h-full`}
     >
       <body className="bg-linen text-ink flex min-h-full flex-col font-sans antialiased">
         <LocaleProvider locale={locale}>
