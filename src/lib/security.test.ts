@@ -46,9 +46,7 @@ describe("security helpers", () => {
 
   it("accepts shop and demo merchandise and line ids", () => {
     expect(isMerchandiseId("gid://shopify/ProductVariant/123")).toBe(true);
-    expect(isMerchandiseId("gid://demo/ProductVariant/ceramic-dish-one-size")).toBe(
-      true,
-    );
+    expect(isMerchandiseId("gid://demo/ProductVariant/ceramic-dish-one-size")).toBe(true);
     expect(isMerchandiseId("gid://shopify/Product/123")).toBe(false);
     expect(isMerchandiseId('gid://shopify/ProductVariant/1"><script>')).toBe(false);
     expect(isCartLineId("gid://shopify/CartLine/abc")).toBe(true);

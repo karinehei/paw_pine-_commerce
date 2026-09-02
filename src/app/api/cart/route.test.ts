@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import { POST } from "@/app/api/cart/route";
 
 function post(body: unknown, origin = "http://127.0.0.1") {
