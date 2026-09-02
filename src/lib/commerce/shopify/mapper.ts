@@ -20,6 +20,7 @@ import type {
 } from "@/lib/commerce/shopify/storefront-types";
 import { quoteShopifySearchTerm } from "@/lib/security";
 import { shopifyCatalogQueryClause } from "@/lib/commerce/catalog-scope";
+import { multiplyMoney, parseAmount } from "@/lib/format";
 
 const CATEGORIES: ProductCategory[] = [
   "toys",
@@ -214,47 +215,65 @@ export function mapCollection(node: ShopifyCollectionNode): Collection {
 }
 
 export function mapCart(node: ShopifyCartNode): Cart {
+  const currency =
+    mapMoney(node.cost.subtotalAmount)?.currencyCode ??
+    mapMoney(node.cost.totalAmount)?.currencyCode ??
+    "EUR";
+  const lines = node.lines.nodes.flatMap((line) => {
+    if (!line.quantity || line.quantity < 1) {
+      return [];
+    }
+
+    const unit =
+      mapMoney(line.merchandise.price) ??
+      mapMoney(line.cost.amountPerQuantity) ??
+      ({ amount: "0.00", currencyCode: currency } satisfies Money);
+    const reportedTotal = mapMoney(line.cost.totalAmount);
+    const totalAmount =
+      reportedTotal && parseAmount(reportedTotal) > 0
+        ? reportedTotal
+        : multiplyMoney(unit, line.quantity);
+
+    return [
+      {
+        id: line.id,
+        quantity: line.quantity,
+        merchandise: {
+          id: line.merchandise.id,
+          title: line.merchandise.title,
+          selectedOptions: line.merchandise.selectedOptions ?? [],
+          price: unit,
+          image: mapImage(
+            line.merchandise.image,
+            line.merchandise.product?.title ?? line.merchandise.title,
+          ),
+          product: {
+            handle: line.merchandise.product?.handle ?? "",
+            title: line.merchandise.product?.title ?? line.merchandise.title,
+            visual: mapVisual(line.merchandise.product?.handle ?? line.merchandise.id),
+          },
+        },
+        cost: { totalAmount },
+      },
+    ];
+  });
+
+  const subtotal = lines.reduce((sum, line) => sum + parseAmount(line.cost.totalAmount), 0);
+  const reportedSubtotal = mapMoney(node.cost.subtotalAmount);
+  const reportedTotal = mapMoney(node.cost.totalAmount);
+  const subtotalAmount =
+    reportedSubtotal && parseAmount(reportedSubtotal) > 0
+      ? reportedSubtotal
+      : { amount: subtotal.toFixed(2), currencyCode: currency };
+
   return {
     id: node.id,
     checkoutUrl: node.checkoutUrl,
-    totalQuantity: node.totalQuantity,
-    lines: node.lines.nodes.map((line) => ({
-      id: line.id,
-      quantity: line.quantity,
-      merchandise: {
-        id: line.merchandise.id,
-        title: line.merchandise.title,
-        selectedOptions: line.merchandise.selectedOptions,
-        price: mapMoney(line.merchandise.price) ?? {
-          amount: "0.00",
-          currencyCode: "EUR",
-        },
-        image: mapImage(
-          line.merchandise.image,
-          line.merchandise.product?.title ?? line.merchandise.title,
-        ),
-        product: {
-          handle: line.merchandise.product?.handle ?? "",
-          title: line.merchandise.product?.title ?? line.merchandise.title,
-          visual: mapVisual(line.merchandise.product?.handle ?? line.merchandise.id),
-        },
-      },
-      cost: {
-        totalAmount: mapMoney(line.cost.totalAmount) ?? {
-          amount: "0.00",
-          currencyCode: "EUR",
-        },
-      },
-    })),
+    totalQuantity: lines.reduce((sum, line) => sum + line.quantity, 0),
+    lines,
     cost: {
-      subtotalAmount: mapMoney(node.cost.subtotalAmount) ?? {
-        amount: "0.00",
-        currencyCode: "EUR",
-      },
-      totalAmount: mapMoney(node.cost.totalAmount) ?? {
-        amount: "0.00",
-        currencyCode: "EUR",
-      },
+      subtotalAmount,
+      totalAmount: reportedTotal && parseAmount(reportedTotal) > 0 ? reportedTotal : subtotalAmount,
     },
   };
 }

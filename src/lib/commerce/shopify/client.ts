@@ -12,6 +12,7 @@ import {
 import { logStorefrontFailure, toStorefrontError } from "@/lib/commerce/shopify/log";
 import {
   storefrontContextVariables,
+  usesStorefrontInContext,
   withStorefrontInContext,
 } from "@/lib/commerce/shopify/in-context";
 import { getLocale } from "@/lib/i18n/locale";
@@ -82,10 +83,10 @@ export async function shopifyFetch<T>({
 
   const endpoint = storefrontEndpoint(config);
   const ip = await buyerIp();
-  const locale = await getLocale();
-  const context = storefrontContextVariables(locale);
+  const contextual = usesStorefrontInContext(operation);
+  const context = contextual ? storefrontContextVariables(await getLocale()) : {};
   const body = JSON.stringify({
-    query: withStorefrontInContext(query),
+    query: contextual ? withStorefrontInContext(query) : query,
     variables: { ...variables, ...context },
   });
   let usedKind: StorefrontTokenKind = config.tokenKind;

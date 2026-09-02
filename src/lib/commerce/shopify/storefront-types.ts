@@ -68,7 +68,10 @@ export interface ShopifyCartNode {
     nodes: Array<{
       id: string;
       quantity: number;
-      cost: { totalAmount: ShopifyMoney };
+      cost: {
+        totalAmount: ShopifyMoney;
+        amountPerQuantity?: ShopifyMoney | null;
+      };
       merchandise: ShopifyVariantNode;
     }>;
   };
@@ -76,5 +79,6 @@ export interface ShopifyCartNode {
 
 export interface ShopifyUserErrorPayload {
   userErrors?: Array<{ message: string; code?: string }>;
+  warnings?: Array<{ message: string; code?: string; target?: string }>;
   cart?: ShopifyCartNode | null;
 }

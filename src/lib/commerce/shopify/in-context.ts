@@ -3,7 +3,14 @@ import { SHOPIFY_COUNTRY, shopifyLanguage, type Locale } from "@/lib/i18n/config
 /**
  * Storefront contextual pricing and translated resources.
  * Country is always FI (Finnish market). Language follows the URL locale.
+ *
+ * Cart queries ignore `@inContext` country; identity is set on `cartCreate`.
+ * Applying the directive to cart mutations can leave lines at quantity 0 / €0.
  */
+export function usesStorefrontInContext(operation: string): boolean {
+  return !operation.startsWith("cart");
+}
+
 export function withStorefrontInContext(document: string): string {
   if (document.includes("@inContext")) {
     return document;

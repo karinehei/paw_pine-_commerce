@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -31,20 +32,23 @@ export function CartProvider({
   mode: CommerceMode;
   children: ReactNode;
 }) {
-  const [cart, setCart] = useState<Cart | null>(null);
+  const [cart, setCartState] = useState<Cart | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [liveMessage, setLiveMessage] = useState("");
+  const loadGeneration = useRef(0);
+
+  const setCart = useCallback((next: Cart | null) => {
+    loadGeneration.current += 1;
+    setCartState(next);
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    const generation = ++loadGeneration.current;
     void getCart().then((next) => {
-      if (!cancelled) {
-        setCart(next);
+      if (generation === loadGeneration.current) {
+        setCartState(next);
       }
     });
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   const openCart = useCallback(() => setIsOpen(true), []);

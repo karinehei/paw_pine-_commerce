@@ -1,5 +1,7 @@
 import { CommerceError } from "@/lib/commerce/errors";
 import { demoCatalogApi } from "@/lib/commerce/demo/catalog-api";
+import { localizeCart } from "@/lib/commerce/demo/localize";
+import { getLocale } from "@/lib/i18n/locale";
 import {
   addDemoLine,
   createDemoCartId,
@@ -24,7 +26,7 @@ async function readDemoLines(): Promise<{ id: string; lines: DemoCartLineRecord[
 
 async function persistDemoCart(id: string, lines: DemoCartLineRecord[]): Promise<Cart> {
   await writeCartCookie({ mode: "demo", id, lines });
-  return hydrateDemoCart(id, lines);
+  return localizeCart(hydrateDemoCart(id, lines), await getLocale());
 }
 
 export const demoProvider: CommerceProvider = {
@@ -35,7 +37,7 @@ export const demoProvider: CommerceProvider = {
     if (cookie?.mode !== "demo" || cookie.id !== cartId) {
       return null;
     }
-    return hydrateDemoCart(cookie.id, cookie.lines);
+    return localizeCart(hydrateDemoCart(cookie.id, cookie.lines), await getLocale());
   },
 
   async createCart(lines: CartLineInput[] = []) {

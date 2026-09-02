@@ -141,7 +141,10 @@ export const CART_FRAGMENT = `
     nodes {
       id
       quantity
-      cost { totalAmount { amount currencyCode } }
+      cost {
+        totalAmount { amount currencyCode }
+        amountPerQuantity { amount currencyCode }
+      }
       merchandise {
         ... on ProductVariant {
           id
@@ -167,6 +170,7 @@ export const CART_CREATE_MUTATION = `
     cartCreate(input: { lines: $lines, buyerIdentity: { countryCode: FI } }) {
       cart { ${CART_FRAGMENT} }
       userErrors { code message }
+      warnings { code message target }
     }
   }
 `;
@@ -176,6 +180,7 @@ export const CART_LINES_ADD_MUTATION = `
     cartLinesAdd(cartId: $cartId, lines: $lines) {
       cart { ${CART_FRAGMENT} }
       userErrors { code message }
+      warnings { code message target }
     }
   }
 `;
@@ -185,6 +190,7 @@ export const CART_LINES_UPDATE_MUTATION = `
     cartLinesUpdate(cartId: $cartId, lines: $lines) {
       cart { ${CART_FRAGMENT} }
       userErrors { code message }
+      warnings { code message target }
     }
   }
 `;
@@ -194,6 +200,7 @@ export const CART_LINES_REMOVE_MUTATION = `
     cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
       cart { ${CART_FRAGMENT} }
       userErrors { code message }
+      warnings { code message target }
     }
   }
 `;

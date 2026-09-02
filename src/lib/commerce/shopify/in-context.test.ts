@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withStorefrontInContext } from "@/lib/commerce/shopify/in-context";
+import { usesStorefrontInContext, withStorefrontInContext } from "@/lib/commerce/shopify/in-context";
 
 describe("Shopify storefront context", () => {
   it("injects country and language @inContext on queries with variables", () => {
@@ -18,5 +18,11 @@ describe("Shopify storefront context", () => {
     expect(next).toContain(
       "query Collections($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language)",
     );
+  });
+
+  it("does not wrap cart operations with @inContext", () => {
+    expect(usesStorefrontInContext("cart")).toBe(false);
+    expect(usesStorefrontInContext("cartLinesAdd")).toBe(false);
+    expect(usesStorefrontInContext("products")).toBe(true);
   });
 });

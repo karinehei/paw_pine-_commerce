@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mapProduct, buildShopifySearchQuery } from "@/lib/commerce/shopify/mapper";
-import type { ShopifyProductNode } from "@/lib/commerce/shopify/storefront-types";
+import { mapCart, mapProduct, buildShopifySearchQuery } from "@/lib/commerce/shopify/mapper";
+import type {
+  ShopifyCartNode,
+  ShopifyProductNode,
+} from "@/lib/commerce/shopify/storefront-types";
 
 const fixture: ShopifyProductNode = {
   id: "gid://shopify/Product/1",
@@ -72,5 +75,52 @@ describe("Shopify product mapper", () => {
     expect(query).toContain('tag:"catalog:paw-pine"');
     expect(query).not.toContain("vendor:");
     expect(query).not.toContain('oak"');
+  });
+});
+
+describe("Shopify cart mapper", () => {
+  const variant = {
+    id: "gid://shopify/ProductVariant/1",
+    title: "Default Title",
+    availableForSale: true,
+    selectedOptions: [{ name: "Title", value: "Default Title" }],
+    price: { amount: "18.00", currencyCode: "EUR" },
+    compareAtPrice: null,
+    product: { handle: "felt-mouse-trio", title: "Felt Mouse Trio" },
+  };
+
+  it("drops sold-out lines and restores totals from the variant price", () => {
+    const node: ShopifyCartNode = {
+      id: "gid://shopify/Cart/1",
+      checkoutUrl: "https://paw-pine.myshopify.com/cart/c/abc",
+      totalQuantity: 0,
+      cost: {
+        subtotalAmount: { amount: "0.0", currencyCode: "EUR" },
+        totalAmount: { amount: "0.0", currencyCode: "EUR" },
+      },
+      lines: {
+        nodes: [
+          {
+            id: "gid://shopify/CartLine/ghost",
+            quantity: 0,
+            cost: { totalAmount: { amount: "0.0", currencyCode: "EUR" } },
+            merchandise: variant,
+          },
+          {
+            id: "gid://shopify/CartLine/ok",
+            quantity: 1,
+            cost: { totalAmount: { amount: "0.0", currencyCode: "EUR" } },
+            merchandise: variant,
+          },
+        ],
+      },
+    };
+
+    const cart = mapCart(node);
+    expect(cart.lines).toHaveLength(1);
+    expect(cart.lines[0]?.quantity).toBe(1);
+    expect(cart.lines[0]?.cost.totalAmount.amount).toBe("18.00");
+    expect(cart.cost.subtotalAmount.amount).toBe("18.00");
+    expect(cart.totalQuantity).toBe(1);
   });
 });

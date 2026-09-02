@@ -15,6 +15,7 @@ import {
   shopifyCatalogQueryClause,
 } from "@/lib/commerce/catalog-scope";
 import {
+  localizeCart,
   localizeCollection,
   localizeProduct,
   localizeProducts,
@@ -55,6 +56,14 @@ import type {
   ProductQuery,
 } from "@/lib/commerce/types";
 
+function hasStockWarning(payload: ShopifyUserErrorPayload): boolean {
+  return (payload.warnings ?? []).some((warning) => {
+    const code = warning.code?.toLowerCase() ?? "";
+    const message = warning.message.toLowerCase();
+    return code.includes("stock") || message.includes("stock") || message.includes("sold out");
+  });
+}
+
 function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
   if (payload?.userErrors?.length) {
     const first = payload.userErrors[0];
@@ -82,7 +91,27 @@ function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
   if (!payload?.cart) {
     throw new CommerceError("invalid_cart");
   }
+  if (hasStockWarning(payload)) {
+    throw new CommerceError("out_of_stock");
+  }
   return mapCart(payload.cart);
+}
+
+function assertLineQuantities(
+  payload: ShopifyUserErrorPayload | null | undefined,
+  variantIds: string[],
+) {
+  const nodes = payload?.cart?.lines.nodes ?? [];
+  for (const variantId of variantIds) {
+    const line = nodes.find((node) => node.merchandise.id === variantId);
+    if (!line || line.quantity < 1) {
+      throw new CommerceError("out_of_stock");
+    }
+  }
+}
+
+async function presentCart(cart: Cart): Promise<Cart> {
+  return localizeCart(cart, await getLocale());
 }
 
 function connect(
@@ -201,7 +230,7 @@ export const shopifyProvider: CommerceProvider = {
       variables: { id: cartId },
       cache: "no-store",
     });
-    return data.cart ? mapCart(data.cart) : null;
+    return data.cart ? presentCart(mapCart(data.cart)) : null;
   },
 
   async createCart(lines: CartLineInput[] = []) {
@@ -216,7 +245,13 @@ export const shopifyProvider: CommerceProvider = {
       },
       cache: "no-store",
     });
-    return unwrapCart(data.cartCreate);
+    if (lines.length > 0) {
+      assertLineQuantities(
+        data.cartCreate,
+        lines.map((line) => line.variantId),
+      );
+    }
+    return presentCart(unwrapCart(data.cartCreate));
   },
 
   async addToCart(cartId: string, variantId: string, quantity: number) {
@@ -229,7 +264,8 @@ export const shopifyProvider: CommerceProvider = {
       },
       cache: "no-store",
     });
-    return unwrapCart(data.cartLinesAdd);
+    assertLineQuantities(data.cartLinesAdd, [variantId]);
+    return presentCart(unwrapCart(data.cartLinesAdd));
   },
 
   async updateCart(cartId: string, lineId: string, quantity: number) {
@@ -242,7 +278,7 @@ export const shopifyProvider: CommerceProvider = {
       },
       cache: "no-store",
     });
-    return unwrapCart(data.cartLinesUpdate);
+    return presentCart(unwrapCart(data.cartLinesUpdate));
   },
 
   async removeFromCart(cartId: string, lineId: string) {
@@ -252,7 +288,7 @@ export const shopifyProvider: CommerceProvider = {
       variables: { cartId, lineIds: [lineId] },
       cache: "no-store",
     });
-    return unwrapCart(data.cartLinesRemove);
+    return presentCart(unwrapCart(data.cartLinesRemove));
   },
 
   async getRecommendations(handle: string) {

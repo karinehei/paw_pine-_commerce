@@ -1,4 +1,4 @@
-import type { Collection, Product } from "@/lib/commerce/types";
+import type { Cart, Collection, Product } from "@/lib/commerce/types";
 import type { Locale } from "@/lib/i18n/config";
 
 const products: Record<
@@ -213,6 +213,25 @@ const catalogueCopy: Partial<
 > = {
   fi: { products, collections },
 };
+
+export function localizeCart(cart: Cart, locale: Locale): Cart {
+  return {
+    ...cart,
+    lines: cart.lines.map((line) => {
+      const copy = catalogueCopy[locale]?.products[line.merchandise.product.handle];
+      if (!copy) {
+        return line;
+      }
+      return {
+        ...line,
+        merchandise: {
+          ...line.merchandise,
+          product: { ...line.merchandise.product, title: copy.title },
+        },
+      };
+    }),
+  };
+}
 
 export function localizeProducts(list: Product[], locale: Locale): Product[] {
   return list.map((product) => localizeProduct(product, locale));
