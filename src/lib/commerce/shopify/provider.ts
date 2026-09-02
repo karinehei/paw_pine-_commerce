@@ -56,12 +56,22 @@ import type {
   ProductQuery,
 } from "@/lib/commerce/types";
 
-function hasStockWarning(payload: ShopifyUserErrorPayload): boolean {
-  return (payload.warnings ?? []).some((warning) => {
-    const code = warning.code?.toLowerCase() ?? "";
-    const message = warning.message?.toLowerCase() ?? "";
-    return code.includes("stock") || message.includes("stock") || message.includes("sold out");
-  });
+function sameMerchandiseId(left?: string | null, right?: string | null): boolean {
+  if (!left || !right) {
+    return false;
+  }
+  const normalise = (id: string) => decodeURIComponent(id).split("?")[0];
+  return normalise(left) === normalise(right);
+}
+
+function purchasableLine(
+  payload: ShopifyUserErrorPayload | null | undefined,
+  variantId: string,
+) {
+  const nodes = payload?.cart?.lines?.nodes ?? [];
+  return nodes.find(
+    (node) => node.quantity >= 1 && sameMerchandiseId(node.merchandise?.id, variantId),
+  );
 }
 
 function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
@@ -71,14 +81,6 @@ function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
     const code = first?.code?.toLowerCase() ?? "";
     const lower = message.toLowerCase();
     if (
-      code.includes("stock") ||
-      code.includes("inventory") ||
-      lower.includes("stock") ||
-      lower.includes("inventory")
-    ) {
-      throw new CommerceError("out_of_stock");
-    }
-    if (
       code.includes("not_found") ||
       lower.includes("not found") ||
       lower.includes("does not exist") ||
@@ -86,13 +88,22 @@ function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
     ) {
       throw new CommerceError("invalid_cart");
     }
+    if (
+      (code.includes("stock") ||
+        code.includes("inventory") ||
+        lower.includes("stock") ||
+        lower.includes("inventory")) &&
+      !(payload.cart?.lines?.nodes ?? []).some((node) => node.quantity >= 1)
+    ) {
+      throw new CommerceError("out_of_stock");
+    }
+    if (payload.cart) {
+      return mapCart(payload.cart);
+    }
     throw new CommerceError("invalid_cart");
   }
   if (!payload?.cart) {
     throw new CommerceError("invalid_cart");
-  }
-  if (hasStockWarning(payload)) {
-    throw new CommerceError("out_of_stock");
   }
   return mapCart(payload.cart);
 }
@@ -101,10 +112,8 @@ function assertLineQuantities(
   payload: ShopifyUserErrorPayload | null | undefined,
   variantIds: string[],
 ) {
-  const nodes = payload?.cart?.lines?.nodes ?? [];
   for (const variantId of variantIds) {
-    const line = nodes.find((node) => node.merchandise?.id === variantId);
-    if (!line || line.quantity < 1) {
+    if (!purchasableLine(payload, variantId)) {
       throw new CommerceError("out_of_stock");
     }
   }
