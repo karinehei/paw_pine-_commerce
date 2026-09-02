@@ -153,7 +153,7 @@ function tagsFor(product: Product): string[] {
   return [...tags];
 }
 
-function productInput(product: Product) {
+function productInput(product: Product, locationId?: string | null) {
   const optionName = product.options[0]?.name ?? "Title";
   const values = product.variants.map(
     (variant) => variant.selectedOptions[0]?.value ?? variant.title,
@@ -185,6 +185,15 @@ function productInput(product: Product) {
         ? parseAmount(variant.compareAtPrice)
         : undefined,
       sku: `${product.sku}-${(variant.selectedOptions[0]?.value ?? "default").replace(/\s+/g, "-")}`,
+      inventoryPolicy: "CONTINUE",
+      inventoryItem: { tracked: Boolean(locationId) },
+      ...(locationId
+        ? {
+            inventoryQuantities: [
+              { locationId, name: "available", quantity: 99 },
+            ],
+          }
+        : {}),
     })),
   };
 }
@@ -223,6 +232,14 @@ const ACCESS_SCOPES = `
   query AccessScopes {
     currentAppInstallation {
       accessScopes { handle }
+    }
+  }
+`;
+
+const LOCATIONS = `
+  query Locations {
+    locations(first: 5) {
+      nodes { id name isActive fulfillsOnlineOrders }
     }
   }
 `;
@@ -293,6 +310,28 @@ async function main(): Promise<void> {
     console.warn(`[seed] could not list token scopes: ${message}`);
   }
 
+  let locationId: string | null = null;
+  try {
+    const { locations } = await adminFetch<{
+      locations: {
+        nodes: Array<{ id: string; name: string; isActive: boolean; fulfillsOnlineOrders: boolean }>;
+      };
+    }>(domain, token, LOCATIONS);
+    const chosen =
+      locations.nodes.find((node) => node.isActive && node.fulfillsOnlineOrders) ??
+      locations.nodes.find((node) => node.isActive) ??
+      locations.nodes[0];
+    locationId = chosen?.id ?? null;
+    console.log(
+      locationId
+        ? `[seed] inventory location ${chosen?.name ?? locationId}`
+        : "[seed] no inventory location; variants will not be quantity-tracked",
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[seed] locations unavailable (${message}). Headless carts may still hit out_of_stock.`);
+  }
+
   let publicationInput: Array<{ publicationId: string }> = [];
   try {
     const { publications } = await adminFetch<{
@@ -321,7 +360,7 @@ async function main(): Promise<void> {
     }>(domain, token, PRODUCT_SET, {
       identifier: { handle: product.handle },
       synchronous: true,
-      input: productInput(product),
+      input: productInput(product, locationId),
     });
 
     const error = userErrorMessage(result.productSet.userErrors);
