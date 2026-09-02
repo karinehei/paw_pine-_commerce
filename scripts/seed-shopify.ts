@@ -11,10 +11,14 @@
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { setDefaultResultOrder } from "node:dns";
 import { demoCollections, demoProducts } from "../src/lib/commerce/demo/catalog";
 import { parseAmount } from "../src/lib/format";
 import { normaliseShopifyDomain } from "../src/lib/security";
 import type { Product } from "../src/lib/commerce/types";
+
+/** WSL often has broken IPv6; Node's fetch then throws a bare "fetch failed". */
+setDefaultResultOrder("ipv4first");
 
 const API_VERSION = "2026-07";
 
@@ -50,50 +54,61 @@ function loadEnvLocal(): void {
 loadEnvLocal();
 console.log("[seed] starting");
 
+function networkErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "failed";
+  }
+  const cause =
+    error.cause && typeof error.cause === "object"
+      ? (error.cause as { message?: string; code?: string })
+      : undefined;
+  return [error.message, cause?.code, cause?.message].filter(Boolean).join(" — ");
+}
+
 async function resolveAdminToken(domain: string): Promise<string> {
   const clientId = process.env.SHOPIFY_CLIENT_ID?.trim();
   const clientSecret = process.env.SHOPIFY_CLIENT_SECRET?.trim();
+  const staticToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
+
   if (clientId && clientSecret) {
-    const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-    });
-    const payload = (await response.json()) as {
-      access_token?: string;
-      expires_in?: number;
-      scope?: string;
-      error?: string;
-      error_description?: string;
-    };
-    if (!response.ok || !payload.access_token) {
-      throw new Error(
-        [
-          payload.error_description ??
-            payload.error ??
-            `Token request failed: HTTP ${response.status}.`,
-          "Use Dev Dashboard Client ID + Client secret (App settings), not the Headless Storefront token.",
-          "The app must be installed on this store, and the store must be in the same Shopify organization as the app.",
-        ].join(" "),
+    try {
+      const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: clientId,
+          client_secret: clientSecret,
+        }),
+      });
+      const payload = (await response.json()) as {
+        access_token?: string;
+        expires_in?: number;
+        scope?: string;
+        error?: string;
+        error_description?: string;
+      };
+      if (response.ok && payload.access_token) {
+        console.log(
+          `[seed] Admin token via client credentials${payload.scope ? ` (${payload.scope})` : ""}`,
+        );
+        return payload.access_token;
+      }
+      console.warn(
+        `[seed] client credentials: ${payload.error_description ?? payload.error ?? `HTTP ${response.status}`}`,
       );
+    } catch (error) {
+      console.warn(`[seed] client credentials: ${networkErrorMessage(error)}`);
     }
-    console.log(
-      `[seed] Admin token via client credentials${payload.scope ? ` (${payload.scope})` : ""}`,
-    );
-    return payload.access_token;
   }
 
-  const staticToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
   if (staticToken) {
     if (!/^(shpat_|shpca_|shppa_)/i.test(staticToken)) {
       console.warn(
         "[seed] SHOPIFY_ADMIN_ACCESS_TOKEN does not look like a legacy Admin token (shpat_…). Prefer SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET from the Dev Dashboard.",
       );
     }
+    console.log("[seed] Admin token via SHOPIFY_ADMIN_ACCESS_TOKEN");
     return staticToken;
   }
 
@@ -473,6 +488,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  console.error("[seed]", error instanceof Error ? error.message : "failed");
+  console.error("[seed]", networkErrorMessage(error));
   process.exit(1);
 });
