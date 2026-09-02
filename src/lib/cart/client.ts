@@ -37,7 +37,7 @@ async function mutate(
   try {
     const response = await fetch(CART_API, {
       method: "POST",
-      credentials: "same-origin",
+      credentials: "include",
       cache: NO_STORE,
       headers: {
         ...localeHeaders(locale),
@@ -54,7 +54,7 @@ async function mutate(
 export async function fetchCart(locale: Locale): Promise<Cart | null> {
   try {
     const response = await fetch(CART_API, {
-      credentials: "same-origin",
+      credentials: "include",
       cache: NO_STORE,
       headers: localeHeaders(locale),
     });

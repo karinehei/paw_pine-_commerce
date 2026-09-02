@@ -42,7 +42,8 @@ This storefront is a portfolio prototype. It is not a claim that the application
 - `httpOnly`, `sameSite=lax`, `secure` in production.
 - Shopify ids must be `gid://shopify/Cart/…`.
 - Demo lines must use `demo-line-` ids and quantities 1–99.
-- Browser cart writes go to `POST /api/cart` (locale middleware does not match `/api/*`). Same-origin `Origin` is required. Merchandise ids must be `gid://shopify/ProductVariant/…` or `gid://demo/ProductVariant/…`; line ids must be `gid://shopify/CartLine/…` or `demo-line-…`.
+- Browser cart writes go to `POST /api/cart` (locale middleware does not match `/api/*`). `Sec-Fetch-Site: same-origin` is trusted; otherwise `Origin` must match `Host` / `X-Forwarded-Host`. Merchandise ids must be `gid://shopify/ProductVariant/…` or `gid://demo/ProductVariant/…`; line ids must be `gid://shopify/CartLine/…` or `demo-line-…`.
+- Cart GraphQL does not send `Shopify-Storefront-Buyer-IP`. Chrome IP Protection can otherwise place the cart in another market while the cached catalogue still shows Finnish stock.
 
 ## Consent cookie
 

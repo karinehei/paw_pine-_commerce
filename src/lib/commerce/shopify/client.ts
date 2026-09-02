@@ -82,8 +82,8 @@ export async function shopifyFetch<T>({
   }
 
   const endpoint = storefrontEndpoint(config);
-  const ip = await buyerIp();
   const contextual = usesStorefrontInContext(operation);
+  const ip = contextual ? await buyerIp() : undefined;
   const context = contextual ? storefrontContextVariables(await getLocale()) : {};
   const body = JSON.stringify({
     query: contextual ? withStorefrontInContext(query) : query,

@@ -74,6 +74,25 @@ describe("security helpers", () => {
     ).toBe(false);
     expect(isSameOriginRequest(new Request(url, { method: "POST" }))).toBe(false);
     expect(
+      isSameOriginRequest(
+        new Request(url, {
+          method: "POST",
+          headers: { "sec-fetch-site": "same-origin" },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isSameOriginRequest(
+        new Request("https://internal.example/api/cart", {
+          method: "POST",
+          headers: {
+            origin: "https://paw-pine-commerce.vercel.app",
+            "x-forwarded-host": "paw-pine-commerce.vercel.app",
+          },
+        }),
+      ),
+    ).toBe(true);
+    expect(
       isSameOriginRequest(new Request(url, { method: "GET" }), {
         requireOrigin: false,
       }),

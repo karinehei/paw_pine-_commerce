@@ -59,18 +59,6 @@ async function persistShopifyCart(cart: Cart): Promise<void> {
   await writeCartCookie({ mode: "shopify", id: cart.id });
 }
 
-async function ensureCartId(): Promise<string> {
-  const mode = getCommerceMode();
-  const cookie = await readCartCookie();
-  if (cookieMatchesMode(cookie, mode)) {
-    return cookie.id;
-  }
-
-  const cart = await getCommerceProvider().createCart();
-  await persistShopifyCart(cart);
-  return cart.id;
-}
-
 export async function addItemToCart(
   variantId: string,
   quantity: number,
@@ -85,22 +73,29 @@ export async function addItemToCart(
   }
 
   const provider = getCommerceProvider();
+  const cookie = await readCartCookie();
+  const mode = getCommerceMode();
 
-  try {
-    const cartId = await ensureCartId();
+  if (cookieMatchesMode(cookie, mode)) {
     try {
-      const cart = await provider.addToCart(cartId, variantId, safeQuantity);
+      const cart = await provider.addToCart(cookie.id, variantId, safeQuantity);
       await persistShopifyCart(cart);
       return { ok: true, cart };
     } catch (error) {
-      if (error instanceof CommerceError && error.code === "invalid_cart") {
-        await clearCartCookie();
-        const cart = await provider.createCart([{ variantId, quantity: safeQuantity }]);
-        await persistShopifyCart(cart);
-        return { ok: true, cart };
+      if (
+        !(error instanceof CommerceError) ||
+        (error.code !== "invalid_cart" && error.code !== "out_of_stock")
+      ) {
+        return asCartResult(error);
       }
-      throw error;
+      await clearCartCookie();
     }
+  }
+
+  try {
+    const cart = await provider.createCart([{ variantId, quantity: safeQuantity }]);
+    await persistShopifyCart(cart);
+    return { ok: true, cart };
   } catch (error) {
     return asCartResult(error);
   }

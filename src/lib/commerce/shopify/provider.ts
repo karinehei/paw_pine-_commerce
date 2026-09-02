@@ -1,4 +1,3 @@
-import { CommerceError } from "@/lib/commerce/errors";
 import {
   applyProductQuery,
   buildFacets,
@@ -41,6 +40,7 @@ import {
   PRODUCTS_QUERY,
   SEARCH_QUERY,
 } from "@/lib/commerce/shopify/queries";
+import { assertLineQuantities, unwrapCart } from "@/lib/commerce/shopify/cart-payload";
 import type {
   ShopifyCartNode,
   ShopifyCollectionNode,
@@ -55,69 +55,6 @@ import type {
   ProductConnection,
   ProductQuery,
 } from "@/lib/commerce/types";
-
-function sameMerchandiseId(left?: string | null, right?: string | null): boolean {
-  if (!left || !right) {
-    return false;
-  }
-  const normalise = (id: string) => decodeURIComponent(id).split("?")[0];
-  return normalise(left) === normalise(right);
-}
-
-function purchasableLine(
-  payload: ShopifyUserErrorPayload | null | undefined,
-  variantId: string,
-) {
-  const nodes = payload?.cart?.lines?.nodes ?? [];
-  return nodes.find(
-    (node) => node.quantity >= 1 && sameMerchandiseId(node.merchandise?.id, variantId),
-  );
-}
-
-function unwrapCart(payload: ShopifyUserErrorPayload | null | undefined): Cart {
-  if (payload?.userErrors?.length) {
-    const first = payload.userErrors[0];
-    const message = first?.message ?? "";
-    const code = first?.code?.toLowerCase() ?? "";
-    const lower = message.toLowerCase();
-    if (
-      code.includes("not_found") ||
-      lower.includes("not found") ||
-      lower.includes("does not exist") ||
-      lower.includes("expired")
-    ) {
-      throw new CommerceError("invalid_cart");
-    }
-    if (
-      (code.includes("stock") ||
-        code.includes("inventory") ||
-        lower.includes("stock") ||
-        lower.includes("inventory")) &&
-      !(payload.cart?.lines?.nodes ?? []).some((node) => node.quantity >= 1)
-    ) {
-      throw new CommerceError("out_of_stock");
-    }
-    if (payload.cart) {
-      return mapCart(payload.cart);
-    }
-    throw new CommerceError("invalid_cart");
-  }
-  if (!payload?.cart) {
-    throw new CommerceError("invalid_cart");
-  }
-  return mapCart(payload.cart);
-}
-
-function assertLineQuantities(
-  payload: ShopifyUserErrorPayload | null | undefined,
-  variantIds: string[],
-) {
-  for (const variantId of variantIds) {
-    if (!purchasableLine(payload, variantId)) {
-      throw new CommerceError("out_of_stock");
-    }
-  }
-}
 
 async function presentCart(cart: Cart): Promise<Cart> {
   return localizeCart(cart, await getLocale());

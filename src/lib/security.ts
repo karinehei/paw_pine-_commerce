@@ -49,38 +49,53 @@ export function isCartLineId(value: string): boolean {
   );
 }
 
-/** Browser POSTs send Origin; GET may omit it. Reject cross-site callers. */
+function requestHosts(request: Request): string[] {
+  const hosts: string[] = [];
+  const add = (value?: string | null) => {
+    const host = value?.split(",")[0]?.trim().toLowerCase();
+    if (host) {
+      hosts.push(host);
+    }
+  };
+  add(request.headers.get("x-forwarded-host"));
+  add(request.headers.get("host"));
+  try {
+    add(new URL(request.url).host);
+  } catch {
+    /* ignore */
+  }
+  return hosts;
+}
+
+/** Browser POSTs send Origin; GET may omit it. Trust Sec-Fetch-Site over request.url. */
 export function isSameOriginRequest(
   request: Request,
   options: { requireOrigin?: boolean } = {},
 ): boolean {
   const requireOrigin = options.requireOrigin ?? true;
-  let expectedOrigin: string;
-  try {
-    expectedOrigin = new URL(request.url).origin;
-  } catch {
+  const site = request.headers.get("sec-fetch-site")?.toLowerCase();
+  if (site === "same-origin") {
+    return true;
+  }
+  if (site === "cross-site") {
     return false;
   }
 
-  const origin = request.headers.get("origin");
-  if (origin) {
+  const originHeader = request.headers.get("origin");
+  if (originHeader) {
     try {
-      if (new URL(origin).origin !== expectedOrigin) {
-        return false;
-      }
+      const originHost = new URL(originHeader).host.toLowerCase();
+      return requestHosts(request).includes(originHost);
     } catch {
       return false;
     }
-  } else if (requireOrigin) {
+  }
+
+  if (requireOrigin) {
     return false;
   }
 
-  const site = request.headers.get("sec-fetch-site");
-  if (site && site !== "same-origin" && site !== "none") {
-    return false;
-  }
-
-  return true;
+  return site !== "same-site";
 }
 
 export function normaliseShopifyDomain(raw: string): string | null {

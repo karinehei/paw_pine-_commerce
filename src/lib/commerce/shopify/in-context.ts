@@ -6,6 +6,8 @@ import { SHOPIFY_COUNTRY, shopifyLanguage, type Locale } from "@/lib/i18n/config
  *
  * Cart queries ignore `@inContext` country; identity is set on `cartCreate`.
  * Applying the directive to cart mutations can leave lines at quantity 0 / €0.
+ * Cart fetches also omit `Shopify-Storefront-Buyer-IP` so Chrome IP Protection
+ * cannot move the cart into another market.
  */
 export function usesStorefrontInContext(operation: string): boolean {
   return !operation.startsWith("cart");
