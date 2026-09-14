@@ -2,6 +2,7 @@
   "name": "paw-pine",
   "version": "1.0.0",
   "private": true,
+  "license": "Apache-2.0",
   "description": "Paw & Pine — a headless Shopify storefront for premium pet accessories.",
   "scripts": {
     "dev": "next dev --turbopack",

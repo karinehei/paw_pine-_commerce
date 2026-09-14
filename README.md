@@ -222,4 +222,6 @@ Longer write-up: [docs/performance.md](docs/performance.md).
 
 ## License
 
-Private portfolio project. Product names and still-life artwork are original to this repository; do not use copyrighted brand assets when you connect a live shop.
+[Apache License 2.0](LICENSE). Copyright 2026 Karine Heinonen.
+
+Product names and still-life artwork are original to this repository; do not use copyrighted brand assets when you connect a live shop.
