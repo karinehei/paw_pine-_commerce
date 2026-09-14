@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-.PHONY: help ci dev lint typecheck test test-e2e build format check linux-check e2e-demo seed seed-archive
+.PHONY: help ci dev lint typecheck test test-e2e build format check linux-check e2e-demo screenshots seed seed-archive
 
 help:
 	@echo "Paw & Pine"
@@ -17,6 +17,7 @@ help:
 	@echo "  make check          lint + typecheck + test"
 	@echo "  make linux-check    Same as check+build from a Linux filesystem copy"
 	@echo "  make e2e-demo       Playwright in demo mode from a Linux copy"
+	@echo "  make screenshots    Recapture docs/screenshots from a demo production build"
 	@echo "  make seed           Push demo catalogue to Shopify"
 	@echo "  make seed-archive    Seed, then archive sample snowboards"
 	@echo
@@ -53,6 +54,9 @@ linux-check:
 
 e2e-demo:
 	bash scripts/e2e-demo.sh
+
+screenshots:
+	bash scripts/capture-screenshots.sh
 
 seed:
 	bash scripts/seed-from-linuxfs.sh

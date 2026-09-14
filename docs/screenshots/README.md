@@ -1,6 +1,10 @@
-Captured from the production build (Playwright, `SCREENSHOTS=1 npm run test:e2e -- e2e/screenshots.spec.ts`).
+Captured from the demo production build (Playwright). English routes (`/en`) so labels stay stable in hiring screenshots.
 
-English routes (`/en`) so labels stay stable in hiring screenshots.
+```bash
+bash scripts/capture-screenshots.sh
+```
+
+Cookie banner is dismissed. Cart and wishlist are seeded with Oakwood Chew Ring before capture.
 
 |            | 375px                                    | 768px                                    | 1440px                                     |
 | ---------- | ---------------------------------------- | ---------------------------------------- | ------------------------------------------ |
@@ -12,3 +16,4 @@ English routes (`/en`) so labels stay stable in hiring screenshots.
 | Search     | [search-375.png](search-375.png)         | [search-768.png](search-768.png)         | [search-1440.png](search-1440.png)         |
 | Cookies    | [cookies-375.png](cookies-375.png)       | [cookies-768.png](cookies-768.png)       | [cookies-1440.png](cookies-1440.png)       |
 | Analytics  | [analytics-375.png](analytics-375.png)   | [analytics-768.png](analytics-768.png)   | [analytics-1440.png](analytics-1440.png)   |
+| Case study | [case-study-375.png](case-study-375.png) | [case-study-768.png](case-study-768.png) | [case-study-1440.png](case-study-1440.png) |
