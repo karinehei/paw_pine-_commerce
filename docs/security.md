@@ -78,4 +78,4 @@ A Content-Security-Policy is not set: GTM/GA4 would need a carefully maintained 
 - Storefront tokens are still powerful; leak of `.env.local` is a shop compromise.
 - Demo cart cookies are unsigned; they can only add known demo variants.
 - No rate limiting on `/api/contact`, `/api/newsletter`, `/api/notify-stock`, `/api/shipping/rates`, or `/api/cart`.
-- Dependency audit is not automated beyond `npm ci` of a short lockfile.
+- Dependabot opens weekly PRs for npm and GitHub Actions. There is still no `npm audit` gate in CI.
